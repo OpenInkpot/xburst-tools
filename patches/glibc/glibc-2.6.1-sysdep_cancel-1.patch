@@ -1,0 +1,34 @@
+Submitted By: Joe Ciccone <jciccone@linuxfromscratch.org>
+Date: 2007-07-04
+Initial Package Version: 2.6
+Upstream Status: Unknown
+Description: Use one instead of two seperate regions. This reverts the following
+             patch from upstream.
+             http://sources.redhat.com/cgi-bin/cvsweb.cgi/libc/nptl/sysdeps/unix/sysv/linux/alpha/sysdep-cancel.h.diff?cvsroot=glibc&r1=text&tr1=1.4.2.2&r2=text&tr2=1.7&f=u
+
+diff -Naur glibc-2.6.orig/nptl/sysdeps/unix/sysv/linux/alpha/sysdep-cancel.h glibc-2.6/nptl/sysdeps/unix/sysv/linux/alpha/sysdep-cancel.h
+--- glibc-2.6.orig/nptl/sysdeps/unix/sysv/linux/alpha/sysdep-cancel.h	2007-07-04 16:48:49.000000000 -0400
++++ glibc-2.6/nptl/sysdeps/unix/sysv/linux/alpha/sysdep-cancel.h	2007-07-04 16:50:30.000000000 -0400
+@@ -55,7 +55,6 @@
+ 	bne	a3, SYSCALL_ERROR_LABEL;			\
+ __LABEL($pseudo_ret)						\
+ 	.subsection 2;						\
+-	cfi_startproc;						\
+ __LABEL($pseudo_cancel)						\
+ 	subq	sp, 64, sp;					\
+ 	cfi_def_cfa_offset(64);					\
+@@ -91,13 +90,12 @@
+ 	cfi_def_cfa_offset(0);					\
+ __LABEL($syscall_error)						\
+ 	SYSCALL_ERROR_HANDLER;					\
+-	cfi_endproc;						\
+ 	.previous
+ 
+ # undef PSEUDO_END
+ # define PSEUDO_END(sym)					\
+-	cfi_endproc;						\
+ 	.subsection 2;						\
++	cfi_endproc;						\
+ 	.size sym, .-sym
+ 
+ # define SAVE_ARGS_0	/* Nothing.  */
