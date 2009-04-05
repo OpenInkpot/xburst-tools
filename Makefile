@@ -23,6 +23,7 @@ BINUTILS_VER=binutils-2.17
 GCC_VER=gcc-4.1.2
 GLIBC_VER=glibc-2.6.1
 GLIBC_PORTS_VER=glibc-ports-2.6.1
+KERNEL_HEADERS_VER=linux-headers-2.6.24.3
 
 TOOLCHAIN_PATH=toolchain
 DL_PATH=$(TOOLCHAIN_PATH)/dl
@@ -39,6 +40,8 @@ GLIBC_PACKAGE=$(GLIBC_VER).tar.bz2
 GLIBC_URL=ftp://ftp.gnu.org/gnu/glibc/$(GLIBC_PACKAGE)
 GLIBC_PORTS_PACKAGE=$(GLIBC_PORTS_VER).tar.bz2
 GLIBC_PORTS_URL=ftp://ftp.gnu.org/gnu/glibc/$(GLIBC_PORTS_PACKAGE)
+KERNEL_HEADERS_PACKAGE=$(KERNEL_HEADERS_VER).tar.bz2
+KERNEL_HEADERS_URL=
 
 CFLAGS="-O2"
 
@@ -89,8 +92,8 @@ gcc: $(DL_PATH)/$(GCC_PACKAGE)
 	--enable-languages=c && make CFLAGS=$(CFLAGS) all-gcc && make install-gcc
 	touch $@
 
-glibc: $(DL_PATH)/$(GLIBC_PACKAGE) $(DL_PATH)/$(GLIBC_PORTS_PACKAGE)
-	[ -e $(TOOLCHAIN_PATH)/$(GLIBC_VER)/ports ] && rm -rf $(TOOLCHAIN_PATH)/$(GLIBC_VER)/ports
+glibc: $(DL_PATH)/$(GLIBC_PACKAGE) $(DL_PATH)/$(GLIBC_PORTS_PACKAGE) $(DL_PATH)/$(KERNEL_HEADERS_PACKAGE)
+	tar -xvjf $(DL_PATH)/$(KERNEL_HEADERS_PACKAGE) -C $(TOOLCHAIN_PATH)
 	tar -xvjf $(DL_PATH)/$(GLIBC_PACKAGE) -C $(TOOLCHAIN_PATH)
 	tar -xvjf $(DL_PATH)/$(GLIBC_PORTS_PACKAGE) -C $(TOOLCHAIN_PATH)/$(GLIBC_VER)
 	mv $(TOOLCHAIN_PATH)/$(GLIBC_VER)/$(GLIBC_PORTS_VER) $(TOOLCHAIN_PATH)/$(GLIBC_VER)/ports
@@ -98,7 +101,11 @@ glibc: $(DL_PATH)/$(GLIBC_PACKAGE) $(DL_PATH)/$(GLIBC_PORTS_PACKAGE)
 	patch -Np1 -i $(PWD)/$(GLIBC_PATCHES_PATH)/glibc-2.6.1-cross_hacks-1.patch && \
 	patch -Np1 -i $(PWD)/$(GLIBC_PATCHES_PATH)/glibc-2.6.1-libgcc_eh-1.patch && \
 	patch -Np1 -i $(PWD)/$(GLIBC_PATCHES_PATH)/glibc-2.6.1-localedef_segfault-1.patch && \
-	patch -Np1 -i $(PWD)/$(GLIBC_PATCHES_PATH)/glibc-2.6.1-mawk_fix-1.patch
+	patch -Np1 -i $(PWD)/$(GLIBC_PATCHES_PATH)/glibc-2.6.1-mawk_fix-1.patch 
+#	patch -Np1 -i $(PWD)/$(GLIBC_PATCHES_PATH)/glibc-2.6.1-alpha_ioperm_fix-1.patch && \
+#	patch -Np1 -i $(PWD)/$(GLIBC_PATCHES_PATH)/glibc-2.6.1-RTLD_SINGLE_THREAD_P-1.patch && \
+#	patch -Np1 -i $(PWD)/$(GLIBC_PATCHES_PATH)/glibc-2.6.1-sysdep_cancel-1.patch && \
+#	patch -Np1 -i $(PWD)/$(GLIBC_PATCHES_PATH)/glibc-2.6.1-hppa_nptl-1.patch
 	mkdir -p $(TOOLCHAIN_PATH)/$(GLIBC_VER)/build
 	cd $(TOOLCHAIN_PATH)/$(GLIBC_VER)/build && \
 	echo "libc_cv_forced_unwind=yes" > config.cache && \
@@ -109,10 +116,13 @@ glibc: $(DL_PATH)/$(GLIBC_PACKAGE) $(DL_PATH)/$(GLIBC_PORTS_PACKAGE)
 	../configure --prefix=/usr --libexecdir=/usr/lib/glibc \
 	--host=mipsel-linux --build=i686-pc-linux-gnu \
 	--disable-profile --enable-add-ons --with-tls --enable-kernel=2.6.0 \
-	--with-__thread --with-binutils=$(INSTALL_PATH)/bin \
-	--cache-file=config.cache && make CFLAGS=$(CFLAGS) && make install
+	--with-__thread --with-binutils=$(PWD)/$(INSTALL_PATH)/bin \
+	--with-headers=$(PWD)/$(TOOLCHAIN_PATH)/$(KERNEL_HEADERS_VER) \
+	--cache-file=config.cache && \
+	make CFLAGS=$(CFLAGS)  && \
+	mkdir -p $(TOOLCHAIN_PATH)/$(GLIBC_VER)/glibc-install && \
+	make install_root=$(TOOLCHAIN_PATH)/$(GLIBC_VER)/glibc-install install
 	touch $@
-
 
 ### clean up
 
@@ -120,13 +130,15 @@ distclean: clean clean-toolchain
 
 clean:
 
-clean-toolchain:
-	rm -rf $(TOOLCHAIN_PATH)/$(BINUTILS_VER)
-	rm -rf $(TOOLCHAIN_PATH)/$(GCC_VER)
-	rm -rf $(TOOLCHAIN_PATH)/$(GLIBC_VER)
-	rm -rf $(INSTALL_PATH) binutils gcc glibc
+clean-toolchain: clean-glibc
+	rm -rf $(TOOLCHAIN_PATH)/$(BINUTILS_VER) binutils 
+	rm -rf $(TOOLCHAIN_PATH)/$(GCC_VER) gcc
+	rm -rf $(INSTALL_PATH) 
 
-testhelp:
+clean-glibc:
+	rm -rf $(TOOLCHAIN_PATH)/$(GLIBC_VER)  glibc
+
+help:
 	make --print-data-base --question |	\
 	awk '/^[^.%][-A-Za-z0-9_]*:/		\
 	{ print substr($$1, 1, length($$1)-1) }' | 	\
