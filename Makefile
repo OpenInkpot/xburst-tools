@@ -24,9 +24,11 @@ GCC_VER=gcc-4.1.2
 GLIBC_VER=glibc-2.6.1
 GLIBC_PORTS_VER=glibc-ports-2.6.1
 KERNEL_HEADERS_VER=linux-headers-2.6.24.3
+KERNEL_VER=linux-2.6.24.3
 U-BOOT_VER=u-boot-1.1.6
 
 U-BOOT_PATH=u-boot
+KERNEL_PATH=kernel
 TOOLCHAIN_PATH=toolchain
 DL_PATH=$(TOOLCHAIN_PATH)/dl
 INSTALL_PATH=install
@@ -136,6 +138,17 @@ u-boot:
 	patch -Np1 -i ../patchs/u-boot-1.1.6-jz-20090306.patch && \
 	make pavo_nand_config && \
 	make
+
+### kernel
+.PHONY: kernel
+kernel:
+	export PATH=/opt/mipseltools-gcc412-glibc261/bin:$PATH
+	tar -xjvf $(KERNEL_PATH)/dl/linux-2.6.24.3.tar.bz2 -C  $(KERNEL_PATH)
+	cd $(KERNEL_PATH)/$(KERNEL_VER) && \
+	patch -Np1 -i ../patchs/linux-2.6.24.3-jz-20090226.patch && \
+	make pavo_defconfig && \
+	make xconfig && \
+	make zImage
 
 ### clean up
 
