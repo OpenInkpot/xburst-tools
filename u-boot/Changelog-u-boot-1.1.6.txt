@@ -1,0 +1,77 @@
+*********************************************************************
+Steps to build the u-boot:
+
+Download and install the cross toolchain gcc version 4:
+
+$ cd /opt
+$ tar xjf mipseltools-gcc412-glibc261.tar.bz2
+$ export PATH=/opt/mipseltools-gcc412-glibc261/bin:$PATH
+
+Download the u-boot tarball u-boot-1.1.6.tar.bz2 and unpack it:
+
+$ tar xjf u-boot-1.1.6.tar.bz2
+
+Download the latest u-boot patch and patch it to the u-boot tree:
+
+$ cd u-boot-1.1.6
+$ gzip -cd ../u-boot-1.1.6-jz-yyyymmdd.patch.gz | patch -p1
+
+Make defconfig of the JZSOC based platform, eg:
+
+$ make apus_nand_config (NAND boot for JZ4750 APUS board)
+
+$ make pavo_config (NOR boot for JZ4740 PAVO board)
+or
+$ make pavo_nand_config (NAND boot for JZ4740 PAVO board)
+
+$ make pmpv2_config (NOR boot for JZ4730 PMP Ver 2.x board)
+or
+$ make pmpv2_nand_config (NAND boot for JZ4730 PMP Ver 2.x board)
+
+Build the u-boot:
+
+$ make
+
+Then burn the u-boot-nand.bin (for NAND flash) or u-boot.bin (for NOR flash)
+to the target board by using JDI or USB boot tool.
+
+
+*********************************************************************
+u-boot-1.1.6-jz-20090306.patch.gz
+  * Nand driver was modified to support using nandwrite_mlc utils in linux to
+    write uImage:
+    nandwrite_mlc -a -p /dev/mtd2 uImage
+
+u-boot-1.1.6-jz-20090216.patch.gz
+
+  * Support Jz4750
+  * Support NAND of 4KB pagesize
+  * The ECC position in NAND oob could be modified by defining CFG_NAND_ECC_POS 
+    in include/configs/xxx.h
+
+u-boot-1.1.6-jz-20080530.patch.gz:
+
+  * Added Jz4725 DIPPER Board Support.
+  * Added FOXCONN_PT035TN01 LCD panel support for PAVO board.
+  * Modify jz4740_nand.c to optimize the RS correction algorithm.
+
+u-boot-1.1.6-jz-20080414.patch.gz:
+
+  * nand_spl/nand_boot_jz4740.c: fixed a fatal bug of nand_load(), which will
+    fail to load u-boot when meeting a bad block.
+  * Modify the nand read/write/erase commands to enable the bad block handling.
+
+u-boot-1.1.6-jz-20080226.patch.gz:
+
+  * Fixed method to test NAND bad block.
+
+u-boot-1.1.6-jz-20071205.patch.gz:
+
+  * Add Jz4720 virgo board.
+  * Add SD 2.0 (SDHC) card support.
+  * Fix the nand wirte command.
+
+u-boot-1.1.6-jz-20071026.patch.gz:
+
+  * Full package support for Jz4730 and Jz4740.
+
