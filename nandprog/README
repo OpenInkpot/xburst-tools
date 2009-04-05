@@ -1,0 +1,30 @@
+This package contains source of the NAND flash programmer. It is an user
+application program running on the Linux kernel.
+
+To build the software, you need to have a Linux PC and install the
+mipsel-linux-gcc compiler first, and then type 'make' under the
+Linux command shell:
+
+$ make
+
+The dir tree as following:
+
+|-- Makefile
+|-- common
+|   |-- cmdline.c
+|   |-- loadcfg.c
+|   `-- main.c
+|-- include
+|   |-- configs.h
+|   |-- include.h
+|   |-- jz4730.h
+|   |-- jz4740.h
+|   `-- nand_ecc.h
+|-- jz4730
+|   `-- nandflash_4730.c
+`-- jz4740
+    `-- nandflash_4740.c
+
+
+To get more information, please read <NandProgrammer_Manual.pdf>.
+Any questions, contact with me <yliu@ingenic.cn>.
