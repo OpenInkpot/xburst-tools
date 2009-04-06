@@ -32,8 +32,8 @@ KERNEL_PATH=kernel
 TOOLCHAIN_PATH=toolchain
 DL_PATH=$(TOOLCHAIN_PATH)/dl
 INSTALL_PATH=install
-PATCHES_PATH=
-GLIBC_PATCHES_PATH=$(TOOLCHAIN_PATH)/patches/glibc
+PATCHES_PATH=$(TOOLCHAIN_PATH)/patches
+GLIBC_PATCHES_PATH=$(PATCHES_PATH)/glibc
 
 BINUTILS_PACKAGE=$(BINUTILS_VER).tar.bz2
 BINUTILS_URL= \
@@ -50,6 +50,14 @@ KERNEL_HEADERS_URL=
 CFLAGS="-O2"
 
 export PATH:=$(PWD)/install/bin:$(PATH)
+
+# this glibc version does not build with gcc 4.3 - hence this special compat parameter
+GCC_VERSION=$(shell [ "`gcc --version | grep '4.3'`" ] && echo "43" )
+ifeq ($(GCC_VERSION),43)
+BUILD_CC="gcc -fgnu89-inline"
+else
+BUILD_CC="gcc"
+endif
 
 
 toolchain: binutils gcc glibc
@@ -68,7 +76,7 @@ $(INSTALL_PATH):
 %$(GLIBC_PACKAGE): URL=$(GLIBC_URL)
 %$(GLIBC_PORTS_PACKAGE): URL=$(GLIBC_PORTS_URL)
 
-%.bz2: $(DL_PATH) $(INSTALL_PATH)
+.tar.bz2: $(DL_PATH) $(INSTALL_PATH)
 	wget -c -O $@ $(URL)
 	touch $@
 
@@ -105,30 +113,29 @@ glibc: $(DL_PATH)/$(GLIBC_PACKAGE) $(DL_PATH)/$(GLIBC_PORTS_PACKAGE) $(DL_PATH)/
 	patch -Np1 -i $(PWD)/$(GLIBC_PATCHES_PATH)/glibc-2.6.1-cross_hacks-1.patch && \
 	patch -Np1 -i $(PWD)/$(GLIBC_PATCHES_PATH)/glibc-2.6.1-libgcc_eh-1.patch && \
 	patch -Np1 -i $(PWD)/$(GLIBC_PATCHES_PATH)/glibc-2.6.1-localedef_segfault-1.patch && \
-	patch -Np1 -i $(PWD)/$(GLIBC_PATCHES_PATH)/glibc-2.6.1-mawk_fix-1.patch && \
-	patch -Np1 -i $(PWD)/$(GLIBC_PATCHES_PATH)/glibc-2.6.1-alpha_ioperm_fix-1.patch && \
-	patch -Np1 -i $(PWD)/$(GLIBC_PATCHES_PATH)/glibc-2.6.1-RTLD_SINGLE_THREAD_P-1.patch && \
-	patch -Np1 -i $(PWD)/$(GLIBC_PATCHES_PATH)/glibc-2.6.1-sysdep_cancel-1.patch && \
-	patch -Np1 -i $(PWD)/$(GLIBC_PATCHES_PATH)/glibc-2.6.1-hppa_nptl-1.patch && \
-	patch -Np1 -i $(PWD)/$(GLIBC_PATCHES_PATH)/glibc-2.6.1-for_gcc-4.3.patch
+	patch -Np1 -i $(PWD)/$(GLIBC_PATCHES_PATH)/glibc-2.6.1-mawk_fix-1.patch
+#	patch -Np1 -i $(PWD)/$(GLIBC_PATCHES_PATH)/glibc-2.6.1-alpha_ioperm_fix-1.patch && \
+#	patch -Np1 -i $(PWD)/$(GLIBC_PATCHES_PATH)/glibc-2.6.1-RTLD_SINGLE_THREAD_P-1.patch && \
+#	patch -Np1 -i $(PWD)/$(GLIBC_PATCHES_PATH)/glibc-2.6.1-sysdep_cancel-1.patch && \
+#	patch -Np1 -i $(PWD)/$(GLIBC_PATCHES_PATH)/glibc-2.6.1-hppa_nptl-1.patch
 	mkdir -p $(TOOLCHAIN_PATH)/$(GLIBC_VER)/build
 	cd $(TOOLCHAIN_PATH)/$(GLIBC_VER)/build && \
 	echo "libc_cv_forced_unwind=yes" > config.cache && \
 	echo "libc_cv_c_cleanup=yes" >> config.cache && \
 	echo "libc_cv_mips_tls=yes" >> config.cache && \
-	BUILD_CC="gcc" CC="mipsel-linux-gcc" \
+	BUILD_CC=$(BUILD_CC) CC="mipsel-linux-gcc" \
 	AR="mipsel-linux-ar" RANLIB="mipsel-linux-ranlib" \
-	../configure --prefix=/usr --libexecdir=/usr/lib/glibc \
+	../configure --prefix=$(PWD)/$(INSTALL_PATH) --libexecdir=$(PWD)/$(INSTALL_PATH)/libexec/glibc \
 	--host=mipsel-linux --build=i686-pc-linux-gnu \
 	--disable-profile --enable-add-ons --with-tls --enable-kernel=2.6.0 \
 	--with-__thread --with-binutils=$(PWD)/$(INSTALL_PATH)/bin \
 	--with-headers=$(PWD)/$(TOOLCHAIN_PATH)/$(KERNEL_HEADERS_VER) \
 	--cache-file=config.cache && \
-	make CFLAGS=$(CFLAGS)  && \
-	mkdir -p $(PWD)$(TOOLCHAIN_PATH)/$(GLIBC_VER)/glibc-install && \
-	make install_root=$(PWD)/$(TOOLCHAIN_PATH)/$(GLIBC_VER)/glibc-install install
+	make CFLAGS=$(CFLAGS) && make install
+	cp $(GLIBC_PATCHES_PATH)/SUPPORTED $(TOOLCHAIN_PATH)/$(GLIBC_VER)/localedata/
+	cd $(TOOLCHAIN_PATH)/$(GLIBC_VER)/build && \
+	make localedata/install-locales
 	touch $@
-
 
 ### u-boot
 .PHONY: u-boot
@@ -158,12 +165,12 @@ distclean: clean clean-toolchain
 clean:
 
 clean-toolchain: clean-glibc
-	rm -rf $(TOOLCHAIN_PATH)/$(BINUTILS_VER) binutils 
+	rm -rf $(TOOLCHAIN_PATH)/$(BINUTILS_VER) binutils
 	rm -rf $(TOOLCHAIN_PATH)/$(GCC_VER) gcc
-	rm -rf $(INSTALL_PATH) 
+	rm -rf $(INSTALL_PATH)
 
 clean-glibc:
-	rm -rf $(TOOLCHAIN_PATH)/$(GLIBC_VER)  glibc
+	rm -rf $(TOOLCHAIN_PATH)/$(GLIBC_VER) glibc
 
 clean-u-boot:
 	rm -rf $(U-BOOT_PATH)/$(U-BOOT_VER)
