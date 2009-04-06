@@ -1,0 +1,24 @@
+diff -Naur glibc-2.6.1/locale/programs/charmap-kw.h glibc-2.6.1.m/locale/programs/charmap-kw.h
+--- glibc-2.6.1/locale/programs/charmap-kw.h	2005-12-20 15:10:31.000000000 +0800
++++ glibc-2.6.1.m/locale/programs/charmap-kw.h	2009-04-06 14:59:23.000000000 +0800
+@@ -127,7 +127,7 @@
+ #ifdef __GNUC__
+ __inline
+ #endif
+-const struct keyword_t *
++static const struct keyword_t *
+ charmap_hash (register const char *str, register unsigned int len)
+ {
+   static const struct keyword_t wordlist[] =
+diff -Naur glibc-2.6.1/locale/programs/locfile-kw.h glibc-2.6.1.m/locale/programs/locfile-kw.h
+--- glibc-2.6.1/locale/programs/locfile-kw.h	2005-12-20 15:10:31.000000000 +0800
++++ glibc-2.6.1.m/locale/programs/locfile-kw.h	2009-04-06 14:59:47.000000000 +0800
+@@ -127,7 +127,7 @@
+ #ifdef __GNUC__
+ __inline
+ #endif
+-const struct keyword_t *
++static const struct keyword_t *
+ locfile_hash (register const char *str, register unsigned int len)
+ {
+   static const struct keyword_t wordlist[] =

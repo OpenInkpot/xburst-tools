@@ -32,8 +32,8 @@ KERNEL_PATH=kernel
 TOOLCHAIN_PATH=toolchain
 DL_PATH=$(TOOLCHAIN_PATH)/dl
 INSTALL_PATH=install
-PATCHES_PATH=$(TOOLCHAIN_PATH)/patches
-GLIBC_PATCHES_PATH=$(PATCHES_PATH)/glibc
+PATCHES_PATH=
+GLIBC_PATCHES_PATH=$(TOOLCHAIN_PATH)/patches/glibc
 
 BINUTILS_PACKAGE=$(BINUTILS_VER).tar.bz2
 BINUTILS_URL= \
@@ -105,11 +105,12 @@ glibc: $(DL_PATH)/$(GLIBC_PACKAGE) $(DL_PATH)/$(GLIBC_PORTS_PACKAGE) $(DL_PATH)/
 	patch -Np1 -i $(PWD)/$(GLIBC_PATCHES_PATH)/glibc-2.6.1-cross_hacks-1.patch && \
 	patch -Np1 -i $(PWD)/$(GLIBC_PATCHES_PATH)/glibc-2.6.1-libgcc_eh-1.patch && \
 	patch -Np1 -i $(PWD)/$(GLIBC_PATCHES_PATH)/glibc-2.6.1-localedef_segfault-1.patch && \
-	patch -Np1 -i $(PWD)/$(GLIBC_PATCHES_PATH)/glibc-2.6.1-mawk_fix-1.patch 
-#	patch -Np1 -i $(PWD)/$(GLIBC_PATCHES_PATH)/glibc-2.6.1-alpha_ioperm_fix-1.patch && \
-#	patch -Np1 -i $(PWD)/$(GLIBC_PATCHES_PATH)/glibc-2.6.1-RTLD_SINGLE_THREAD_P-1.patch && \
-#	patch -Np1 -i $(PWD)/$(GLIBC_PATCHES_PATH)/glibc-2.6.1-sysdep_cancel-1.patch && \
-#	patch -Np1 -i $(PWD)/$(GLIBC_PATCHES_PATH)/glibc-2.6.1-hppa_nptl-1.patch
+	patch -Np1 -i $(PWD)/$(GLIBC_PATCHES_PATH)/glibc-2.6.1-mawk_fix-1.patch && \
+	patch -Np1 -i $(PWD)/$(GLIBC_PATCHES_PATH)/glibc-2.6.1-alpha_ioperm_fix-1.patch && \
+	patch -Np1 -i $(PWD)/$(GLIBC_PATCHES_PATH)/glibc-2.6.1-RTLD_SINGLE_THREAD_P-1.patch && \
+	patch -Np1 -i $(PWD)/$(GLIBC_PATCHES_PATH)/glibc-2.6.1-sysdep_cancel-1.patch && \
+	patch -Np1 -i $(PWD)/$(GLIBC_PATCHES_PATH)/glibc-2.6.1-hppa_nptl-1.patch && \
+	patch -Np1 -i $(PWD)/$(GLIBC_PATCHES_PATH)/glibc-2.6.1-for_gcc-4.3.patch
 	mkdir -p $(TOOLCHAIN_PATH)/$(GLIBC_VER)/build
 	cd $(TOOLCHAIN_PATH)/$(GLIBC_VER)/build && \
 	echo "libc_cv_forced_unwind=yes" > config.cache && \
@@ -124,8 +125,8 @@ glibc: $(DL_PATH)/$(GLIBC_PACKAGE) $(DL_PATH)/$(GLIBC_PORTS_PACKAGE) $(DL_PATH)/
 	--with-headers=$(PWD)/$(TOOLCHAIN_PATH)/$(KERNEL_HEADERS_VER) \
 	--cache-file=config.cache && \
 	make CFLAGS=$(CFLAGS)  && \
-	mkdir -p $(TOOLCHAIN_PATH)/$(GLIBC_VER)/glibc-install && \
-	make install_root=$(TOOLCHAIN_PATH)/$(GLIBC_VER)/glibc-install install
+	mkdir -p $(PWD)$(TOOLCHAIN_PATH)/$(GLIBC_VER)/glibc-install && \
+	make install_root=$(PWD)/$(TOOLCHAIN_PATH)/$(GLIBC_VER)/glibc-install install
 	touch $@
 
 
