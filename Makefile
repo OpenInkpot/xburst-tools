@@ -189,7 +189,7 @@ clean-u-boot:
 	rm -rf $(U-BOOT_PATH)/$(U-BOOT_VER)
 
 help:
-	make --print-data-base --question |	\
+	@make --print-data-base --question |	\
 	awk '/^[^.%][-A-Za-z0-9_]*:/		\
 	{ print substr($$1, 1, length($$1)-1) }' | 	\
 	sort |	\
