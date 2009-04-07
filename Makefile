@@ -34,6 +34,9 @@ DL_PATH=$(TOOLCHAIN_PATH)/dl
 INSTALL_PATH=install
 PATCHES_PATH=$(TOOLCHAIN_PATH)/patches
 GLIBC_PATCHES_PATH=$(PATCHES_PATH)/glibc
+USBBOOT_PATH=usbboot
+USBBOOT_STAGE1_PATH=$(USBBOOT_PATH)/stage1
+USBBOOT_STAGE2_PATH=$(USBBOOT_PATH)/stage2
 
 BINUTILS_PACKAGE=$(BINUTILS_VER).tar.bz2
 BINUTILS_URL= \
@@ -147,6 +150,16 @@ u-boot:
 	make pavo_nand_config && \
 	make
 
+### usbboot
+.PHONY: usbboot
+usbboot: usbboot-tools usbboot-stage
+
+usbboot-tools:
+
+usbboot-stage:
+	make -C $(USBBOOT_STAGE1_PATH)
+	make -C $(USBBOOT_STAGE2_PATH)
+
 ### kernel
 .PHONY: kernel
 kernel:
@@ -162,7 +175,7 @@ kernel:
 
 distclean: clean clean-toolchain
 
-clean:
+clean: clean-u-boot
 
 clean-toolchain: clean-glibc
 	rm -rf $(TOOLCHAIN_PATH)/$(BINUTILS_VER) binutils
