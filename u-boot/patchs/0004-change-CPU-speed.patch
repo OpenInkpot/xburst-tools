@@ -1,0 +1,34 @@
+From 64f6690dbfb512c7c55060f7b7ed1b5c085c3240 Mon Sep 17 00:00:00 2001
+From: xiangfu <xiangfu.z@gmail.com>
+Date: Mon, 13 Apr 2009 21:57:26 +0800
+Subject: [PATCH] change CPU speed
+
+---
+ include/configs/pavo.h |    4 ++--
+ 1 files changed, 2 insertions(+), 2 deletions(-)
+
+diff --git a/include/configs/pavo.h b/include/configs/pavo.h
+index 432a6f8..9f4d4ad 100644
+--- a/include/configs/pavo.h
++++ b/include/configs/pavo.h
+@@ -50,7 +50,7 @@
+ #define JZ4740_NORBOOT_CFG	JZ4740_NORBOOT_16BIT	/* NOR Boot config code */
+ #define JZ4740_NANDBOOT_CFG	JZ4740_NANDBOOT_B8R3	/* NAND Boot config code */
+ 
+-#define CFG_CPU_SPEED		336000000	/* CPU clock: 336 MHz */
++#define CFG_CPU_SPEED		252000000	/* CPU clock: 252 MHz */
+ #define CFG_EXTAL		12000000	/* EXTAL freq: 12 MHz */
+ #define	CFG_HZ			(CFG_EXTAL/256) /* incrementer freq */
+ 
+@@ -104,7 +104,7 @@
+  * Miscellaneous configurable options
+  */
+ #define	CFG_LONGHELP				/* undef to save memory      */
+-#define	CFG_PROMPT		"PAVO # "	/* Monitor Command Prompt    */
++#define	CFG_PROMPT		"PI # "	/* Monitor Command Prompt    */
+ #define	CFG_CBSIZE		256		/* Console I/O Buffer Size   */
+ #define	CFG_PBSIZE (CFG_CBSIZE+sizeof(CFG_PROMPT)+16)  /* Print Buffer Size */
+ #define	CFG_MAXARGS		16		/* max number of command args*/
+-- 
+1.6.0.4
+
