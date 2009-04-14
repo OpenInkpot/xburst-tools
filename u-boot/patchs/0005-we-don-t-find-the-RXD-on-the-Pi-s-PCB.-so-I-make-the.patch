@@ -1,0 +1,76 @@
+From e8b5d16e1b6ece6a4821efa0b54d19d076306fdd Mon Sep 17 00:00:00 2001
+From: xiangfu <xiangfu.z@gmail.com>
+Date: Tue, 14 Apr 2009 11:55:07 +0800
+Subject: [PATCH] we don't find the RXD on the Pi's PCB. so I make the u-boot driectly boot kernel.
+ change some config base on GGV's nandboot.
+
+---
+ common/main.c          |    3 ++-
+ include/configs/pavo.h |   10 ++++++----
+ 2 files changed, 8 insertions(+), 5 deletions(-)
+
+diff --git a/common/main.c b/common/main.c
+index cc4b50f..7b90e3b 100644
+--- a/common/main.c
++++ b/common/main.c
+@@ -404,7 +404,8 @@ void main_loop (void)
+ 
+ 	debug ("### main_loop: bootcmd=\"%s\"\n", s ? s : "<UNDEFINED>");
+ 
+-	if (bootdelay >= 0 && s && !abortboot (bootdelay)) {
++	//if (bootdelay >= 0 && s && !abortboot (bootdelay)) {
++	if (s) {
+ # ifdef CONFIG_AUTOBOOT_KEYED
+ 		int prev = disable_ctrlc(1);	/* disable Control C checking */
+ # endif
+diff --git a/include/configs/pavo.h b/include/configs/pavo.h
+index 9f4d4ad..93f0a35 100644
+--- a/include/configs/pavo.h
++++ b/include/configs/pavo.h
+@@ -25,13 +25,15 @@
+ #ifndef __CONFIG_H
+ #define __CONFIG_H
+ 
++#define DEBUG
++#define CONFIG_DEBUG
+ #define CONFIG_MIPS32		1  /* MIPS32 CPU core */
+ #define CONFIG_JzRISC		1  /* JzRISC core */
+ #define CONFIG_JZSOC		1  /* Jz SoC */
+ #define CONFIG_JZ4740		1  /* Jz4740 SoC */
+ #define CONFIG_PAVO		1  /* PAVO validation board */
+ 
+-#define CONFIG_LCD                 /* LCD support */
++//#define CONFIG_LCD                 /* LCD support */
+ //#define CONFIG_SLCD                 /* LCD support */
+ 
+ #ifndef CONFIG_SLCD                 /* LCD support */
+@@ -83,7 +85,7 @@
+ #define CONFIG_BOOTFILE	        "uImage"	/* file to load */
+ #define CONFIG_BOOTARGS		"mem=64M console=ttyS0,57600n8 ip=off rootfstype=yaffs2 root=/dev/mtdblock2 rw"
+ #define CONFIG_BOOTCOMMAND	"nand read 0x80600000 0x400000 0x300000;bootm"
+-#define CFG_AUTOLOAD		"n"		/* No autoload */
++#define CFG_AUTOLOAD		"y"		/* No autoload */
+ 
+ //#define CONFIG_NET_MULTI
+ 
+@@ -206,7 +208,7 @@
+ #define CONFIG_NR_DRAM_BANKS	1
+ 
+ // SDRAM paramters
+-#define SDRAM_BW16		0	/* Data bus width: 0-32bit, 1-16bit */
++#define SDRAM_BW16		1	/* Data bus width: 0-32bit, 1-16bit */
+ #define SDRAM_BANK4		1	/* Banks each chip: 0-2bank, 1-4bank */
+ #define SDRAM_ROW		13	/* Row address: 11 to 13 */
+ #define SDRAM_COL		9	/* Column address: 8 to 12 */
+@@ -217,7 +219,7 @@
+ #define SDRAM_RCD		20	/* RAS# to CAS# Delay */
+ #define SDRAM_TPC		20	/* RAS# Precharge Time */
+ #define SDRAM_TRWL		7	/* Write Latency Time */
+-#define SDRAM_TREF	        7812	/* Refresh period: 8192 refresh cycles/64ms */
++#define SDRAM_TREF	        15625	/* Refresh period: 8192 refresh cycles/64ms */
+ 
+ /*-----------------------------------------------------------------------
+  * Cache Configuration
+-- 
+1.6.0.4
+
