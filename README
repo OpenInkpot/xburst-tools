@@ -2,6 +2,7 @@ Pi is a Chinese device.
 We want port Openmoko to Pi, All free software
 
 1. open the case
+
 2. take off the cover of PCB
    then you will send the "GND" and "TXD"
    and th TP74 is the "RXD"
