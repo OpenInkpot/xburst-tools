@@ -160,24 +160,6 @@ out:
 	return status;
 }
 
-int usb_send_bulk_to_ingenic(struct ingenic_dev *ingenic_dev)
-{
-	int status;
-
-	status = usb_bulk_write(ingenic_dev->usb_handle,
-	/* endpoint         */ INGENIC_ENDPOINT,
-	/* bulk data        */ ingenic_dev->file_buff, // + i,
-	/* bulk data length */ ingenic_dev->file_len,
-				USB_TIMEOUT);
-
-	if (status < ingenic_dev->file_len) {
-		fprintf(stderr, "Error - can't send bulk data to Ingenic CPU: %i\n", status);
-		return -1;
-	}
-
-	return 1;
-}
-
 int usb_ingenic_upload(struct ingenic_dev *ingenic_dev, int stage)
 {
 	int status;
@@ -197,24 +179,30 @@ int usb_ingenic_upload(struct ingenic_dev *ingenic_dev, int stage)
 		goto out;
 	}
 
-//	not needed ? the windows driver does not send the length
-// 	/* tell the device the length of the file to be uploaded */
-// 	status = usb_control_msg(ingenic_dev->usb_handle,
-//           /* bmRequestType */ USB_ENDPOINT_OUT | USB_TYPE_VENDOR | USB_RECIP_DEVICE,
-//           /* bRequest      */ VR_SET_DATA_LENGTH,
-//           /* wValue        */ htons(ingenic_dev->file_len),
-//           /* wIndex        */ ingenic_dev->file_len,
-//           /* Data          */ 0,
-//           /* wLength       */ 0,
-//                               USB_TIMEOUT);
-//
-// 	if (status != 0)
-// 		fprintf(stderr, "Error - can't set the address on Ingenic device: %i\n", status);
+	/* tell the device the length of the file to be uploaded */
+	status = usb_control_msg(ingenic_dev->usb_handle,
+          /* bmRequestType */ USB_ENDPOINT_OUT | USB_TYPE_VENDOR | USB_RECIP_DEVICE,
+          /* bRequest      */ VR_SET_DATA_LENGTH,
+          /* wValue        */ 0,
+          /* wIndex        */ ingenic_dev->file_len,
+          /* Data          */ 0,
+          /* wLength       */ 0,
+                              USB_TIMEOUT);
 
-	status = usb_send_bulk_to_ingenic(ingenic_dev);
+	if (status != 0)
+		fprintf(stderr, "Error - can't set the address on Ingenic device: %i\n", status);
 
-	if (status < 1)
-		return status;
+	/* upload the file */
+	status = usb_bulk_read(ingenic_dev->usb_handle,
+	/* endpoint         */ INGENIC_ENDPOINT,
+	/* bulk data        */ ingenic_dev->file_buff,
+	/* bulk data length */ ingenic_dev->file_len,
+				USB_TIMEOUT);
+
+	if (status < ingenic_dev->file_len) {
+		fprintf(stderr, "Error - can't send bulk data to Ingenic CPU: %i\n", status);
+		return -1;
+	}
 
 	/* tell the device to start the uploaded device */
 	status = usb_control_msg(ingenic_dev->usb_handle,
