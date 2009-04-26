@@ -22,144 +22,96 @@
 
 
 #include "main.h"
+#include "usb.h"
 
-#include <usb.h>
 #include <stdio.h>
 #include <string.h>
+#include <unistd.h>
+#include <stdlib.h>
 #include <errno.h>
+#include <fcntl.h>
+#include <sys/types.h>
+#include <sys/stat.h>
 
 
-static int get_ingenic_device(struct ingenic_dev *ingenic_dev)
+int load_file(struct ingenic_dev *ingenic_dev, const char *file_path)
 {
-	struct usb_bus *usb_busses, *usb_bus;
-	struct usb_device *usb_dev;
-	int count = 0;
+	struct stat fstat;
+	int fd, status, res = -1;
 
-	usb_busses = usb_get_busses();
+	if (ingenic_dev->file_buff)
+		free(ingenic_dev->file_buff);
 
-	for (usb_bus = usb_busses; usb_bus != NULL; usb_bus = usb_bus->next) {
-		for (usb_dev = usb_bus->devices; usb_dev != NULL; usb_dev = usb_dev->next) {
+	ingenic_dev->file_buff = NULL;
 
-			if ((usb_dev->descriptor.idVendor == VENDOR_ID) &&
-				(usb_dev->descriptor.idProduct == PRODUCT_ID)) {
-				ingenic_dev->usb_dev = usb_dev;
-				count++;
-			}
+	status = stat(file_path, &fstat);
 
-		}
+	if (status < 0) {
+		fprintf(stderr, "Error - can't get file size from '%s': %s\n", file_path, strerror(errno));
+		goto out;
 	}
 
-	return count;
-}
+	ingenic_dev->file_len = fstat.st_size;
+	ingenic_dev->file_buff = malloc(ingenic_dev->file_len);
 
-static int get_ingenic_interface(struct ingenic_dev *ingenic_dev)
-{
-	struct usb_config_descriptor *usb_config_desc;
-	struct usb_interface_descriptor *usb_if_desc;
-	struct usb_interface *usb_if;
-	int config_index, if_index, alt_index;
-
-	for (config_index = 0; config_index < ingenic_dev->usb_dev->descriptor.bNumConfigurations; config_index++) {
-		usb_config_desc = &ingenic_dev->usb_dev->config[config_index];
-
-		if (!usb_config_desc)
-			return 0;
-
-		for (if_index = 0; if_index < usb_config_desc->bNumInterfaces; if_index++) {
-			usb_if = &usb_config_desc->interface[if_index];
-
-			if (!usb_if)
-				return 0;
-
-			for (alt_index = 0; alt_index < usb_if->num_altsetting; alt_index++) {
-				usb_if_desc = &usb_if->altsetting[alt_index];
-
-				if (!usb_if_desc)
-					return 0;
-
-				if ((usb_if_desc->bInterfaceClass == 0xff) &&
-					(usb_if_desc->bInterfaceSubClass == 0)) {
-					ingenic_dev->interface = usb_if_desc->bInterfaceNumber;
-					return 1;
-				}
-			}
-		}
+	if (!ingenic_dev->file_buff) {
+		fprintf(stderr, "Error - can't allocate memory to read file '%s': %s\n", file_path, strerror(errno));
+		return -1;
 	}
 
-	return 0;
+	fd = open(file_path, O_RDONLY);
+
+	if (fd < 0) {
+		fprintf(stderr, "Error - can't open file '%s': %s\n", file_path, strerror(errno));
+		goto out;
+	}
+
+	status = read(fd, ingenic_dev->file_buff, ingenic_dev->file_len);
+
+	if (status < ingenic_dev->file_len) {
+		fprintf(stderr, "Error - can't read file '%s': %s\n", file_path, strerror(errno));
+		goto close;
+	}
+
+	res = 1;
+
+close:
+	close(fd);
+out:
+	return res;
 }
 
 int main(int argc, char **argv)
 {
-	int num_ingenic, status;
-	int res = EXIT_FAILURE;
-	char cpu_buff[8];
 	struct ingenic_dev ingenic_dev;
+	int res = EXIT_FAILURE;
 
 	if ((getuid()) || (getgid())) {
 		fprintf(stderr, "Error - you must be root to run '%s'\n", argv[0]);
-		exit(EXIT_FAILURE);
+		goto out;
 	}
 
 	memset(&ingenic_dev, 0, sizeof(struct ingenic_dev));
-	memset(cpu_buff, 0, sizeof(cpu_buff));
 
-	usb_init();
-// 	usb_set_debug(255);
-	usb_find_busses();
-	usb_find_devices();
+	if (usb_ingenic_init(&ingenic_dev) < 1)
+		goto out;
 
-	num_ingenic = get_ingenic_device(&ingenic_dev);
+	if (usb_get_ingenic_cpu(&ingenic_dev) < 1)
+		goto out;
 
-	if (num_ingenic == 0) {
-		fprintf(stderr, "Error - no Ingenic device found\n");
-		goto exit;
-	}
+	if (load_file(&ingenic_dev, STAGE1_FILE_PATH) < 1)
+		goto out;
 
-	if (num_ingenic > 1) {
-		fprintf(stderr, "Error - too many Ingenic devices found: %i\n", num_ingenic);
-		goto exit;
-	}
+	if (usb_ingenic_upload(&ingenic_dev, 1) < 1)
+		goto cleanup;
 
-	ingenic_dev.usb_handle = usb_open(ingenic_dev.usb_dev);
-	if (!ingenic_dev.usb_handle) {
-		fprintf(stderr, "Error - can't open Ingenic device: %s\n", usb_strerror());
-		goto exit;
-	}
+	res = EXIT_SUCCESS;
 
-	if (get_ingenic_interface(&ingenic_dev) < 1) {
-		fprintf(stderr, "Error - can't find Ingenic interface\n");
-		goto close_handle;
-	}
-
-	if (usb_claim_interface(ingenic_dev.usb_handle, ingenic_dev.interface) < 0) {
-		fprintf(stderr, "Error - can't claim Ingenic interface: %s\n", usb_strerror());
-		goto close_handle;
-	}
-
-	status = usb_control_msg(ingenic_dev.usb_handle,
-          /* bmRequestType */ INGENIC_REQUEST_TYPE,
-          /* bRequest      */ VR_GET_CPU_INFO,
-          /* wValue        */ 0,
-          /* wIndex        */ 0,
-          /* Data          */ cpu_buff,
-          /* wLength       */ 8,
-                              USB_TIMEOUT);
-
-	if (status != sizeof(cpu_buff)) {
-		fprintf(stderr, "Error - can't retrieve Ingenic CPU type: %i\n", status);
-		goto release_if;
-	}
-
-	printf("Found cpu: %02x, %02x, %02x, %02x, %02x, %02x, %02x, %02x\n",
-		cpu_buff[0], cpu_buff[1], cpu_buff[2], cpu_buff[3],
-		cpu_buff[4], cpu_buff[5], cpu_buff[6], cpu_buff[7]);
-
-release_if:
-	usb_release_interface(ingenic_dev.usb_handle, ingenic_dev.interface);
-close_handle:
-	usb_close(ingenic_dev.usb_handle);
-exit:
-	exit(res);
+cleanup:
+	if (ingenic_dev.file_buff)
+		free(ingenic_dev.file_buff);
+out:
+	usb_ingenic_cleanup(&ingenic_dev);
+	return res;
 }
 

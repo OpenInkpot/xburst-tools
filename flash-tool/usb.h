@@ -21,20 +21,25 @@
 
 
 
-#include <stdint.h>
+#define INGENIC_ENDPOINT	0x01
+
+#define VR_GET_CPU_INFO		0x00
+#define VR_SET_DATA_ADDRESS	0x01
+#define VR_SET_DATA_LENGTH	0x02
+#define VR_FLUSH_CACHES		0x03
+#define VR_PROGRAM_START1	0x04
+#define VR_PROGRAM_START2	0x05
+
+#define STAGE1_ADDR_MSB 0x8000
+#define STAGE1_ADDR_LSB 0x0000
+#define STAGE2_ADDR_MSB 0x8000
+#define STAGE2_ADDR_LSB 0x0000
+
+#define USB_PACKET_SIZE 512
+#define USB_TIMEOUT 5000
 
 
-#define VENDOR_ID	0x601a
-#define PRODUCT_ID	0x4740
-
-#define STAGE1_FILE_PATH "fw.bin"
-
-
-struct ingenic_dev {
-	struct usb_device *usb_dev;
-	struct usb_dev_handle *usb_handle;
-	uint8_t interface;
-	char cpu_info_buff[8];
-	char *file_buff;
-	int file_len;
-};
+int usb_ingenic_init(struct ingenic_dev *ingenic_dev);
+int usb_get_ingenic_cpu(struct ingenic_dev *ingenic_dev);
+int usb_ingenic_upload(struct ingenic_dev *ingenic_dev, int stage);
+void usb_ingenic_cleanup(struct ingenic_dev *ingenic_dev);
