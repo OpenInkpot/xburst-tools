@@ -92,7 +92,7 @@ int usb_ingenic_init(struct ingenic_dev *ingenic_dev)
 	int num_ingenic, status = -1;
 
 	usb_init();
-// 	usb_set_debug(255);
+ 	/* usb_set_debug(255); */
 	usb_find_busses();
 	usb_find_devices();
 
@@ -193,14 +193,14 @@ int usb_ingenic_upload(struct ingenic_dev *ingenic_dev, int stage)
 		fprintf(stderr, "Error - can't set the address on Ingenic device: %i\n", status);
 
 	/* upload the file */
-	status = usb_bulk_read(ingenic_dev->usb_handle,
-	/* endpoint         */ INGENIC_ENDPOINT,
+	status = usb_bulk_write(ingenic_dev->usb_handle,
+	/* endpoint         */ INGENIC_OUT_ENDPOINT,
 	/* bulk data        */ ingenic_dev->file_buff,
 	/* bulk data length */ ingenic_dev->file_len,
 				USB_TIMEOUT);
 
 	if (status < ingenic_dev->file_len) {
-		fprintf(stderr, "Error - can't send bulk data to Ingenic CPU: %i\n", status);
+		fprintf(stderr, "Error - can't send bulk data to Ingenic CPU: %i\nfile length: %d\n", status, ingenic_dev->file_len);
 		return -1;
 	}
 
