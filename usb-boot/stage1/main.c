@@ -23,22 +23,24 @@ volatile u32 CFG_EXTAL;
 volatile u8 PHM_DIV;
 volatile u8 IS_SHARE;
 extern int pllout2;
-#if 0
+#if 1
 void test_load_args(void)
 {
 	CPU_ID = 0x4740 ;
 	CFG_EXTAL = 12000000 ;
-	CFG_CPU_SPEED = 336000000 ;
-	PHM_DIV = 4;
+	CFG_CPU_SPEED = 252000000 ;
+	PHM_DIV = 3;
 	fw_args->use_uart = 0;
 	UART_BASE = UART0_BASE + fw_args->use_uart * 0x1000;
 	CONFIG_BAUDRATE = 57600;
-	SDRAM_BW16 = 0;
-	SDRAM_BANK4 = 1;
+	SDRAM_BW16 = 16;
+	SDRAM_BANK4 = 4;
 	SDRAM_ROW = 13;
 	SDRAM_COL = 9;
 	CONFIG_MOBILE_SDRAM = 0;
 	IS_SHARE = 1;
+
+	fw_args->debug_ops = -1;
 }
 #endif
 
@@ -67,7 +69,7 @@ void load_args(void)
 
 void c_main(void)
 {
-	load_args();
+	test_load_args();
 
 	if (fw_args->debug_ops > 0)
 	{
