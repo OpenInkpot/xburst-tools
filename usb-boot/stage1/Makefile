@@ -3,6 +3,7 @@
 #
 # Makefile for the JZ4740 internal bootrom code.
 #
+FLASH_TOOL_PATH = ../../flash-tool
 
 CROSS	:= mipsel-linux-
 
@@ -18,7 +19,7 @@ fw.bin: fw.elf
 	$(CROSS)objdump -D $< > fw.dump
 	$(CROSS)objdump -h $< > fw.map
 	$(CROSS)nm -n $< > System.map
-	cp fw.bin ../../../../tools
+	cp fw.bin $(FLASH_TOOL_PATH)
 
 fw.elf: $(OBJS)
 	$(CROSS)ld $(LDFLAGS) $(OBJS) -o $@

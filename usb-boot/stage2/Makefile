@@ -7,7 +7,7 @@
 # published by the Free Software Foundation.
 # 
 
-# -----------------------------
+FLASH_TOOL_PATH = ../../flash-tool
 
 CC	:= mipsel-linux-gcc
 AR	:= mipsel-linux-ar rcsv
@@ -53,7 +53,7 @@ all:	$(APP)
 	$(OBJDUMP) -D $(APP) > $(TARGET).dump
 	$(NM) $(APP) | sort > $(TARGET).sym
 	$(OBJDUMP) -h $(APP) > $(TARGET).map
-	cp usb_boot.bin ../../../tools
+	cp usb_boot.bin $(FLASH_TOOL_PATH)
 
 $(APP):	$(HEADO) $(OBJS) $(EXTLIBS) 
 	$(CC) $(LDFLAGS) $^ -o $@
