@@ -29,6 +29,11 @@
 #define VR_FLUSH_CACHES		0x03
 #define VR_PROGRAM_START1	0x04
 #define VR_PROGRAM_START2	0x05
+#define VR_NOR_OPS		0x06
+#define VR_NAND_OPS		0x07
+#define VR_SDRAM_OPS		0x08
+#define VR_CONFIGRATION		0x09
+#define VR_GET_NUM		0x0a
 
 #define STAGE1_ADDR_MSB 0x8000
 #define STAGE1_ADDR_LSB 0x0000
