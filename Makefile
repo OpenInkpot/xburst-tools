@@ -1,7 +1,7 @@
 #
 # "PI Makefile" - for setting up the PI development environment
 #
-# (C) Copyright 2009 PI, Inc.
+# (C) Copyright 2009 PI.
 # Author: xiangfu liu <xiangfu@openmoko.org>
 #
 # This program is free software; you can redistribute it and/or
