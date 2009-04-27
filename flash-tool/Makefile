@@ -31,11 +31,11 @@ endif
 
 CC = 		gcc
 CFLAGS +=	-pedantic -Wall -W -O1 -g3 -std=gnu99
-LDFLAGS +=	-lusb
+LDFLAGS +=	-lusb -lconfuse
 BINARY_NAME =	inflash
 
 SRC_C= main.c usb.c
-SRC_H= main.h usb.h
+SRC_H= main.h usb.h usb_boot_defines.h
 SRC_O= $(SRC_C:.c=.o)
 
 $(BINARY_NAME):	$(SRC_O) $(SRC_H) Makefile

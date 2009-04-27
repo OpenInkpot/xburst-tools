@@ -35,10 +35,8 @@
 #define VR_CONFIGRATION		0x09
 #define VR_GET_NUM		0x0a
 
-#define STAGE1_ADDR_MSB (0x80002000 >> 16)
-#define STAGE1_ADDR_LSB (0x80002000 & 0xffff)
-#define STAGE2_ADDR_MSB 0x8000
-#define STAGE2_ADDR_LSB 0x0000
+#define STAGE_ADDR_MSB(addr) ((addr) >> 16)
+#define STAGE_ADDR_LSB(addr) ((addr) & 0xffff)
 
 #define USB_PACKET_SIZE 512
 #define USB_TIMEOUT 5000

@@ -23,11 +23,12 @@
 
 #include <stdint.h>
 
-
 #define VENDOR_ID	0x601a
 #define PRODUCT_ID	0x4740
 
 #define STAGE1_FILE_PATH "fw.bin"
+#define STAGE2_FILE_PATH "usb_boot.bin"
+#define CONFIG_FILE_PATH "usb_boot.cfg"
 
 
 struct ingenic_dev {
@@ -38,3 +39,6 @@ struct ingenic_dev {
 	char *file_buff;
 	int file_len;
 };
+
+unsigned total_size;
+
