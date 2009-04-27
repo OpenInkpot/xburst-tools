@@ -24,11 +24,7 @@ GCC_VER=gcc-4.1.2
 GLIBC_VER=glibc-2.6.1
 GLIBC_PORTS_VER=glibc-ports-2.6.1
 KERNEL_HEADERS_VER=linux-headers-2.6.24.3
-KERNEL_VER=linux-2.6.24.3
-U-BOOT_VER=u-boot-1.1.6
 
-U-BOOT_PATH=u-boot
-KERNEL_PATH=kernel
 TOOLCHAIN_PATH=toolchain
 DL_PATH=$(TOOLCHAIN_PATH)/dl
 INSTALL_PATH=install
@@ -85,7 +81,6 @@ $(INSTALL_PATH):
 
 
 ### toolchain stuff
-
 binutils: $(DL_PATH)/$(BINUTILS_PACKAGE)
 	tar -xvjf $(DL_PATH)/$(BINUTILS_PACKAGE) -C $(TOOLCHAIN_PATH)
 	mkdir -p $(TOOLCHAIN_PATH)/$(BINUTILS_VER)/build
@@ -144,17 +139,17 @@ glibc: $(DL_PATH)/$(GLIBC_PACKAGE) $(DL_PATH)/$(GLIBC_PORTS_PACKAGE) $(DL_PATH)/
 .PHONY: u-boot
 u-boot:
 	export PATH=/opt/mipseltools-gcc412-glibc261/bin:$PATH
-	tar -xjvf $(U-BOOT_PATH)/dl/u-boot-1.1.6.tar.bz2 -C  $(U-BOOT_PATH)
-	cd $(U-BOOT_PATH)/$(U-BOOT_VER) && \
-	patch -Np1 -i ../patchs/u-boot-1.1.6-jz-20090306.patch && \
-	make pavo_nand_config && \
+	git clone git://github.com/xiangfu/pi-u-boot.git u-boot
+	cd u-boot && \
+	make pi_config && \
 	make
 
 ### usbboot
 .PHONY: usbboot
 usbboot: usbboot-tools usbboot-stage
 
-usbboot-tools:
+usbboot-tools: usbboot-stage
+	make -C flash-tool
 
 usbboot-stage:
 	make -C $(USBBOOT_STAGE1_PATH)
@@ -164,18 +159,15 @@ usbboot-stage:
 .PHONY: kernel
 kernel:
 	export PATH=/opt/mipseltools-gcc412-glibc261/bin:$PATH
-	tar -xjvf $(KERNEL_PATH)/dl/linux-2.6.24.3.tar.bz2 -C  $(KERNEL_PATH)
-	cd $(KERNEL_PATH)/$(KERNEL_VER) && \
-	patch -Np1 -i ../patchs/linux-2.6.24.3-jz-20090226.patch && \
-	make pavo_defconfig && \
-	make xconfig && \
-	make zImage
+	git clone git://github.com/xiangfu/pi-kernel.git kernel
+	cd kernel && \
+	make pi_defconfig && \
+	make uImage
 
 ### clean up
-
 distclean: clean clean-toolchain
 
-clean: clean-u-boot
+clean:
 
 clean-toolchain: clean-glibc
 	rm -rf $(TOOLCHAIN_PATH)/$(BINUTILS_VER) binutils
@@ -184,9 +176,6 @@ clean-toolchain: clean-glibc
 
 clean-glibc:
 	rm -rf $(TOOLCHAIN_PATH)/$(GLIBC_VER) glibc
-
-clean-u-boot:
-	rm -rf $(U-BOOT_PATH)/$(U-BOOT_VER)
 
 help:
 	@make --print-data-base --question |	\
