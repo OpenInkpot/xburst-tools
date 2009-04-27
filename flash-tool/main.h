@@ -35,10 +35,10 @@ struct ingenic_dev {
 	struct usb_device *usb_dev;
 	struct usb_dev_handle *usb_handle;
 	uint8_t interface;
-	char cpu_info_buff[8];
+	char cpu_info_buff[9];
 	char *file_buff;
 	int file_len;
 };
 
-unsigned total_size;
+unsigned int total_size;
 

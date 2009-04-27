@@ -149,19 +149,25 @@ int usb_get_ingenic_cpu(struct ingenic_dev *ingenic_dev)
           /* wLength       */ 8,
                               USB_TIMEOUT);
 
-	if (status != sizeof(ingenic_dev->cpu_info_buff)) {
+	if (status != sizeof(ingenic_dev->cpu_info_buff) - 1 ) {
 		fprintf(stderr, "Error - can't retrieve Ingenic CPU information: %i\n", status);
 		return status;
 	}
 
-	printf("CPU data: %02x, %02x, %02x, %02x, %02x, %02x, %02x, %02x : %s\n",
+	ingenic_dev->cpu_info_buff[8] = '\0';
+	printf("\n CPU data: %02x, %02x, %02x, %02x, %02x, %02x, %02x, %02x : %s\n",
 		ingenic_dev->cpu_info_buff[0], ingenic_dev->cpu_info_buff[1],
 		ingenic_dev->cpu_info_buff[2], ingenic_dev->cpu_info_buff[3],
 		ingenic_dev->cpu_info_buff[4], ingenic_dev->cpu_info_buff[5],
 		ingenic_dev->cpu_info_buff[6], ingenic_dev->cpu_info_buff[7],
 		ingenic_dev->cpu_info_buff);
 
-	return 1;
+	if (!strcmp(ingenic_dev->cpu_info_buff,"JZ4740V1")) return 1;
+	if (!strcmp(ingenic_dev->cpu_info_buff,"JZ4750V1")) return 2;
+	if (!strcmp(ingenic_dev->cpu_info_buff,"Boot4740")) return 3;
+	if (!strcmp(ingenic_dev->cpu_info_buff,"Boot4750")) return 4;
+
+	return 0;
 }
 
 int usb_ingenic_flush_cache(struct ingenic_dev *ingenic_dev)
@@ -177,7 +183,7 @@ int usb_ingenic_flush_cache(struct ingenic_dev *ingenic_dev)
           /* wLength       */ 0,
                               USB_TIMEOUT);
 
-	if (status != sizeof(ingenic_dev->cpu_info_buff)) {
+	if (status != 0) {
 		fprintf(stderr, "Error - can't flush cache: %i\n", status);
 		return status;
 	}
@@ -192,13 +198,14 @@ int usb_ingenic_upload(struct ingenic_dev *ingenic_dev, int stage)
 	unsigned int stage2_addr;
 	stage2_addr = total_size + 0x80000000;
 	stage2_addr -= CODE_SIZE;
+	int stage_addr = (stage == 1 ? 0x80002000 : stage2_addr);
 
 	/* tell the device the RAM address to store the file */
 	status = usb_control_msg(ingenic_dev->usb_handle,
           /* bmRequestType */ USB_ENDPOINT_OUT | USB_TYPE_VENDOR | USB_RECIP_DEVICE,
           /* bRequest      */ VR_SET_DATA_ADDRESS,
-          /* wValue        */ STAGE_ADDR_MSB(stage == 1 ? 0x80002000 : stage2_addr),
-          /* wIndex        */ STAGE_ADDR_LSB(stage == 1 ? 0x80002000 : stage2_addr),
+          /* wValue        */ STAGE_ADDR_MSB(stage_addr),
+          /* wIndex        */ STAGE_ADDR_LSB(stage_addr),
           /* Data          */ 0,
           /* wLength       */ 0,
                               USB_TIMEOUT);
@@ -223,6 +230,7 @@ int usb_ingenic_upload(struct ingenic_dev *ingenic_dev, int stage)
 		fprintf(stderr, "Error - can't set data length on Ingenic device: %i\n", status);
 #endif
 
+	printf("\n Download stage %d program and execute at 0x%08x ", stage, (stage_addr));
 	/* upload the file */
 	status = usb_bulk_write(ingenic_dev->usb_handle,
 	/* endpoint         */ INGENIC_OUT_ENDPOINT,
@@ -236,6 +244,7 @@ int usb_ingenic_upload(struct ingenic_dev *ingenic_dev, int stage)
 	}
 
 	if (stage == 2) {
+		sleep(1);
 		usb_get_ingenic_cpu(ingenic_dev);
 		usb_ingenic_flush_cache(ingenic_dev);
 	}
@@ -244,8 +253,8 @@ int usb_ingenic_upload(struct ingenic_dev *ingenic_dev, int stage)
 	status = usb_control_msg(ingenic_dev->usb_handle,
           /* bmRequestType */ USB_ENDPOINT_OUT | USB_TYPE_VENDOR | USB_RECIP_DEVICE,
           /* bRequest      */ (stage == 1 ? VR_PROGRAM_START1 : VR_PROGRAM_START2),
-          /* wValue        */ STAGE_ADDR_MSB(stage == 1 ? 0x80002000 : stage2_addr),
-          /* wIndex        */ STAGE_ADDR_LSB(stage == 1 ? 0x80002000 : stage2_addr),
+          /* wValue        */ STAGE_ADDR_MSB(stage_addr),
+          /* wIndex        */ STAGE_ADDR_LSB(stage_addr),
           /* Data          */ 0,
           /* wLength       */ 0,
                               USB_TIMEOUT);
@@ -255,6 +264,7 @@ int usb_ingenic_upload(struct ingenic_dev *ingenic_dev, int stage)
 		goto out;
 	}
 
+	sleep(1);
 	usb_get_ingenic_cpu(ingenic_dev);
 	status = 1;
 

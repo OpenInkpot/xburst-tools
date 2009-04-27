@@ -68,11 +68,97 @@ static int parse_configure(char * file_path)
 	cfg_free(cfg);
 
 	fw_args.cpu_id = 0x4740;
+	if (fw_args.bus_width == 32)
+		fw_args.bus_width = 0 ;
+	else
+		fw_args.bus_width = 1 ; 
+	fw_args.bank_num = fw_args.bank_num / 4; 
+	fw_args.cpu_speed = fw_args.cpu_speed / fw_args.ext_clk;
 
-	total_size = (unsigned int)(2 << (fw_args.row_addr + fw_args.col_addr - 1)) * 2 
+	total_size = (unsigned int)
+		(2 << (fw_args.row_addr + fw_args.col_addr - 1)) * 2 
 		* (fw_args.bank_num + 1) * 2 
 		* (2 - fw_args.bus_width);
 
+	return 1;
+}
+
+int check_dump_cfg()
+{
+	printf("\n Now checking whether all configure args valid: ");
+	/* check PLL */
+	if (fw_args.ext_clk > 27 || fw_args.ext_clk < 12 ) {
+		printf("\n EXTCLK setting invalid!");
+		return 0;
+	}
+	if (fw_args.phm_div > 32 || fw_args.ext_clk < 2 ) {
+		printf("\n PHMDIV setting invalid!");
+		return 0;
+	}
+	if ( (fw_args.cpu_speed * fw_args.ext_clk ) % 12 != 0 ) {
+		printf("\n CPUSPEED setting invalid!");
+		return 0;
+	}
+
+	/* check SDRAM */
+	if (fw_args.bus_width > 1 ) {
+		printf("\n SDRAMWIDTH setting invalid!");
+		return 0;
+	}
+	if (fw_args.bank_num > 1 ) {
+		printf("\n BANKNUM setting invalid!");
+		return 0;
+	}
+	if (fw_args.row_addr > 13 && fw_args.row_addr < 11 ) {
+		printf("\n ROWADDR setting invalid!");
+		return 0;
+	}
+	if (fw_args.col_addr > 13 && fw_args.col_addr < 11 ) {
+		printf("\n COLADDR setting invalid!");
+		return 0;
+	}
+
+	/* check NAND */
+	/* if ( Hand.nand_ps < 2048 && Hand.nand_os > 16 )
+	{
+		printf("\n PAGESIZE or OOBSIZE setting invalid!");
+		return 0;
+	}
+	if ( Hand.nand_ps < 2048 && Hand.nand_ppb > 32 )
+	{
+		printf("\n PAGESIZE or PAGEPERBLOCK setting invalid!");
+		return 0;
+	}
+
+	if ( Hand.nand_ps > 512 && Hand.nand_os <= 16 )
+	{
+		printf("\n PAGESIZE or OOBSIZE setting invalid!");
+		return 0;
+	}
+	if ( Hand.nand_ps > 512 && Hand.nand_ppb < 64 )
+	{
+		printf("\n PAGESIZE or PAGEPERBLOCK setting invalid!");
+		return 0;
+		} */
+
+	printf("\n Current device information:");
+	printf(" CPU is Jz%x",fw_args.cpu_id);
+	printf("\n Crystal work at %dMHz, the CCLK up to %dMHz and PMH_CLK up to %dMHz",
+		fw_args.ext_clk,
+		(unsigned int)fw_args.cpu_speed * fw_args.ext_clk,
+		((unsigned int)fw_args.cpu_speed * fw_args.ext_clk) / fw_args.phm_div);
+
+	printf("\n Total SDRAM size is %d MB, work in %d bank and %d bit mode",
+		total_size / 0x100000, 2 * (fw_args.bank_num + 1), 16 * (2 - fw_args.bus_width));
+
+	/* printf("\n Nand page size %d, ECC offset %d, ",
+		Hand.nand_ps,Hand.nand_eccpos);
+
+	printf("bad block ID %d, ",Hand.nand_bbpage);
+
+	printf("use %d plane mode",Hand.nand_plane); */
+
+	printf("\n");
 	return 1;
 }
 
@@ -130,6 +216,7 @@ int main(int argc, char **argv)
 	struct ingenic_dev ingenic_dev;
 
 	int res = EXIT_FAILURE;
+	int status;
 
 	if ((getuid()) || (getgid())) {
 		fprintf(stderr, "Error - you must be root to run '%s'\n", argv[0]);
@@ -145,27 +232,54 @@ int main(int argc, char **argv)
 	if (usb_ingenic_init(&ingenic_dev) < 1)
 		goto out;
 
-	if (usb_get_ingenic_cpu(&ingenic_dev) < 1)
+	status = usb_get_ingenic_cpu(&ingenic_dev);
+	switch (status)	{
+	case 1:            /* Jz4740v1 */
+		status = 0;
+		fw_args.cpu_id = 0x4740;
+		break;
+	case 2:            /* Jz4750v1 */
+		status = 0;
+		fw_args.cpu_id = 0x4750;
+		break;
+	case 3:            /* Boot4740 */
+		status = 1;
+		fw_args.cpu_id = 0x4740;
+		break;
+	case 4:            /* Boot4750 */
+		status = 1;
+		fw_args.cpu_id = 0x4750;
+		break;
+	default:
 		goto out;
+	}
 
-	/* now we upload the usb boot stage1 */
-	printf("upload usb boot stage1\n");
-	if (load_file(&ingenic_dev, STAGE1_FILE_PATH) < 1)
+	if (status) {
+		printf("Booted");
 		goto out;
+	} else {
+		printf("Unboot");
+		printf("\n Now booting device");
 
-	if (usb_ingenic_upload(&ingenic_dev, 1) < 1)
-		goto cleanup;
-#if 0
-	/* now we upload the usb boot stage2 */
-	sleep(1);
-	printf("upload usb boot stage2\n");
-	if (load_file(&ingenic_dev, STAGE2_FILE_PATH) < 1)
-		goto cleanup;
+		/* now we upload the usb boot stage1 */
+		printf("\n Upload usb boot stage1");
+		if (load_file(&ingenic_dev, STAGE1_FILE_PATH) < 1)
+			goto out;
 
-	if (usb_ingenic_upload(&ingenic_dev, 2) < 1)
-		goto cleanup;
+		if (usb_ingenic_upload(&ingenic_dev, 1) < 1)
+			goto cleanup;
 
-#endif
+		/* now we upload the usb boot stage2 */
+		sleep(1);
+		printf("\n Upload usb boot stage2");
+		if (load_file(&ingenic_dev, STAGE2_FILE_PATH) < 1)
+			goto cleanup;
+
+		if (usb_ingenic_upload(&ingenic_dev, 2) < 1)
+			goto cleanup;
+		check_dump_cfg();
+	}
+
 	res = EXIT_SUCCESS;
 
 cleanup:

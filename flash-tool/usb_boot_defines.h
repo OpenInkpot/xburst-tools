@@ -107,7 +107,7 @@ typedef struct {
 	/* for align */
 	/* unsigned char align1; */
 	/* unsigned char align2; */
-}fw_args_t;
+} __attribute__((packed)) fw_args_t;
 
 typedef struct {
 
@@ -130,6 +130,6 @@ typedef struct {
 
 	fw_args_t fw_args;
 
-} hand_t;
+} __attribute__((packed)) hand_t;
 
 #endif	/* __JZ4740_USBDEFINES__H_ */
