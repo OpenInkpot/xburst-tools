@@ -235,7 +235,7 @@ int usb_ingenic_upload(struct ingenic_dev *ingenic_dev, int stage)
 		return -1;
 	}
 
-	if (stage != 1) {
+	if (stage == 2) {
 		usb_get_ingenic_cpu(ingenic_dev);
 		usb_ingenic_flush_cache(ingenic_dev);
 	}

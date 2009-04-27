@@ -67,6 +67,8 @@ static int parse_configure(char * file_path)
 		return -1;
 	cfg_free(cfg);
 
+	fw_args.cpu_id = 0x4740;
+
 	total_size = (unsigned int)(2 << (fw_args.row_addr + fw_args.col_addr - 1)) * 2 
 		* (fw_args.bank_num + 1) * 2 
 		* (2 - fw_args.bus_width);
@@ -147,6 +149,7 @@ int main(int argc, char **argv)
 		goto out;
 
 	/* now we upload the usb boot stage1 */
+	printf("upload usb boot stage1\n");
 	if (load_file(&ingenic_dev, STAGE1_FILE_PATH) < 1)
 		goto out;
 
@@ -155,6 +158,7 @@ int main(int argc, char **argv)
 #if 0
 	/* now we upload the usb boot stage2 */
 	sleep(1);
+	printf("upload usb boot stage2\n");
 	if (load_file(&ingenic_dev, STAGE2_FILE_PATH) < 1)
 		goto cleanup;
 
