@@ -114,6 +114,11 @@ int usb_ingenic_init(struct ingenic_dev *ingenic_dev)
 		goto out;
 	}
 
+	if (usb_set_configuration(ingenic_dev->usb_handle, 1) < 0) {
+		fprintf(stderr, "Error - can't set Ingenic configuration: %s\n", usb_strerror());
+		goto out;
+	}
+
 	if (get_ingenic_interface(ingenic_dev) < 1) {
 		fprintf(stderr, "Error - can't find Ingenic interface\n");
 		goto out;
@@ -148,11 +153,12 @@ int usb_get_ingenic_cpu(struct ingenic_dev *ingenic_dev)
 		goto out;
 	}
 
-	printf("CPU data: %02x, %02x, %02x, %02x, %02x, %02x, %02x, %02x\n",
+	printf("CPU data: %02x, %02x, %02x, %02x, %02x, %02x, %02x, %02x : %s\n",
 		ingenic_dev->cpu_info_buff[0], ingenic_dev->cpu_info_buff[1],
 		ingenic_dev->cpu_info_buff[2], ingenic_dev->cpu_info_buff[3],
 		ingenic_dev->cpu_info_buff[4], ingenic_dev->cpu_info_buff[5],
-		ingenic_dev->cpu_info_buff[6], ingenic_dev->cpu_info_buff[7]);
+		ingenic_dev->cpu_info_buff[6], ingenic_dev->cpu_info_buff[7],
+		ingenic_dev->cpu_info_buff);
 
 	status = 1;
 
@@ -179,6 +185,7 @@ int usb_ingenic_upload(struct ingenic_dev *ingenic_dev, int stage)
 		goto out;
 	}
 
+#if 0
 	/* tell the device the length of the file to be uploaded */
 	status = usb_control_msg(ingenic_dev->usb_handle,
           /* bmRequestType */ USB_ENDPOINT_OUT | USB_TYPE_VENDOR | USB_RECIP_DEVICE,
@@ -190,7 +197,8 @@ int usb_ingenic_upload(struct ingenic_dev *ingenic_dev, int stage)
                               USB_TIMEOUT);
 
 	if (status != 0)
-		fprintf(stderr, "Error - can't set the address on Ingenic device: %i\n", status);
+		fprintf(stderr, "Error - can't set data length on Ingenic device: %i\n", status);
+#endif
 
 	/* upload the file */
 	status = usb_bulk_write(ingenic_dev->usb_handle,
