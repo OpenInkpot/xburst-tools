@@ -34,6 +34,7 @@
 #include <sys/types.h>
 #include <sys/stat.h>
 #include <confuse.h>
+#include <getopt.h>
 
 fw_args_t fw_args;
 
@@ -211,6 +212,31 @@ out:
 	return res;
 }
 
+static void help(void)
+{
+	printf("Usage: inflash [options] ...(must run as root)\n"
+		"  -h --help\t\t\tPrint this help message\n"
+		"  -v --version\t\t\tPrint the version number\n"
+		"  -c --cfg \t\t\tSpecify the Configuration of inflash device\n"
+		"  -o --stageone \t\tSpecify the stage one file(default ./bw.bin)\n"
+		"  -t --stagetwo \t\tSpecify the stage two file(default ./usb_boot.bin)\n"
+		);
+}
+
+static void print_version(void)
+{
+	printf("inflash version \n");
+}
+
+static struct option opts[] = {
+	{ "help", 0, 0, 'h' },
+	{ "version", 0, 0, 'v' },
+	{ "cfg", 1, 0, 'c' },
+	{ "stageone", 1, 0, 'o' },
+	{ "stagetwo", 1, 0, 't' },
+	{ NULL, 0, 0, NULL }
+};
+
 int main(int argc, char **argv)
 {
 	struct ingenic_dev ingenic_dev;
@@ -218,15 +244,53 @@ int main(int argc, char **argv)
 	int res = EXIT_FAILURE;
 	int status;
 
+	printf("inflash - (C) 2009\n"
+	       "This program is Free Software and has ABSOLUTELY NO WARRANTY\n\n");
 	if ((getuid()) || (getgid())) {
 		fprintf(stderr, "Error - you must be root to run '%s'\n", argv[0]);
-		goto out;
+		return -1;
+	}
+
+	char *stage1_path = STAGE1_FILE_PATH;
+	char *stage2_path = STAGE2_FILE_PATH;
+	char *config_path = CONFIG_FILE_PATH;
+
+	while (1) {
+		int c, option_index = 0;
+		c = getopt_long(argc, argv, "hvc:o:t:", opts,
+				&option_index);
+		if (c == -1)
+			break;
+
+		switch (c) {
+		case 'h':
+			help();
+			exit(0);
+			break;
+		case 'V':
+			print_version();
+			exit(0);
+			break;
+		case 'c':
+			/* Configuration */
+			config_path = optarg;
+			break;
+		case 'o':
+			stage1_path = optarg;
+			break;
+		case 't':
+			stage2_path = optarg;
+			break;
+		default:
+			help();
+			exit(2);
+		}
 	}
 
 	memset(&ingenic_dev, 0, sizeof(struct ingenic_dev));
 	memset(&fw_args, 0, sizeof(fw_args_t));
 
-	if (parse_configure(CONFIG_FILE_PATH) < 1)
+	if (parse_configure(config_path) < 1)
 		goto out;
 
 	if (usb_ingenic_init(&ingenic_dev) < 1)
@@ -263,7 +327,7 @@ int main(int argc, char **argv)
 
 		/* now we upload the usb boot stage1 */
 		printf("\n Upload usb boot stage1");
-		if (load_file(&ingenic_dev, STAGE1_FILE_PATH) < 1)
+		if (load_file(&ingenic_dev, stage1_path) < 1)
 			goto out;
 
 		if (usb_ingenic_upload(&ingenic_dev, 1) < 1)
@@ -272,7 +336,7 @@ int main(int argc, char **argv)
 		/* now we upload the usb boot stage2 */
 		sleep(1);
 		printf("\n Upload usb boot stage2");
-		if (load_file(&ingenic_dev, STAGE2_FILE_PATH) < 1)
+		if (load_file(&ingenic_dev, stage2_path) < 1)
 			goto cleanup;
 
 		if (usb_ingenic_upload(&ingenic_dev, 2) < 1)
