@@ -30,7 +30,7 @@ DL_PATH=$(TOOLCHAIN_PATH)/dl
 INSTALL_PATH=install
 PATCHES_PATH=$(TOOLCHAIN_PATH)/patches
 GLIBC_PATCHES_PATH=$(PATCHES_PATH)/glibc
-USBBOOT_PATH=usbboot
+USBBOOT_PATH=usb-boot
 USBBOOT_STAGE1_PATH=$(USBBOOT_PATH)/stage1
 USBBOOT_STAGE2_PATH=$(USBBOOT_PATH)/stage2
 
@@ -145,13 +145,13 @@ u-boot:
 	make
 
 ### usbboot
-.PHONY: usbboot
-usbboot: usbboot-tools usbboot-stage
+.PHONY: usb-boot
+usb-boot: flash-tool usb-boot-stage
 
-usbboot-tools: usbboot-stage
+flash-tool: usb-boot-stage
 	make -C flash-tool
 
-usbboot-stage:
+usb-boot-stage:
 	make -C $(USBBOOT_STAGE1_PATH)
 	make -C $(USBBOOT_STAGE2_PATH)
 

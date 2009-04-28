@@ -197,8 +197,7 @@ int command_handle(char *buf)
 		break;
 	default:
 		printf("\n Command not support!");
-		result = -1;
-		break;
+		return -1;
 	}
 
 	return 1;
