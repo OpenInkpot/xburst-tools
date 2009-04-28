@@ -19,7 +19,7 @@
  * Boston, MA  02110-1301, USA
  */
 
-
+#include <stdint.h>
 
 #define INGENIC_OUT_ENDPOINT	0x01
 
@@ -41,6 +41,21 @@
 #define USB_PACKET_SIZE 512
 #define USB_TIMEOUT 5000
 
+#define VENDOR_ID	0x601a
+#define PRODUCT_ID	0x4740
+
+#define STAGE1_FILE_PATH "fw.bin"
+#define STAGE2_FILE_PATH "usb_boot.bin"
+#define CONFIG_FILE_PATH "usb_boot.cfg"
+
+struct ingenic_dev {
+	struct usb_device *usb_dev;
+	struct usb_dev_handle *usb_handle;
+	uint8_t interface;
+	char cpu_info_buff[9];
+	char *file_buff;
+	int file_len;
+};
 
 int usb_ingenic_init(struct ingenic_dev *ingenic_dev);
 int usb_get_ingenic_cpu(struct ingenic_dev *ingenic_dev);

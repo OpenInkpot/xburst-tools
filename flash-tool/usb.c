@@ -21,12 +21,12 @@
 
 
 
-#include "main.h"
 #include "usb.h"
 #include "usb_boot_defines.h"
 #include <usb.h>
 #include <stdio.h>
 
+extern unsigned int total_size;
 
 static int get_ingenic_device(struct ingenic_dev *ingenic_dev)
 {
