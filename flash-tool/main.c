@@ -88,7 +88,8 @@ int main(int argc, char **argv)
 
 	while (1) {
 		printf("\n inflash :> ");
-		if (!command_input(com_buf)) continue;
+		if (command_input(com_buf)) 
+			continue;
 		command_handle(com_buf);
 	}
 

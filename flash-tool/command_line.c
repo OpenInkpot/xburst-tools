@@ -130,7 +130,7 @@ int handle_boot(void)
 int command_input(char *buf)
 {
 	char *cptr;
-	cptr = fgets(buf, ARRAY_SIZE(buf), stdin);
+	cptr = fgets(buf, 256, stdin);
 
         if (cptr != NULL) 
 		return 0;
