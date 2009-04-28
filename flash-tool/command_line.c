@@ -28,7 +28,7 @@
 #include "config.h"
  
 static int com_argc;
-static char com_argv[20][50];
+static char com_argv[9][100];
 
 static const char COMMAND[][30]=
 {
@@ -133,33 +133,32 @@ int command_input(char *buf)
 	cptr = fgets(buf, 256, stdin);
 
         if (cptr != NULL) 
-		return 0;
-	return 1;
+		return 1;
+	return 0;
 }
 
 int command_interpret(char * com_buf)
 {
 	char *buf = com_buf;
-	int k, L, i=0, j = 0;
+	int k, L, i = 0, j = 0;
 	
 	L = (int)strlen(buf);
 	buf[L]=' ';
 	for (k = 0; k <= L; k++) {
-		if (*buf==' '|| *buf=='\n') {
-			while(*(++buf)==' ');
-			com_argv[i][j]='\0';
+		if (*buf == ' ' || *buf == '\n') {
+			while ( *(++buf) == ' ' );
+			com_argv[i][j] = '\0';
 			i++;
-			if (i>9) {
+			if (i > 9) {
 				printf("\n Para is too much! About!");
 				return 0;
 			}
 			j=0;
 			continue;
 		} else {
-			com_argv[i][j]=*buf;
+			com_argv[i][j] = *buf;
 			j++;
-			if (j>100)
-			{
+			if (j > 100) {
 				printf("\n Para is too long! About!");
 				return 0;
 			}
@@ -167,10 +166,10 @@ int command_interpret(char * com_buf)
 		buf++;
 	}
 
-	com_argc=i;
+	com_argc = i;
 
 	for (i = 1; i <= COMMAND_NUM; i++) 
-		if (!strcmp(COMMAND[i],com_argv[0])) 
+		if (!strcmp(COMMAND[i], com_argv[0])) 
 			return i;
 	return COMMAND_NUM + 1;
 }
@@ -178,9 +177,8 @@ int command_interpret(char * com_buf)
 int command_handle(char *buf)
 {
 	int cmd = command_interpret(buf);
-	int result = 0;
 
-	if (!cmd) return 1;
+	if (!cmd) return -1;
 	switch (cmd) {
 	case 11:
 		handle_nprog();
@@ -199,9 +197,9 @@ int command_handle(char *buf)
 		break;
 	default:
 		printf("\n Command not support!");
-		result = 1;
+		result = -1;
 		break;
 	}
 
-	return result;
+	return 1;
 }

@@ -212,7 +212,7 @@ out:
 int boot(char *stage1_path, char *stage2_path, char *config_path ){
 	struct ingenic_dev ingenic_dev;
 
-	int res = EXIT_FAILURE;
+	int res = 0;
 	int status;
 
 	memset(&ingenic_dev, 0, sizeof(struct ingenic_dev));
@@ -272,7 +272,7 @@ int boot(char *stage1_path, char *stage2_path, char *config_path ){
 		check_dump_cfg();
 	}
 
-	res = EXIT_SUCCESS;
+	res = 1;
 
 cleanup:
 	if (ingenic_dev.file_buff)

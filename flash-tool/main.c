@@ -70,12 +70,10 @@ int main(int argc, char **argv)
 		switch (c) {
 		case 'h':
 			help();
-			exit(0);
-			break;
+			exit(EXIT_SUCCESS);
 		case 'v':
 			print_version();
-			exit(0);
-			break;
+			exit(EXIT_SUCCESS);
 		default:
 			help();
 			exit(2);
@@ -88,11 +86,11 @@ int main(int argc, char **argv)
 
 	while (1) {
 		printf("\n inflash :> ");
-		if (command_input(com_buf)) 
+		if (!command_input(com_buf)) 
 			continue;
 		command_handle(com_buf);
 	}
 
-	return 0;
+	return EXIT_SUCCESS;
 }
 
