@@ -23,6 +23,7 @@
 #include "usb_boot_defines.h"
 #include <usb.h>
 #include <stdio.h>
+#include <string.h>
 
 extern unsigned int total_size;
 
