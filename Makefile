@@ -18,7 +18,6 @@
 # Foundation, Inc., 51 Franklin Street, Fifth Floor,
 # Boston, MA  02110-1301, USA
 
-
 BINUTILS_VER=binutils-2.17
 GCC_VER=gcc-4.1.2
 GLIBC_VER=glibc-2.6.1
@@ -58,9 +57,7 @@ else
 BUILD_CC="gcc"
 endif
 
-
 toolchain: binutils gcc glibc
-
 
 ### misc
 
@@ -144,7 +141,7 @@ u-boot:
 	make pi_config && \
 	make
 
-### usbboot
+### usb-boot
 .PHONY: usb-boot
 usb-boot: flash-tool usb-boot-stage
 
@@ -168,6 +165,10 @@ kernel:
 distclean: clean clean-toolchain
 
 clean:
+	make clean -C flash-tool
+	make clean -C $(USBBOOT_STAGE1_PATH)
+	make clean -C $(USBBOOT_STAGE2_PATH)
+	rm flash-tool/*.bin
 
 clean-toolchain: clean-glibc
 	rm -rf $(TOOLCHAIN_PATH)/$(BINUTILS_VER) binutils
