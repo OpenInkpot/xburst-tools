@@ -19,9 +19,7 @@
  * Boston, MA  02110-1301, USA
  */
 
-
-
-#include "usb.h"
+#include "ingenic_usb.h"
 #include "usb_boot_defines.h"
 #include <usb.h>
 #include <stdio.h>

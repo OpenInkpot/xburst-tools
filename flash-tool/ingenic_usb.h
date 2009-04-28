@@ -18,6 +18,8 @@
  * Foundation, Inc., 51 Franklin Street, Fifth Floor,
  * Boston, MA  02110-1301, USA
  */
+#ifndef __INGENIC_USB_H__
+#define __INGENIC_USB_H__
 
 #include <stdint.h>
 
@@ -47,6 +49,7 @@
 #define STAGE1_FILE_PATH "fw.bin"
 #define STAGE2_FILE_PATH "usb_boot.bin"
 #define CONFIG_FILE_PATH "usb_boot.cfg"
+#define ARRAY_SIZE(a) (sizeof(a) / sizeof(a[0]))
 
 struct ingenic_dev {
 	struct usb_device *usb_dev;
@@ -61,3 +64,5 @@ int usb_ingenic_init(struct ingenic_dev *ingenic_dev);
 int usb_get_ingenic_cpu(struct ingenic_dev *ingenic_dev);
 int usb_ingenic_upload(struct ingenic_dev *ingenic_dev, int stage);
 void usb_ingenic_cleanup(struct ingenic_dev *ingenic_dev);
+
+#endif	/* __INGENIC_USB_H__ */

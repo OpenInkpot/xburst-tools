@@ -28,30 +28,26 @@
 #include <sys/types.h>
 #include <sys/stat.h>
 #include "usb.h"
+#include "config.h"
+#include "command_line.h"
 
 static void help(void)
 {
 	printf("Usage: inflash [options] ...(must run as root)\n"
 		"  -h --help\t\t\tPrint this help message\n"
 		"  -v --version\t\t\tPrint the version number\n"
-		"  -c --cfg \t\t\tSpecify the Configuration of inflash device\n"
-		"  -o --stageone \t\tSpecify the stage one file(default ./bw.bin)\n"
-		"  -t --stagetwo \t\tSpecify the stage two file(default ./usb_boot.bin)\n"
 		);
 }
 
 static void print_version(void)
 {
-	printf("inflash version \n");
+	printf("inflash version: %s\n", CURRENT_VERSION);
 }
 
 static struct option opts[] = {
 	{ "help", 0, 0, 'h' },
 	{ "version", 0, 0, 'v' },
-	{ "cfg", 1, 0, 'c' },
-	{ "stageone", 1, 0, 'o' },
-	{ "stagetwo", 1, 0, 't' },
-	{ NULL, 0, 0, NULL }
+	{ 0, 0, 0, 0 }
 };
 
 int main(int argc, char **argv)
@@ -64,13 +60,9 @@ int main(int argc, char **argv)
 		return -1;
 	}
 
-	char *stage1_path = STAGE1_FILE_PATH;
-	char *stage2_path = STAGE2_FILE_PATH;
-	char *config_path = CONFIG_FILE_PATH;
-
 	while (1) {
 		int c, option_index = 0;
-		c = getopt_long(argc, argv, "hvc:o:t:", opts,
+		c = getopt_long(argc, argv, "hv", opts,
 				&option_index);
 		if (c == -1)
 			break;
@@ -84,31 +76,21 @@ int main(int argc, char **argv)
 			print_version();
 			exit(0);
 			break;
-		case 'c':
-			/* Configuration */
-			config_path = optarg;
-			break;
-		case 'o':
-			stage1_path = optarg;
-			break;
-		case 't':
-			stage2_path = optarg;
-			break;
 		default:
 			help();
 			exit(2);
 		}
 	}
 
-#if 0
+	char com_buf[256];
+	printf("\n Welcome!");
+	printf("\n USB Boot Host Software!");
+
 	while (1) {
-		printf("\n USBBoot :> ");
+		printf("\n inflash :> ");
 		if (!command_input(com_buf)) continue;
 		command_handle(com_buf);
 	}
-#endif
-
-	boot(stage1_path, stage2_path, config_path);
 
 	return 0;
 }

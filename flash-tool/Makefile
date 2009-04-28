@@ -34,8 +34,8 @@ CFLAGS +=	-pedantic -Wall -W -O1 -g3 -std=gnu99
 LDFLAGS +=	-lusb -lconfuse
 BINARY_NAME =	inflash
 
-SRC_C= main.c usb.c cmd_boot.c
-SRC_H= usb.h usb_boot_defines.h
+SRC_C= main.c usb.c cmd_boot.c command_line.c
+SRC_H= ingenic_usb.h usb_boot_defines.h command_line.h cmd.h config.h
 SRC_O= $(SRC_C:.c=.o)
 
 $(BINARY_NAME):	$(SRC_O) $(SRC_H) Makefile
