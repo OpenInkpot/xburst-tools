@@ -1,0 +1,2 @@
+to compile this program you need:
+ sudo apt-get install libusb-dev libconfuse-dev
