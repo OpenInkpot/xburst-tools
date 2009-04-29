@@ -27,8 +27,10 @@
 #include "cmd.h"
 #include "config.h"
  
+#define MAX_ARGC	10
+#define MAX_ARGV_LENGTH	100
 static int com_argc;
-static char com_argv[9][100];
+static char com_argv[MAX_ARGC][MAX_ARGV_LENGTH];
 
 static const char COMMAND[][30]=
 {
@@ -132,7 +134,7 @@ int command_interpret(char * com_buf)
 			while ( *(++buf) == ' ' );
 			com_argv[i][j] = '\0';
 			i++;
-			if (i > 9) {
+			if (i > MAX_ARGC) {
 				printf("\n Para is too much! About!");
 				return 0;
 			}
@@ -141,7 +143,7 @@ int command_interpret(char * com_buf)
 		} else {
 			com_argv[i][j] = *buf;
 			j++;
-			if (j > 100) {
+			if (j > MAX_ARGV_LENGTH) {
 				printf("\n Para is too long! About!");
 				return 0;
 			}

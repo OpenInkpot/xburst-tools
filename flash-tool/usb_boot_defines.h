@@ -146,7 +146,7 @@ struct  hand_t {
 	struct fw_args_t fw_args;
 } __attribute__((packed));
 
-struct nand_in {
+struct nand_in_t {
 	unsigned char dev;
 	unsigned char max_chip;
 	unsigned char *buf;
@@ -158,11 +158,11 @@ struct nand_in {
 	int (* check) (unsigned char *,unsigned char *,unsigned int);
 };
 
-struct nand_out {
+struct nand_out_t {
 	unsigned char *status;
 };
 
-struct sdram_in {
+struct sdram_in_t {
 	unsigned char dev;
 	unsigned char *buf;
 	unsigned int start;
