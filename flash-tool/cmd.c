@@ -32,8 +32,10 @@
 #include <sys/stat.h>
 #include <confuse.h>
 
+struct nand_in nand_in;
+struct nand_out nand_out;
+struct fw_args_t fw_args;
 unsigned int total_size;
-fw_args_t fw_args;
 
 static int parse_configure(char * file_path)
 {
@@ -199,7 +201,7 @@ static int load_file(struct ingenic_dev *ingenic_dev, const char *file_path)
 		goto close;
 	}
 
-	memcpy(ingenic_dev->file_buff + 8, &fw_args, sizeof(fw_args_t));
+	memcpy(ingenic_dev->file_buff + 8, &fw_args, sizeof(struct fw_args_t));
 
 	res = 1;
 
@@ -216,7 +218,7 @@ int boot(char *stage1_path, char *stage2_path, char *config_path ){
 	int status;
 
 	memset(&ingenic_dev, 0, sizeof(struct ingenic_dev));
-	memset(&fw_args, 0, sizeof(fw_args_t));
+	memset(&fw_args, 0, sizeof(struct fw_args_t));
 
 	if (parse_configure(config_path) < 1)
 		goto out;
@@ -280,4 +282,50 @@ cleanup:
 out:
 	usb_ingenic_cleanup(&ingenic_dev);
 	return res;
+}
+int nprog(int com_argc, char **com_argv)
+{
+#if 0
+	unsigned int i;
+	if (com_argc < 6)
+	{
+		printf("\n Usage:"
+		       " nprog (1) (2) (3) (4) (5) "
+		       "\n 1:start page number"
+		       "\n 2:image file name"
+		       "\n 3:device index number"
+		       "\n 4:flash index number"
+		       "\n 5:image type  -n:no oob,-o:with oob no ecc,-e:with oob and ecc");
+
+		return 0;
+	}
+	for (i = 0; i < MAX_DEV_NUM; i++)
+		(nand_in.cs_map)[i] = 0;
+	if (atoi(com_argv[4]) >= MAX_DEV_NUM) {
+		printf("\n Flash index number overflow!");
+		return -1;
+	}
+	(nand_in.cs_map)[atoi(com_argv[4])] = 1;
+	nand_in.start = atoi(com_argv[1]);
+	nand_in.dev = atoi(com_argv[3]);
+
+	if (!strcmp(com_argv[5],"-e")) 
+		nand_in.option = OOB_ECC;
+	else if (!strcmp(com_argv[5],"-o")) 
+		nand_in.option = OOB_NO_ECC;
+	else 
+		nand_in.option = NO_OOB;
+
+	if (Hand.nand_plane > 1)
+		/* API_Nand_Program_File_Planes(&nand_in,&nand_out,com_argv[2]); */
+	else
+		/* API_Nand_Program_File(&nand_in,&nand_out,com_argv[2]); */
+#if 0
+		printf("\n Flash check result:");
+	for (i = 0; i < 16; i++)
+		printf(" %d", (nand_out.status)[i]);
+#endif
+#endif 
+	printf("\n not implement yet!!");
+	return 1;
 }

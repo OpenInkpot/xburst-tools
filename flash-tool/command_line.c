@@ -64,18 +64,6 @@ static const char COMMAND[][30]=
 	"run"
 };
 
-void handle_exit(int res)
-{
-	printf("\n exiting inflash software\n");
-	exit(res);
-}
-
-int handle_nprog(void)
-{
-	printf("\n not implement");
-	return 1;
-}
-
 int handle_help(void)
 {
 	printf("\n Command support in current version:"
@@ -120,11 +108,6 @@ int handle_fconfig(void)
 	}
 	/* usb_infenic_config(atoi(com_argv[2]),com_argv[1]); */
 	return 1;
-}
-
-int handle_boot(void)
-{
-	return boot(STAGE1_FILE_PATH, STAGE2_FILE_PATH, CONFIG_FILE_PATH);
 }
 
 int command_input(char *buf)
@@ -181,20 +164,18 @@ int command_handle(char *buf)
 	if (!cmd) return -1;
 	switch (cmd) {
 	case 11:
-		handle_nprog();
-		break;
+		return nprog(com_argc, com_argv);
 	case 12:
 		handle_help();
 		break;
 	case 13:
 		handle_version();
 		break;
-	case 16:
-		handle_exit(0);
-		break;
+	case 16:		/* exit */
+		printf("\n exiting inflash software\n");
+		exit(EXIT_SUCCESS);
 	case 20:
-		handle_boot();
-		break;
+		return boot(STAGE1_FILE_PATH, STAGE2_FILE_PATH, CONFIG_FILE_PATH);
 	default:
 		printf("\n Command not support!");
 		return -1;

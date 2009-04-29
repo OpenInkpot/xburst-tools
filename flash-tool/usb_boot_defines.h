@@ -1,3 +1,24 @@
+/*
+ * "Ingenic flash tool" - flash the Ingenic CPU via USB
+ *
+ * (C) Copyright 2009
+ * Author: Marek Lindner <lindner_marek@yahoo.de>
+ *
+ * This program is free software; you can redistribute it and/or
+ * modify it under the terms of the GNU General Public License
+ * version 3 as published by the Free Software Foundation.
+ *
+ * This program is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU General Public License for more details.
+ *
+ * You should have received a copy of the GNU General Public License
+ * along with this program; if not, write to the Free Software
+ * Foundation, Inc., 51 Franklin Street, Fifth Floor,
+ * Boston, MA  02110-1301, USA
+ */
+
 #ifndef __JZ4740_USBDEFINES__H_
 #define __JZ4740_USBDEFINES__H_
 
@@ -18,29 +39,25 @@
 #define	IOCTL_OUTBUF_SIZE	512
 #define MAX_DEV_NUM 16 
 
-enum CPUTYPE 
-{
+enum CPUTYPE {
 	JZ4740,
 	JZ4750,
 };
 
-enum USB_Boot_State 
-{
+enum USB_Boot_State {
 	DISCONNECT,
 	CONNECT,
 	BOOT,
 	UNBOOT
 };
 
-enum OPTION
-{
+enum OPTION {
 	OOB_ECC,
 	OOB_NO_ECC,
 	NO_OOB,
 };
 
-enum NOR_OPS_TYPE
-{
+enum NOR_OPS_TYPE {
 	NOR_INIT = 0,
 	NOR_QUERY,
 	NOR_WRITE,
@@ -56,8 +73,7 @@ enum NOR_FLASH_TYPE
 	NOR_SST39x8
 };
 
-enum NAND_OPS_TYPE
-{
+enum NAND_OPS_TYPE {
 	NAND_QUERY = 0,
 	NAND_INIT,
 	NAND_MARK_BAD,
@@ -69,20 +85,19 @@ enum NAND_OPS_TYPE
 	NAND_READ_TO_RAM
 };
 
-enum SDRAM_OPS_TYPE
-{
+enum SDRAM_OPS_TYPE {
 	SDRAM_LOAD,
 };
 
-enum DATA_STRUCTURE_OB
-{
+enum DATA_STRUCTURE_OB {
 	DS_flash_info ,
 	DS_hand
 };
 
-typedef struct {
+struct fw_args_t {
 	/* CPU ID */
 	unsigned int  cpu_id;
+
 	/* PLL args */
 	unsigned char ext_clk;
 	unsigned char cpu_speed;
@@ -107,9 +122,9 @@ typedef struct {
 	/* for align */
 	/* unsigned char align1; */
 	/* unsigned char align2; */
-} __attribute__((packed)) fw_args_t;
+} __attribute__((packed));
 
-typedef struct {
+struct  hand_t {
 
 	/* nand flash info */
 	int pt;             	/* cpu type */
@@ -128,8 +143,31 @@ typedef struct {
 	int nand_wppin;
 	int nand_bpc;		/* block number per chip */
 
-	fw_args_t fw_args;
+	struct fw_args_t fw_args;
+} __attribute__((packed));
 
-} __attribute__((packed)) hand_t;
+struct nand_in {
+	unsigned char dev;
+	unsigned char max_chip;
+	unsigned char *buf;
+	unsigned char *cs_map;
+	unsigned int start;
+	unsigned int length;
+	unsigned int option;
+
+	int (* check) (unsigned char *,unsigned char *,unsigned int);
+};
+
+struct nand_out {
+	unsigned char *status;
+};
+
+struct sdram_in {
+	unsigned char dev;
+	unsigned char *buf;
+	unsigned int start;
+	unsigned int length;
+	unsigned int option;
+};
 
 #endif	/* __JZ4740_USBDEFINES__H_ */

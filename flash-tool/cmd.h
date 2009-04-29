@@ -23,5 +23,6 @@
 #define __CMD_H__
 
 int boot(char *stage1_path, char *stage2_path, char *config_path);
+int nprog(int com_argc, char **com_argv);
 
 #endif  /* __CMD_H__ */
