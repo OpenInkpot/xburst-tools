@@ -31,10 +31,11 @@
 #include <sys/types.h>
 #include <sys/stat.h>
 #include <confuse.h>
+#include <ctype.h>
 
-struct nand_in nand_in;
-struct nand_out nand_out;
-struct fw_args_t fw_args;
+static struct nand_in_t nand_in;
+static struct nand_out_t nand_out;
+static struct fw_args_t fw_args;
 unsigned int total_size;
 
 static int parse_configure(char * file_path)
@@ -287,45 +288,88 @@ int nprog(int com_argc, char **com_argv)
 {
 #if 0
 	unsigned int i;
-	if (com_argc < 6)
-	{
-		printf("\n Usage:"
-		       " nprog (1) (2) (3) (4) (5) "
-		       "\n 1:start page number"
-		       "\n 2:image file name"
-		       "\n 3:device index number"
-		       "\n 4:flash index number"
-		       "\n 5:image type  -n:no oob,-o:with oob no ecc,-e:with oob and ecc");
-
+	int index;
+	int c;
+	char *image_file;
+	char *help = "\n Usage: nprog [options] ..."
+		"\n -s\tstart page number"
+		"\n -i\timage file name"
+		"\n -d\tdevice index number"
+		"\n -f\tflash index number"
+		"\n image type:"
+		"\n \t-n:\tno oob"
+		"\n \t-o:\twith oob no ecc"
+		"\n \t-e:\twith oob and ecc";
+	opterr = 0;
+	if (com_argc != 10) {
+		printf("\n not enough argument.");
+		printf("%s", help);
 		return 0;
 	}
 	for (i = 0; i < MAX_DEV_NUM; i++)
 		(nand_in.cs_map)[i] = 0;
-	if (atoi(com_argv[4]) >= MAX_DEV_NUM) {
-		printf("\n Flash index number overflow!");
-		return -1;
-	}
-	(nand_in.cs_map)[atoi(com_argv[4])] = 1;
-	nand_in.start = atoi(com_argv[1]);
-	nand_in.dev = atoi(com_argv[3]);
 
-	if (!strcmp(com_argv[5],"-e")) 
-		nand_in.option = OOB_ECC;
-	else if (!strcmp(com_argv[5],"-o")) 
-		nand_in.option = OOB_NO_ECC;
-	else 
-		nand_in.option = NO_OOB;
+	while ((c = getopt (com_argc, com_argv, "s:i:d:f:noe")) != -1)
+		switch (c)
+		{
 
+		case 's':
+			nand_in.start = atoi(optarg);
+			break;
+		case 'i':
+			image_file = optarg;
+			break;
+		case 'd':
+			nand_in.dev = atoi(optarg);
+			break;
+		case 'f':
+			(nand_in.cs_map)[atoi(optarg)] = 1;
+			if (atoi(optarg) >= MAX_DEV_NUM) {
+				printf("\n Flash index number overflow!");
+				return -1;
+			}
+			break;
+		case 'n':
+			nand_in.option = NO_OOB;
+			break;
+		case 'o':
+			nand_in.option = OOB_NO_ECC;
+			break;
+		case 'e':
+			nand_in.option = OOB_ECC;
+			break;
+		case '?':
+			if (optopt == 's' ||
+			    optopt == 'i' ||
+			    optopt == 'd' ||
+			    optopt == 'f')
+				printf ("Option -%c requires an argument.\n", optopt);
+			else if (isprint (optopt))
+				printf ("Unknown option `-%c'.\n", optopt);
+			else
+				printf ("Unknown option character `\\x%x'.\n", optopt);
+			printf("%s", help);
+			return -1;
+		default:
+			printf("%s", help);
+			return -1;
+		}
+     
 	if (Hand.nand_plane > 1)
 		/* API_Nand_Program_File_Planes(&nand_in,&nand_out,com_argv[2]); */
 	else
 		/* API_Nand_Program_File(&nand_in,&nand_out,com_argv[2]); */
-#if 0
+
 		printf("\n Flash check result:");
 	for (i = 0; i < 16; i++)
 		printf(" %d", (nand_out.status)[i]);
+	printf("nprog %d %s %d %d %d", nand_in.start,
+	       image_file,
+	       nand_in.dev,
+	       (nand_in.cs_map)[atoi(optarg)],
+	       nand_in.option);
 #endif
-#endif 
-	printf("\n not implement yet!!");
+	printf("\n not implement yet!! ");
+
 	return 1;
 }
