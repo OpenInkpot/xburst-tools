@@ -78,27 +78,27 @@ int handle_nprog(void)
 
 int handle_help(void)
 {
-	printf("\n Command support in current version:");
-	printf("\n help          print this help;");
-	printf("\n boot          boot device and make it in stage2;");
-	printf("\n list          show current device number can connect;");
-	printf("\n fconfig       set USB Boot config file;");
-	printf("\n nquery        query NAND flash info;");
-	printf("\n nread         read NAND flash data with checking bad block and ECC;");
-	printf("\n nreadraw      read NAND flash data without checking bad block and ECC;");
-	printf("\n nreadoob      read NAND flash oob without checking bad block and ECC;");
-	printf("\n nerase        erase NAND flash;");
-	printf("\n nprog         program NAND flash with data and ECC;");
-	printf("\n nmark         mark a bad block in NAND flash;");
-	printf("\n go            execute program in SDRAM;");
-	printf("\n version       show current USB Boot software version;");
-	printf("\n exit          quit from telnet session;");
-	printf("\n readnand      read data from nand flash and store to SDRAM;");
-	printf("\n load          load file data to SDRAM;");
-	printf("\n run           run command script in file;");
-	printf("\n memtest       do SDRAM test;");
-	printf("\n gpios         let one GPIO to high level;");
-	printf("\n gpioc         let one GPIO to low level;");
+	printf("\n Command support in current version:"
+	       "\n help          print this help;"
+	       "\n boot          boot device and make it in stage2;"
+	       "\n list          show current device number can connect;"
+	       "\n fconfig       set USB Boot config file;"
+	       "\n nquery        query NAND flash info;"
+	       "\n nread         read NAND flash data with checking bad block and ECC;"
+	       "\n nreadraw      read NAND flash data without checking bad block and ECC;"
+	       "\n nreadoob      read NAND flash oob without checking bad block and ECC;"
+	       "\n nerase        erase NAND flash;"
+	       "\n nprog         program NAND flash with data and ECC;"
+	       "\n nmark         mark a bad block in NAND flash;"
+	       "\n go            execute program in SDRAM;"
+	       "\n version       show current USB Boot software version;"
+	       "\n exit          quit from telnet session;"
+	       "\n readnand      read data from nand flash and store to SDRAM;"
+	       "\n load          load file data to SDRAM;"
+	       "\n run           run command script in file;"
+	       "\n memtest       do SDRAM test;"
+	       "\n gpios         let one GPIO to high level;"
+	       "\n gpioc         let one GPIO to low level;");
 	/* printf("\n nmake         read all data from nand flash and store to file(experimental);"); */
 	return 1;
 }
@@ -112,10 +112,10 @@ int handle_version(void)
 int handle_fconfig(void)
 {
 	if (com_argc < 3) {
-		printf("\n Usage:");
-		printf(" fconfig (1) (2) ");
-		printf("\n 1:configration file name \
-			    \n 2:deivce index number ");
+		printf("\n Usage:"
+		       " fconfig (1) (2) "
+		       "\n 1:configration file name"
+		       "\n 2:deivce index number");
 		return -1;
 	}
 	/* usb_infenic_config(atoi(com_argv[2]),com_argv[1]); */
