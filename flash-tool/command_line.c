@@ -27,11 +27,8 @@
 #include "cmd.h"
 #include "config.h"
  
-#define COMMAND_NUM 31
-#define MAX_ARGC	10
-#define MAX_COMMAND_LENGTH	100
-static int com_argc;
-static char com_argv[MAX_ARGC][MAX_COMMAND_LENGTH];
+int com_argc;
+char com_argv[MAX_ARGC][MAX_COMMAND_LENGTH];
 
 static const char COMMAND[][30]=
 {
@@ -167,7 +164,7 @@ int command_handle(char *buf)
 	if (!cmd) return -1;
 	switch (cmd) {
 	case 11:
-		return nprog(com_argc, com_argv);
+		return nprog();
 	case 12:
 		handle_help();
 		break;

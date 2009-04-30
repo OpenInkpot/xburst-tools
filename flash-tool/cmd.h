@@ -22,7 +22,11 @@
 #ifndef __CMD_H__
 #define __CMD_H__
 
+#define COMMAND_NUM 31
+#define MAX_ARGC	10
+#define MAX_COMMAND_LENGTH	100
+
 int boot(char *stage1_path, char *stage2_path, char *config_path);
-int nprog(int com_argc, char **com_argv);
+int nprog(void);
 
 #endif  /* __CMD_H__ */
