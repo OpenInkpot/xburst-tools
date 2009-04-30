@@ -60,17 +60,6 @@ int main(int argc, char **argv)
 	printf("inflash - (C) 2009\n"
 	       "This program is Free Software and has ABSOLUTELY NO WARRANTY\n\n");
 
-	if ((getuid()) || (getgid())) {
-		fprintf(stderr, "Error - you must be root to run '%s'\n", argv[0]);
-		return EXIT_FAILURE;
-	}
-
-	if (usb_ingenic_init(&ingenic_dev) < 1)
-		return EXIT_FAILURE;
-
-	if (parse_configure(&hand, CONFIG_FILE_PATH) < 1)
-		return EXIT_FAILURE;
-
 	while (1) {
 		int c, option_index = 0;
 		c = getopt_long(argc, argv, "hv", opts,
@@ -91,9 +80,20 @@ int main(int argc, char **argv)
 		}
 	}
 
+	if ((getuid()) || (getgid())) {
+		fprintf(stderr, "Error - you must be root to run '%s'\n", argv[0]);
+		return EXIT_FAILURE;
+	}
+
+	if (usb_ingenic_init(&ingenic_dev) < 1)
+		return EXIT_FAILURE;
+
+	if (parse_configure(&hand, CONFIG_FILE_PATH) < 1)
+		return EXIT_FAILURE;
+
 	char com_buf[256];
 	printf("\n Welcome!");
-	printf("\n USB Boot Host Software!");
+	printf("\n Ingenic Tools Software!");
 
 	while (1) {
 		printf("\n inflash :> ");
