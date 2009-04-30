@@ -39,7 +39,7 @@ extern char com_argv[MAX_ARGC][MAX_COMMAND_LENGTH];
 
 static struct nand_in_t nand_in;
 static struct nand_out_t nand_out;
-static struct fw_args_t fw_args;
+static struct hand_t hand;
 unsigned int total_size;
 unsigned char code_buf[4 * 512 * 1024];
 unsigned char cs[16];
@@ -47,23 +47,37 @@ unsigned char cs[16];
 static int parse_configure(char * file_path)
 {
 	cfg_opt_t opts[] = {
-		CFG_SIMPLE_INT("EXTCLK", &fw_args.ext_clk),
-		CFG_SIMPLE_INT("CPUSPEED", &fw_args.cpu_speed),
-		CFG_SIMPLE_INT("PHMDIV", &fw_args.phm_div),
-		CFG_SIMPLE_INT("BOUDRATE", &fw_args.boudrate),
-		CFG_SIMPLE_INT("USEUART", &fw_args.use_uart),
+		CFG_SIMPLE_INT("EXTCLK", &hand.fw_args.ext_clk),
+		CFG_SIMPLE_INT("CPUSPEED", &hand.fw_args.cpu_speed),
+		CFG_SIMPLE_INT("PHMDIV", &hand.fw_args.phm_div),
+		CFG_SIMPLE_INT("BOUDRATE", &hand.fw_args.boudrate),
+		CFG_SIMPLE_INT("USEUART", &hand.fw_args.use_uart),
 
-		CFG_SIMPLE_INT("BUSWIDTH", &fw_args.bus_width),
-		CFG_SIMPLE_INT("BANKS", &fw_args.bank_num),
-		CFG_SIMPLE_INT("ROWADDR", &fw_args.row_addr),
-		CFG_SIMPLE_INT("COLADDR", &fw_args.col_addr),
+		CFG_SIMPLE_INT("BUSWIDTH", &hand.fw_args.bus_width),
+		CFG_SIMPLE_INT("BANKS", &hand.fw_args.bank_num),
+		CFG_SIMPLE_INT("ROWADDR", &hand.fw_args.row_addr),
+		CFG_SIMPLE_INT("COLADDR", &hand.fw_args.col_addr),
 
-		CFG_SIMPLE_INT("ISMOBILE", &fw_args.is_mobile),
-		CFG_SIMPLE_INT("ISBUSSHARE", &fw_args.is_busshare),
-		CFG_SIMPLE_INT("DEBUGOPS", &fw_args.debug_ops),
-		CFG_SIMPLE_INT("PINNUM", &fw_args.pin_num),
-		CFG_SIMPLE_INT("START", &fw_args.start),
-		CFG_SIMPLE_INT("SIZE", &fw_args.size),
+		CFG_SIMPLE_INT("ISMOBILE", &hand.fw_args.is_mobile),
+		CFG_SIMPLE_INT("ISBUSSHARE", &hand.fw_args.is_busshare),
+		CFG_SIMPLE_INT("DEBUGOPS", &hand.fw_args.debug_ops),
+		CFG_SIMPLE_INT("PINNUM", &hand.fw_args.pin_num),
+		CFG_SIMPLE_INT("START", &hand.fw_args.start),
+		CFG_SIMPLE_INT("SIZE", &hand.fw_args.size),
+
+		CFG_SIMPLE_INT("NAND_BUSWIDTH", &hand.nand_bw),
+		CFG_SIMPLE_INT("NAND_ROWCYCLES", &hand.nand_rc),
+		CFG_SIMPLE_INT("NAND_PAGESIZE", &hand.nand_ps),
+		CFG_SIMPLE_INT("NAND_PAGEPERBLOCK", &hand.nand_ppb),
+		CFG_SIMPLE_INT("NAND_FORCEERASE", &hand.nand_force_erase),
+		CFG_SIMPLE_INT("NAND_OOBSIZE", &hand.nand_os),
+		CFG_SIMPLE_INT("NAND_ECCPOS", &hand.nand_eccpos),
+		CFG_SIMPLE_INT("NAND_BADBLACKPOS", &hand.nand_bbpos),
+		CFG_SIMPLE_INT("NAND_BADBLACKPAGE", &hand.nand_bbpage),
+		CFG_SIMPLE_INT("NAND_PLANENUM", &hand.nand_plane),
+		CFG_SIMPLE_INT("NAND_BCHBIT", &hand.nand_bchbit),
+		CFG_SIMPLE_INT("NAND_WPPIN", &hand.nand_wppin),
+		CFG_SIMPLE_INT("NAND_BLOCKPERCHIP", &hand.nand_bbpage),
 
 		CFG_END()
 	};
@@ -74,18 +88,18 @@ static int parse_configure(char * file_path)
 		return -1;
 	cfg_free(cfg);
 
-	fw_args.cpu_id = 0x4740;
-	if (fw_args.bus_width == 32)
-		fw_args.bus_width = 0 ;
+	hand.fw_args.cpu_id = 0x4740;
+	if (hand.fw_args.bus_width == 32)
+		hand.fw_args.bus_width = 0 ;
 	else
-		fw_args.bus_width = 1 ; 
-	fw_args.bank_num = fw_args.bank_num / 4; 
-	fw_args.cpu_speed = fw_args.cpu_speed / fw_args.ext_clk;
+		hand.fw_args.bus_width = 1 ; 
+	hand.fw_args.bank_num = hand.fw_args.bank_num / 4; 
+	hand.fw_args.cpu_speed = hand.fw_args.cpu_speed / hand.fw_args.ext_clk;
 
 	total_size = (unsigned int)
-		(2 << (fw_args.row_addr + fw_args.col_addr - 1)) * 2 
-		* (fw_args.bank_num + 1) * 2 
-		* (2 - fw_args.bus_width);
+		(2 << (hand.fw_args.row_addr + hand.fw_args.col_addr - 1)) * 2 
+		* (hand.fw_args.bank_num + 1) * 2 
+		* (2 - hand.fw_args.bus_width);
 
 	return 1;
 }
@@ -94,33 +108,33 @@ int check_dump_cfg()
 {
 	printf("\n Now checking whether all configure args valid: ");
 	/* check PLL */
-	if (fw_args.ext_clk > 27 || fw_args.ext_clk < 12 ) {
+	if (hand.fw_args.ext_clk > 27 || hand.fw_args.ext_clk < 12 ) {
 		printf("\n EXTCLK setting invalid!");
 		return 0;
 	}
-	if (fw_args.phm_div > 32 || fw_args.ext_clk < 2 ) {
+	if (hand.fw_args.phm_div > 32 || hand.fw_args.ext_clk < 2 ) {
 		printf("\n PHMDIV setting invalid!");
 		return 0;
 	}
-	if ( (fw_args.cpu_speed * fw_args.ext_clk ) % 12 != 0 ) {
+	if ( (hand.fw_args.cpu_speed * hand.fw_args.ext_clk ) % 12 != 0 ) {
 		printf("\n CPUSPEED setting invalid!");
 		return 0;
 	}
 
 	/* check SDRAM */
-	if (fw_args.bus_width > 1 ) {
+	if (hand.fw_args.bus_width > 1 ) {
 		printf("\n SDRAMWIDTH setting invalid!");
 		return 0;
 	}
-	if (fw_args.bank_num > 1 ) {
+	if (hand.fw_args.bank_num > 1 ) {
 		printf("\n BANKNUM setting invalid!");
 		return 0;
 	}
-	if (fw_args.row_addr > 13 && fw_args.row_addr < 11 ) {
+	if (hand.fw_args.row_addr > 13 && hand.fw_args.row_addr < 11 ) {
 		printf("\n ROWADDR setting invalid!");
 		return 0;
 	}
-	if (fw_args.col_addr > 13 && fw_args.col_addr < 11 ) {
+	if (hand.fw_args.col_addr > 13 && hand.fw_args.col_addr < 11 ) {
 		printf("\n COLADDR setting invalid!");
 		return 0;
 	}
@@ -149,14 +163,14 @@ int check_dump_cfg()
 		} */
 
 	printf("\n Current device information:");
-	printf(" CPU is Jz%x",fw_args.cpu_id);
+	printf(" CPU is Jz%x",hand.fw_args.cpu_id);
 	printf("\n Crystal work at %dMHz, the CCLK up to %dMHz and PMH_CLK up to %dMHz",
-		fw_args.ext_clk,
-		(unsigned int)fw_args.cpu_speed * fw_args.ext_clk,
-		((unsigned int)fw_args.cpu_speed * fw_args.ext_clk) / fw_args.phm_div);
+		hand.fw_args.ext_clk,
+		(unsigned int)hand.fw_args.cpu_speed * hand.fw_args.ext_clk,
+		((unsigned int)hand.fw_args.cpu_speed * hand.fw_args.ext_clk) / hand.fw_args.phm_div);
 
 	printf("\n Total SDRAM size is %d MB, work in %d bank and %d bit mode",
-		total_size / 0x100000, 2 * (fw_args.bank_num + 1), 16 * (2 - fw_args.bus_width));
+		total_size / 0x100000, 2 * (hand.fw_args.bank_num + 1), 16 * (2 - hand.fw_args.bus_width));
 
 	/* printf("\n Nand page size %d, ECC offset %d, ",
 		Hand.nand_ps,Hand.nand_eccpos);
@@ -208,7 +222,7 @@ static int load_file(struct ingenic_dev *ingenic_dev, const char *file_path)
 		goto close;
 	}
 
-	memcpy(ingenic_dev->file_buff + 8, &fw_args, sizeof(struct fw_args_t));
+	memcpy(ingenic_dev->file_buff + 8, &hand.fw_args, sizeof(struct fw_args_t));
 
 	res = 1;
 
@@ -225,7 +239,7 @@ int boot(char *stage1_path, char *stage2_path, char *config_path ){
 	int status;
 
 	memset(&ingenic_dev, 0, sizeof(struct ingenic_dev));
-	memset(&fw_args, 0, sizeof(struct fw_args_t));
+	memset(&hand.fw_args, 0, sizeof(struct fw_args_t));
 
 	if (parse_configure(config_path) < 1)
 		goto out;
@@ -237,19 +251,19 @@ int boot(char *stage1_path, char *stage2_path, char *config_path ){
 	switch (status)	{
 	case 1:            /* Jz4740v1 */
 		status = 0;
-		fw_args.cpu_id = 0x4740;
+		hand.fw_args.cpu_id = 0x4740;
 		break;
 	case 2:            /* Jz4750v1 */
 		status = 0;
-		fw_args.cpu_id = 0x4750;
+		hand.fw_args.cpu_id = 0x4750;
 		break;
 	case 3:            /* Boot4740 */
 		status = 1;
-		fw_args.cpu_id = 0x4740;
+		hand.fw_args.cpu_id = 0x4740;
 		break;
 	case 4:            /* Boot4750 */
 		status = 1;
-		fw_args.cpu_id = 0x4750;
+		hand.fw_args.cpu_id = 0x4750;
 		break;
 	default:
 		goto out;
@@ -331,9 +345,9 @@ int nprog(void)
 		printf("%s", help);
 #if 0
 	if (Hand.nand_plane > 1)
-		/* API_Nand_Program_File_Planes(&nand_in,&nand_out,com_argv[2]); */
+		/* API_Nand_Program_File_Planes(&nand_in,&nand_out, image_file); */
 	else
-		/* API_Nand_Program_File(&nand_in,&nand_out,com_argv[2]); */
+		/* API_Nand_Program_File(&nand_in,&nand_out, image_file); */
 
 		printf("\n Flash check result:");
 	for (i = 0; i < 16; i++)
