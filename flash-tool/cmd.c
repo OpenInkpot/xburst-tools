@@ -44,6 +44,34 @@ unsigned int total_size;
 unsigned char code_buf[4 * 512 * 1024];
 unsigned char cs[16];
 
+void init_hand_def(void)
+{
+	/* nand flash info */
+	/* hand.nand_start=0;important !!!! */
+	hand.pt = JZ4740;    /* cpu type  */
+	hand.nand_bw=8;
+	hand.nand_rc=3;
+	hand.nand_ps=2048;
+	hand.nand_ppb=64;
+	hand.nand_eccpos = 6;
+	hand.nand_bbpage = 0;
+	hand.nand_bbpos  = 0;
+	hand.nand_force_erase=0;
+	/* hand.nand_ids=0;  */ /* vendor_id & device_id */
+	hand.fw_args.cpu_id = 0x4740;
+	hand.fw_args.ext_clk = 12;
+	hand.fw_args.cpu_speed = 336 / hand.fw_args.ext_clk;
+	hand.fw_args.phm_div = 4;
+	hand.fw_args.use_uart = 0;
+	hand.fw_args.boudrate = 57600;
+	hand.fw_args.bus_width = 0;
+	hand.fw_args.bank_num = 1;
+	hand.fw_args.row_addr = 13;
+	hand.fw_args.col_addr = 9;
+	hand.fw_args.is_mobile = 0;
+	hand.fw_args.is_busshare = 1;
+}
+
 static int parse_configure(char * file_path)
 {
 	cfg_opt_t opts[] = {
@@ -140,27 +168,23 @@ int check_dump_cfg()
 	}
 
 	/* check NAND */
-	/* if ( Hand.nand_ps < 2048 && Hand.nand_os > 16 )
-	{
+	if ( hand.nand_ps < 2048 && hand.nand_os > 16 ) {
 		printf("\n PAGESIZE or OOBSIZE setting invalid!");
 		return 0;
 	}
-	if ( Hand.nand_ps < 2048 && Hand.nand_ppb > 32 )
-	{
+	if ( hand.nand_ps < 2048 && hand.nand_ppb > 32 ) {
 		printf("\n PAGESIZE or PAGEPERBLOCK setting invalid!");
 		return 0;
 	}
 
-	if ( Hand.nand_ps > 512 && Hand.nand_os <= 16 )
-	{
+	if ( hand.nand_ps > 512 && hand.nand_os <= 16 ) {
 		printf("\n PAGESIZE or OOBSIZE setting invalid!");
 		return 0;
 	}
-	if ( Hand.nand_ps > 512 && Hand.nand_ppb < 64 )
-	{
+	if ( hand.nand_ps > 512 && hand.nand_ppb < 64 ) {
 		printf("\n PAGESIZE or PAGEPERBLOCK setting invalid!");
 		return 0;
-		} */
+	}	       
 
 	printf("\n Current device information:");
 	printf(" CPU is Jz%x",hand.fw_args.cpu_id);
@@ -173,11 +197,11 @@ int check_dump_cfg()
 		total_size / 0x100000, 2 * (hand.fw_args.bank_num + 1), 16 * (2 - hand.fw_args.bus_width));
 
 	/* printf("\n Nand page size %d, ECC offset %d, ",
-		Hand.nand_ps,Hand.nand_eccpos);
+		hand.nand_ps,hand.nand_eccpos);
 
-	printf("bad block ID %d, ",Hand.nand_bbpage);
+	printf("bad block ID %d, ",hand.nand_bbpage);
 
-	printf("use %d plane mode",Hand.nand_plane); */
+	printf("use %d plane mode",hand.nand_plane); */
 
 	printf("\n");
 	return 1;
@@ -241,6 +265,7 @@ int boot(char *stage1_path, char *stage2_path, char *config_path ){
 	memset(&ingenic_dev, 0, sizeof(struct ingenic_dev));
 	memset(&hand.fw_args, 0, sizeof(struct fw_args_t));
 
+	init_hand_def();
 	if (parse_configure(config_path) < 1)
 		goto out;
 
@@ -344,7 +369,7 @@ int nprog(void)
 	else
 		printf("%s", help);
 #if 0
-	if (Hand.nand_plane > 1)
+	if (hand.nand_plane > 1)
 		/* API_Nand_Program_File_Planes(&nand_in,&nand_out, image_file); */
 	else
 		/* API_Nand_Program_File(&nand_in,&nand_out, image_file); */
