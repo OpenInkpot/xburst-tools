@@ -19,8 +19,8 @@
  * Boston, MA  02110-1301, USA
  */
 
-#ifndef __JZ4740_USBDEFINES__H_
-#define __JZ4740_USBDEFINES__H_
+#ifndef __USB_BOOT_DEFINES_H__
+#define __USB_BOOT_DEFINES_H__
 
 /* #define dprintf(x...) printf(x) */
 #define SDRAM_SIZE ( 16 * 1024 * 1024 )
@@ -122,24 +122,24 @@ struct fw_args_t {
 	/* unsigned char align2; */
 } __attribute__((packed));
 
-struct  hand_t {
+struct hand_t {
 
 	/* nand flash info */
 	int pt;             	/* cpu type */
-	int nand_bw;		/* bus width */
-	int nand_rc;		/* row cycle */
-	int nand_ps;		/* page size */
-	int nand_ppb;		/* page number per block */
-	int nand_force_erase;
-	int nand_pn;		/* page number in total */
-	int nand_os;		/* oob size */
-	int nand_eccpos;
-	int nand_bbpage;
-	int nand_bbpos;
-	int nand_plane;
-	int nand_bchbit;
-	int nand_wppin;
-	int nand_bpc;		/* block number per chip */
+	unsigned int nand_bw;		/* bus width */
+	unsigned int nand_rc;		/* row cycle */
+	unsigned int nand_ps;		/* page size */
+	unsigned int nand_ppb;		/* page number per block */
+	unsigned int nand_force_erase;
+	unsigned int nand_pn;		/* page number in total */
+	unsigned int nand_os;		/* oob size */
+	unsigned int nand_eccpos;
+	unsigned int nand_bbpage;
+	unsigned int nand_bbpos;
+	unsigned int nand_plane;
+	unsigned int nand_bchbit;
+	unsigned int nand_wppin;
+	unsigned int nand_bpc;		/* block number per chip */
 
 	struct fw_args_t fw_args;
 } __attribute__((packed));
@@ -168,4 +168,4 @@ struct sdram_in_t {
 	unsigned int option;
 };
 
-#endif	/* __JZ4740_USBDEFINES__H_ */
+#endif	/* __USB_BOOT_DEFINES_H__ */

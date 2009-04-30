@@ -30,182 +30,27 @@
 #include <fcntl.h>
 #include <sys/types.h>
 #include <sys/stat.h>
-#include <confuse.h>
 #include <ctype.h>
 #include "cmd.h"
+#include "ingenic_cfg.h"
 
 extern int com_argc;
 extern char com_argv[MAX_ARGC][MAX_COMMAND_LENGTH];
 
+struct ingenic_dev ingenic_dev;
+struct hand_t hand;
+
 static struct nand_in_t nand_in;
 static struct nand_out_t nand_out;
-static struct hand_t hand;
 unsigned int total_size;
 unsigned char code_buf[4 * 512 * 1024];
 unsigned char cs[16];
 
-void init_hand_def(void)
-{
-	/* nand flash info */
-	/* hand.nand_start=0;important !!!! */
-	hand.pt = JZ4740;    /* cpu type  */
-	hand.nand_bw=8;
-	hand.nand_rc=3;
-	hand.nand_ps=2048;
-	hand.nand_ppb=64;
-	hand.nand_eccpos = 6;
-	hand.nand_bbpage = 0;
-	hand.nand_bbpos  = 0;
-	hand.nand_force_erase=0;
-	/* hand.nand_ids=0;  */ /* vendor_id & device_id */
-	hand.fw_args.cpu_id = 0x4740;
-	hand.fw_args.ext_clk = 12;
-	hand.fw_args.cpu_speed = 336 / hand.fw_args.ext_clk;
-	hand.fw_args.phm_div = 4;
-	hand.fw_args.use_uart = 0;
-	hand.fw_args.boudrate = 57600;
-	hand.fw_args.bus_width = 0;
-	hand.fw_args.bank_num = 1;
-	hand.fw_args.row_addr = 13;
-	hand.fw_args.col_addr = 9;
-	hand.fw_args.is_mobile = 0;
-	hand.fw_args.is_busshare = 1;
-}
-
-static int parse_configure(char * file_path)
-{
-	cfg_opt_t opts[] = {
-		CFG_SIMPLE_INT("EXTCLK", &hand.fw_args.ext_clk),
-		CFG_SIMPLE_INT("CPUSPEED", &hand.fw_args.cpu_speed),
-		CFG_SIMPLE_INT("PHMDIV", &hand.fw_args.phm_div),
-		CFG_SIMPLE_INT("BOUDRATE", &hand.fw_args.boudrate),
-		CFG_SIMPLE_INT("USEUART", &hand.fw_args.use_uart),
-
-		CFG_SIMPLE_INT("BUSWIDTH", &hand.fw_args.bus_width),
-		CFG_SIMPLE_INT("BANKS", &hand.fw_args.bank_num),
-		CFG_SIMPLE_INT("ROWADDR", &hand.fw_args.row_addr),
-		CFG_SIMPLE_INT("COLADDR", &hand.fw_args.col_addr),
-
-		CFG_SIMPLE_INT("ISMOBILE", &hand.fw_args.is_mobile),
-		CFG_SIMPLE_INT("ISBUSSHARE", &hand.fw_args.is_busshare),
-		CFG_SIMPLE_INT("DEBUGOPS", &hand.fw_args.debug_ops),
-		CFG_SIMPLE_INT("PINNUM", &hand.fw_args.pin_num),
-		CFG_SIMPLE_INT("START", &hand.fw_args.start),
-		CFG_SIMPLE_INT("SIZE", &hand.fw_args.size),
-
-		CFG_SIMPLE_INT("NAND_BUSWIDTH", &hand.nand_bw),
-		CFG_SIMPLE_INT("NAND_ROWCYCLES", &hand.nand_rc),
-		CFG_SIMPLE_INT("NAND_PAGESIZE", &hand.nand_ps),
-		CFG_SIMPLE_INT("NAND_PAGEPERBLOCK", &hand.nand_ppb),
-		CFG_SIMPLE_INT("NAND_FORCEERASE", &hand.nand_force_erase),
-		CFG_SIMPLE_INT("NAND_OOBSIZE", &hand.nand_os),
-		CFG_SIMPLE_INT("NAND_ECCPOS", &hand.nand_eccpos),
-		CFG_SIMPLE_INT("NAND_BADBLACKPOS", &hand.nand_bbpos),
-		CFG_SIMPLE_INT("NAND_BADBLACKPAGE", &hand.nand_bbpage),
-		CFG_SIMPLE_INT("NAND_PLANENUM", &hand.nand_plane),
-		CFG_SIMPLE_INT("NAND_BCHBIT", &hand.nand_bchbit),
-		CFG_SIMPLE_INT("NAND_WPPIN", &hand.nand_wppin),
-		CFG_SIMPLE_INT("NAND_BLOCKPERCHIP", &hand.nand_bbpage),
-
-		CFG_END()
-	};
-
-	cfg_t *cfg;
-	cfg = cfg_init(opts, 0);
-	if (cfg_parse(cfg, file_path) == CFG_PARSE_ERROR)
-		return -1;
-	cfg_free(cfg);
-
-	hand.fw_args.cpu_id = 0x4740;
-	if (hand.fw_args.bus_width == 32)
-		hand.fw_args.bus_width = 0 ;
-	else
-		hand.fw_args.bus_width = 1 ; 
-	hand.fw_args.bank_num = hand.fw_args.bank_num / 4; 
-	hand.fw_args.cpu_speed = hand.fw_args.cpu_speed / hand.fw_args.ext_clk;
-
-	total_size = (unsigned int)
-		(2 << (hand.fw_args.row_addr + hand.fw_args.col_addr - 1)) * 2 
-		* (hand.fw_args.bank_num + 1) * 2 
-		* (2 - hand.fw_args.bus_width);
-
-	return 1;
-}
-
-int check_dump_cfg()
-{
-	printf("\n Now checking whether all configure args valid: ");
-	/* check PLL */
-	if (hand.fw_args.ext_clk > 27 || hand.fw_args.ext_clk < 12 ) {
-		printf("\n EXTCLK setting invalid!");
-		return 0;
-	}
-	if (hand.fw_args.phm_div > 32 || hand.fw_args.ext_clk < 2 ) {
-		printf("\n PHMDIV setting invalid!");
-		return 0;
-	}
-	if ( (hand.fw_args.cpu_speed * hand.fw_args.ext_clk ) % 12 != 0 ) {
-		printf("\n CPUSPEED setting invalid!");
-		return 0;
-	}
-
-	/* check SDRAM */
-	if (hand.fw_args.bus_width > 1 ) {
-		printf("\n SDRAMWIDTH setting invalid!");
-		return 0;
-	}
-	if (hand.fw_args.bank_num > 1 ) {
-		printf("\n BANKNUM setting invalid!");
-		return 0;
-	}
-	if (hand.fw_args.row_addr > 13 && hand.fw_args.row_addr < 11 ) {
-		printf("\n ROWADDR setting invalid!");
-		return 0;
-	}
-	if (hand.fw_args.col_addr > 13 && hand.fw_args.col_addr < 11 ) {
-		printf("\n COLADDR setting invalid!");
-		return 0;
-	}
-
-	/* check NAND */
-	if ( hand.nand_ps < 2048 && hand.nand_os > 16 ) {
-		printf("\n PAGESIZE or OOBSIZE setting invalid!");
-		return 0;
-	}
-	if ( hand.nand_ps < 2048 && hand.nand_ppb > 32 ) {
-		printf("\n PAGESIZE or PAGEPERBLOCK setting invalid!");
-		return 0;
-	}
-
-	if ( hand.nand_ps > 512 && hand.nand_os <= 16 ) {
-		printf("\n PAGESIZE or OOBSIZE setting invalid!");
-		return 0;
-	}
-	if ( hand.nand_ps > 512 && hand.nand_ppb < 64 ) {
-		printf("\n PAGESIZE or PAGEPERBLOCK setting invalid!");
-		return 0;
-	}	       
-
-	printf("\n Current device information:");
-	printf(" CPU is Jz%x",hand.fw_args.cpu_id);
-	printf("\n Crystal work at %dMHz, the CCLK up to %dMHz and PMH_CLK up to %dMHz",
-		hand.fw_args.ext_clk,
-		(unsigned int)hand.fw_args.cpu_speed * hand.fw_args.ext_clk,
-		((unsigned int)hand.fw_args.cpu_speed * hand.fw_args.ext_clk) / hand.fw_args.phm_div);
-
-	printf("\n Total SDRAM size is %d MB, work in %d bank and %d bit mode",
-		total_size / 0x100000, 2 * (hand.fw_args.bank_num + 1), 16 * (2 - hand.fw_args.bus_width));
-
-	/* printf("\n Nand page size %d, ECC offset %d, ",
-		hand.nand_ps,hand.nand_eccpos);
-
-	printf("bad block ID %d, ",hand.nand_bbpage);
-
-	printf("use %d plane mode",hand.nand_plane); */
-
-	printf("\n");
-	return 1;
-}
+static const char IMAGE_TYPE[][30] = {
+	"with oob and ecc",
+	"with oob and without ecc",
+	"without oob",
+};
 
 static int load_file(struct ingenic_dev *ingenic_dev, const char *file_path)
 {
@@ -220,7 +65,8 @@ static int load_file(struct ingenic_dev *ingenic_dev, const char *file_path)
 	status = stat(file_path, &fstat);
 
 	if (status < 0) {
-		fprintf(stderr, "Error - can't get file size from '%s': %s\n", file_path, strerror(errno));
+		fprintf(stderr, "Error - can't get file size from '%s': %s\n",
+			file_path, strerror(errno));
 		goto out;
 	}
 
@@ -228,21 +74,24 @@ static int load_file(struct ingenic_dev *ingenic_dev, const char *file_path)
 	ingenic_dev->file_buff = malloc(ingenic_dev->file_len);
 
 	if (!ingenic_dev->file_buff) {
-		fprintf(stderr, "Error - can't allocate memory to read file '%s': %s\n", file_path, strerror(errno));
+		fprintf(stderr, "Error - can't allocate memory to read file '%s': %s\n", 
+			file_path, strerror(errno));
 		return -1;
 	}
 
 	fd = open(file_path, O_RDONLY);
 
 	if (fd < 0) {
-		fprintf(stderr, "Error - can't open file '%s': %s\n", file_path, strerror(errno));
+		fprintf(stderr, "Error - can't open file '%s': %s\n", 
+			file_path, strerror(errno));
 		goto out;
 	}
 
 	status = read(fd, ingenic_dev->file_buff, ingenic_dev->file_len);
 
 	if (status < ingenic_dev->file_len) {
-		fprintf(stderr, "Error - can't read file '%s': %s\n", file_path, strerror(errno));
+		fprintf(stderr, "Error - can't read file '%s': %s\n", 
+			file_path, strerror(errno));
 		goto close;
 	}
 
@@ -256,21 +105,10 @@ out:
 	return res;
 }
 
-int boot(char *stage1_path, char *stage2_path, char *config_path ){
-	struct ingenic_dev ingenic_dev;
+int boot(char *stage1_path, char *stage2_path){
 
 	int res = 0;
 	int status;
-
-	memset(&ingenic_dev, 0, sizeof(struct ingenic_dev));
-	memset(&hand.fw_args, 0, sizeof(struct fw_args_t));
-
-	init_hand_def();
-	if (parse_configure(config_path) < 1)
-		goto out;
-
-	if (usb_ingenic_init(&ingenic_dev) < 1)
-		goto out;
 
 	status = usb_get_ingenic_cpu(&ingenic_dev);
 	switch (status)	{
@@ -317,7 +155,6 @@ int boot(char *stage1_path, char *stage2_path, char *config_path ){
 
 		if (usb_ingenic_upload(&ingenic_dev, 2) < 1)
 			goto cleanup;
-		check_dump_cfg();
 	}
 
 	res = 1;
@@ -329,6 +166,173 @@ out:
 	usb_ingenic_cleanup(&ingenic_dev);
 	return res;
 }
+
+/* nand function  */
+int nand_program_check(struct nand_in_t *nand_in,
+		       struct nand_out_t *nand_out)
+{
+
+	return -1;
+}
+
+int nand_erase(struct nand_in_t *nand_in)
+{
+#if 0
+	unsigned int start_blk, blk_num, end_block;
+	int i;
+
+	start_blk = nand_in->start;
+	blk_num = nand_in->length;
+	if (start_blk > (unsigned int)NAND_MAX_BLK_NUM)  {
+		printf("\n Start block number overflow!");
+		return -1;
+	}
+	if (blk_num > (unsigned int)NAND_MAX_BLK_NUM) {
+		printf("\n Length block number overflow!");
+		return -1;
+	}
+
+	if (usb_get_ingenic_cpu(&ingenic_dev) < 3) {
+		printf("\n Device unboot! Boot it first!");
+		return -1;
+	}
+
+	for (i = 0; i < nand_in->max_chip; i++) {
+		if ((nand_in->cs_map)[i]==0) 
+			continue;
+		printf("\n Erasing No.%d device No.%d flash......",
+		       nand_in->dev, i);
+
+		JZ4740_USB_SET_DATA_ADDRESS(start_blk,hDevice);
+		JZ4740_USB_SET_DATA_LENGTH(blk_num,hDevice);
+		unsigned short temp = ((i<<4) & 0xff0) + NAND_ERASE;
+		JZ4740_USB_NAND_OPS(temp,hDevice);
+		ReadFile(hDevice, ret, 8, &nRead, NULL);
+		printf(" Finish!");
+	}
+	Handle_Close();
+	end_block = ((ret[3]<<24)|(ret[2]<<16)|(ret[1]<<8)|(ret[0]<<0)) / Hand.nand_ppb;
+	printf("\n Operation end position : %d ",end_block);
+	if ( !Hand.nand_force_erase )     //not force erase ,show bad block infomation
+	{
+		printf("\n There are marked bad blocks :%d ",end_block - start_blk - blk_num );
+	}
+	else                              //force erase ,no bad block infomation can show
+	{
+		printf("\n Force erase ,no bad block infomation !" );
+	}
+#endif
+	return 1;
+}
+
+int nand_program_file(struct nand_in_t *nand_in,
+		      struct nand_out_t *nand_out,
+		      char *fname)
+{
+
+	int flen, m, j, k;
+	unsigned int start_page = 0, page_num, code_len, offset, transfer_size;
+	FILE *fp;
+	unsigned char status_buf[32];
+	struct nand_in_t n_in;
+	struct nand_out_t n_out;
+
+#if 0
+	/* nand_out->status = (unsigned char *)malloc(nand_in->max_chip * sizeof(unsigned char)); */
+	nand_out->status = status_buf;
+	for (i=0;i<nand_in->max_chip;i++)
+		(nand_out->status)[i] = 0; /* set all status to fail */
+#endif
+	fp = fopen(fname,"rb");
+	if (fp == NULL) {
+		printf("\n Can not open file !");
+		return 0;
+	}
+
+	printf("\n Programing No.%d device...",nand_in->dev);
+	fseek(fp,0,SEEK_END);
+	flen=ftell(fp);
+	n_in.start = nand_in->start / hand.nand_ppb; 
+	if (nand_in->option == NO_OOB) {
+		if (flen % (hand.nand_ppb * hand.nand_ps) == 0) 
+			n_in.length = flen / (hand.nand_ps * hand.nand_ppb);
+		else
+			n_in.length = flen / (hand.nand_ps * hand.nand_ppb) + 1;
+	} else {
+		if (flen % (hand.nand_ppb * (hand.nand_ps + hand.nand_os)) == 0) 
+			n_in.length = flen / ((hand.nand_ps + hand.nand_os) * hand.nand_ppb);
+		else
+			n_in.length = flen / ((hand.nand_ps + hand.nand_os) * hand.nand_ppb) + 1;
+	}
+	/* printf(" length %d flen %d \n",n_in.length,flen); */
+	n_in.cs_map = nand_in->cs_map;
+	n_in.dev = nand_in->dev;
+	n_in.max_chip = nand_in->max_chip;
+	if (nand_erase(&n_in)!=1)
+		return -1;
+	if (nand_in->option == NO_OOB)
+		transfer_size = (hand.nand_ppb * hand.nand_ps);
+	else
+		transfer_size = (hand.nand_ppb * (hand.nand_ps + hand.nand_os));
+	m = flen / transfer_size;
+	j = flen % transfer_size;
+	fseek(fp,0,SEEK_SET);	/* file point return to begin */
+	offset = 0; 
+	printf("\n Total size to send in byte is :%d",flen);
+	printf("\n Image type : %s",IMAGE_TYPE[nand_in->option]);
+	printf("\n It will cause %d times buffer transfer.",m+1);
+#if 0
+	for (i = 0; i < nand_in->max_chip; i++)
+		(nand_out->status)[i] = 1; /* set all status to success! */
+#endif
+	for (k = 0; k < m; k++)	{
+		if (nand_in->option == NO_OOB) {
+			page_num = transfer_size / hand.nand_ps;
+		} else {
+			page_num = transfer_size / (hand.nand_ps + hand.nand_os);
+		}
+		code_len = transfer_size;
+		fread(code_buf, 1, code_len, fp); /* read code from file to buffer */
+		printf("\n No.%d Programming...",k+1);
+		nand_in->length = code_len; /* code length,not page number! */
+		nand_in->buf = code_buf;
+		start_page = nand_program_check(nand_in,&n_out);
+		if ( start_page - nand_in->start > hand.nand_ppb ) 
+			printf("\n Skip a old bad block !");
+		nand_in->start = start_page;
+#if 0
+		for (i = 0; i < nand_in->max_chip; i++) {
+			(nand_out->status)[i] = (nand_out->status)[i] * (n_out.status)[i];
+		}
+#endif
+		/* offset += code_len - 1; */
+		offset += code_len ;
+		/* start_page += page_num; */
+		/* nand_in->start += page_num; */
+		fseek(fp,offset,SEEK_SET);
+	}
+
+	if (j) {
+		j += hand.nand_ps - (j % hand.nand_ps);
+		memset(code_buf,0,j); /* set all to null */
+		fread(code_buf,1,j,fp); /* read code from file to buffer */
+		nand_in->length = j;
+		nand_in->buf = code_buf;
+		printf("\n No.%d Programming...",k+1);
+		start_page = nand_program_check(nand_in,&n_out);
+		if ( start_page - nand_in->start > hand.nand_ppb ) 
+			printf(" Skip a old bad block !");
+#if 0
+		for (i=0;i<nand_in->max_chip;i++) {
+			(nand_out->status)[i] = (nand_out->status)[i] * (n_out.status)[i];
+		}
+#endif
+	}
+	
+	fclose(fp);
+	return 1;
+}
+
 int nprog(void)
 {
 	unsigned int i;
@@ -368,13 +372,14 @@ int nprog(void)
 		nand_in.option = NO_OOB;
 	else
 		printf("%s", help);
-#if 0
-	if (hand.nand_plane > 1)
-		/* API_Nand_Program_File_Planes(&nand_in,&nand_out, image_file); */
-	else
-		/* API_Nand_Program_File(&nand_in,&nand_out, image_file); */
 
-		printf("\n Flash check result:");
+	if (hand.nand_plane > 1)
+		;/* nand_program_file_planes(&nand_in,&nand_out, image_file); */
+	else
+		nand_program_file(&nand_in,&nand_out, image_file);
+
+#if 0
+	printf("\n Flash check result:");
 	for (i = 0; i < 16; i++)
 		printf(" %d", (nand_out.status)[i]);
 #endif
@@ -383,7 +388,7 @@ int nprog(void)
 	       nand_in.dev,
 	       (nand_in.cs_map)[atoi(com_argv[4])],
 	       nand_in.option);
-	printf("\n not implement yet!! ");
+	printf("\n not implement yet!! just test");
 
 	return 1;
 }

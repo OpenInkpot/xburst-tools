@@ -175,7 +175,7 @@ int command_handle(char *buf)
 		printf("\n exiting inflash software\n");
 		exit(EXIT_SUCCESS);
 	case 20:
-		return boot(STAGE1_FILE_PATH, STAGE2_FILE_PATH, CONFIG_FILE_PATH);
+		return boot(STAGE1_FILE_PATH, STAGE2_FILE_PATH);
 	default:
 		printf("\n Command not support!");
 		return -1;

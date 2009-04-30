@@ -1,8 +1,8 @@
 /*
- * "Ingenic flash tool" - flash the Ingenic CPU via USB
+ * put all the configure operate to this file
  *
  * (C) Copyright 2009
- * Author: Xiangfu Liu <xiangfu.z@gmail.com>
+ * Author: Marek Lindner <lindner_marek@yahoo.de>
  *
  * This program is free software; you can redistribute it and/or
  * modify it under the terms of the GNU General Public License
@@ -19,14 +19,15 @@
  * Boston, MA  02110-1301, USA
  */
 
-#ifndef __CMD_H__
-#define __CMD_H__
+#ifndef __INGENIC_CFG_H__
+#define __INGENIC_CFG_H__
 
-#define COMMAND_NUM 31
-#define MAX_ARGC	10
-#define MAX_COMMAND_LENGTH	100
+#include "usb_boot_defines.h"
 
-int boot(char *stage1_path, char *stage2_path);
-int nprog(void);
+#define CONFIG_FILE_PATH "usb_boot.cfg"
 
-#endif  /* __CMD_H__ */
+int hand_init_def(struct hand_t *hand);
+int check_dump_cfg(struct hand_t *hand);
+int parse_configure(struct hand_t *hand, char * file_path);
+
+#endif	/*__INGENIC_CFG_H__ */

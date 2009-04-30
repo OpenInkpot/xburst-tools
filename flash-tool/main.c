@@ -30,6 +30,11 @@
 #include "usb.h"
 #include "config.h"
 #include "command_line.h"
+#include "ingenic_usb.h"
+#include "ingenic_cfg.h"
+
+extern struct ingenic_dev ingenic_dev;
+extern struct hand_t hand;
 
 static void help(void)
 {
@@ -57,8 +62,14 @@ int main(int argc, char **argv)
 
 	if ((getuid()) || (getgid())) {
 		fprintf(stderr, "Error - you must be root to run '%s'\n", argv[0]);
-		return -1;
+		return EXIT_FAILURE;
 	}
+
+	if (usb_ingenic_init(&ingenic_dev) < 1)
+		return EXIT_FAILURE;
+
+	if (parse_configure(&hand, CONFIG_FILE_PATH) < 1)
+		return EXIT_FAILURE;
 
 	while (1) {
 		int c, option_index = 0;

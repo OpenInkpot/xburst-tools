@@ -48,7 +48,7 @@
 
 #define STAGE1_FILE_PATH "fw.bin"
 #define STAGE2_FILE_PATH "usb_boot.bin"
-#define CONFIG_FILE_PATH "usb_boot.cfg"
+
 #define ARRAY_SIZE(a) (sizeof(a) / sizeof(a[0]))
 
 struct ingenic_dev {

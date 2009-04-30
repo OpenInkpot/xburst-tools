@@ -91,6 +91,8 @@ int usb_ingenic_init(struct ingenic_dev *ingenic_dev)
 {
 	int num_ingenic, status = -1;
 
+	memset(ingenic_dev, 0, sizeof(struct ingenic_dev));
+
 	usb_init();
  	/* usb_set_debug(255); */
 	usb_find_busses();
