@@ -27,8 +27,6 @@
 #define CODE_SIZE  ( 4 * 1024 * 1024 )
 /* #define START_ADDR ( 0x80000000 + SDRAM_SIZE - CODE_SIZE ) */
 
-#define MAX_COMMAND_LENGTH 100
-#define COMMAND_NUM 31
 #define NAND_MAX_BLK_NUM  10000000	/* ((Hand.nand_pn / Hand.nand_ppb) + 1) */
 #define NAND_MAX_PAGE_NUM 1073740824	/*Hand.nand_pn */
 #define NAND_SECTION_NUM 23
