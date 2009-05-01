@@ -141,6 +141,9 @@ int usb_get_ingenic_cpu(struct ingenic_dev *ingenic_dev)
 {
 	int status;
 
+	memset(&ingenic_dev->cpu_info_buff, 0, 
+	       ARRAY_SIZE(ingenic_dev->cpu_info_buff));
+
 	status = usb_control_msg(ingenic_dev->usb_handle,
           /* bmRequestType */ USB_ENDPOINT_IN | USB_TYPE_VENDOR | USB_RECIP_DEVICE,
           /* bRequest      */ VR_GET_CPU_INFO,
@@ -192,31 +195,9 @@ int usb_ingenic_flush_cache(struct ingenic_dev *ingenic_dev)
 	return 1;
 }
 
-int usb_ingenic_upload(struct ingenic_dev *ingenic_dev, int stage)
+int usb_send_data_length_to_ingenic(struct ingenic_dev *ingenic_dev)
 {
 	int status;
-
-	unsigned int stage2_addr;
-	stage2_addr = total_size + 0x80000000;
-	stage2_addr -= CODE_SIZE;
-	int stage_addr = (stage == 1 ? 0x80002000 : stage2_addr);
-
-	/* tell the device the RAM address to store the file */
-	status = usb_control_msg(ingenic_dev->usb_handle,
-          /* bmRequestType */ USB_ENDPOINT_OUT | USB_TYPE_VENDOR | USB_RECIP_DEVICE,
-          /* bRequest      */ VR_SET_DATA_ADDRESS,
-          /* wValue        */ STAGE_ADDR_MSB(stage_addr),
-          /* wIndex        */ STAGE_ADDR_LSB(stage_addr),
-          /* Data          */ 0,
-          /* wLength       */ 0,
-                              USB_TIMEOUT);
-
-	if (status != 0) {
-		fprintf(stderr, "Error - can't set the address on Ingenic device: %i\n", status);
-		goto out;
-	}
-
-#if 0
 	/* tell the device the length of the file to be uploaded */
 	status = usb_control_msg(ingenic_dev->usb_handle,
           /* bmRequestType */ USB_ENDPOINT_OUT | USB_TYPE_VENDOR | USB_RECIP_DEVICE,
@@ -229,20 +210,58 @@ int usb_ingenic_upload(struct ingenic_dev *ingenic_dev, int stage)
 
 	if (status != 0)
 		fprintf(stderr, "Error - can't set data length on Ingenic device: %i\n", status);
-#endif
 
-	printf("\n Download stage %d program and execute at 0x%08x ", stage, (stage_addr));
-	/* upload the file */
+	return status;
+}
+
+int usb_send_data_address_to_ingenic(struct ingenic_dev *ingenic_dev, unsigned int stage_addr)
+{
+	int status;
+	/* tell the device the RAM address to store the file */
+	status = usb_control_msg(ingenic_dev->usb_handle,
+          /* bmRequestType */ USB_ENDPOINT_OUT | USB_TYPE_VENDOR | USB_RECIP_DEVICE,
+          /* bRequest      */ VR_SET_DATA_ADDRESS,
+          /* wValue        */ STAGE_ADDR_MSB(stage_addr),
+          /* wIndex        */ STAGE_ADDR_LSB(stage_addr),
+          /* Data          */ 0,
+          /* wLength       */ 0,
+                              USB_TIMEOUT);
+
+	if (status != 0) {
+		fprintf(stderr, "Error - can't set the address on Ingenic device: %i\n", status);
+		return -1;
+	}
+
+	return status;
+}
+
+int usb_send_data_to_ingenic(struct ingenic_dev *ingenic_dev)
+{
+	int status;
 	status = usb_bulk_write(ingenic_dev->usb_handle,
 	/* endpoint         */ INGENIC_OUT_ENDPOINT,
 	/* bulk data        */ ingenic_dev->file_buff,
 	/* bulk data length */ ingenic_dev->file_len,
 				USB_TIMEOUT);
-
 	if (status < ingenic_dev->file_len) {
-		fprintf(stderr, "Error - can't send bulk data to Ingenic CPU: %i\nfile length: %d\n", status, ingenic_dev->file_len);
+		fprintf(stderr, "Error - can't send bulk data to Ingenic CPU: %i\n", status);
 		return -1;
 	}
+	return 1;
+}
+
+int usb_ingenic_upload(struct ingenic_dev *ingenic_dev, int stage)
+{
+	int status;
+
+	unsigned int stage2_addr;
+	stage2_addr = total_size + 0x80000000;
+	stage2_addr -= CODE_SIZE;
+	int stage_addr = (stage == 1 ? 0x80002000 : stage2_addr);
+
+	usb_send_data_address_to_ingenic(ingenic_dev, stage_addr);
+	printf("\n Download stage %d program and execute at 0x%08x ", stage, (stage_addr));
+	usb_send_data_to_ingenic(ingenic_dev);
 
 	if (stage == 2) {
 		sleep(1);

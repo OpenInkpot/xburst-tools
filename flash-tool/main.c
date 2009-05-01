@@ -102,6 +102,7 @@ int main(int argc, char **argv)
 		command_handle(com_buf);
 	}
 
+	usb_ingenic_cleanup(&ingenic_dev);
 	return EXIT_SUCCESS;
 }
 

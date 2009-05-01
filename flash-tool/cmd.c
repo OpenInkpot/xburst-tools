@@ -163,7 +163,6 @@ cleanup:
 	if (ingenic_dev.file_buff)
 		free(ingenic_dev.file_buff);
 out:
-	usb_ingenic_cleanup(&ingenic_dev);
 	return res;
 }
 
@@ -177,7 +176,6 @@ int nand_program_check(struct nand_in_t *nand_in,
 
 int nand_erase(struct nand_in_t *nand_in)
 {
-#if 0
 	unsigned int start_blk, blk_num, end_block;
 	int i;
 
@@ -197,28 +195,29 @@ int nand_erase(struct nand_in_t *nand_in)
 		return -1;
 	}
 
+#if 0
 	for (i = 0; i < nand_in->max_chip; i++) {
 		if ((nand_in->cs_map)[i]==0) 
 			continue;
 		printf("\n Erasing No.%d device No.%d flash......",
 		       nand_in->dev, i);
 
-		JZ4740_USB_SET_DATA_ADDRESS(start_blk,hDevice);
-		JZ4740_USB_SET_DATA_LENGTH(blk_num,hDevice);
+		JZ4740_USB_SET_DATA_ADDRESS(start_blk, hDevice);
+		JZ4740_USB_SET_DATA_LENGTH(blk_num, hDevice);
 		unsigned short temp = ((i<<4) & 0xff0) + NAND_ERASE;
 		JZ4740_USB_NAND_OPS(temp,hDevice);
 		ReadFile(hDevice, ret, 8, &nRead, NULL);
 		printf(" Finish!");
 	}
 	Handle_Close();
-	end_block = ((ret[3]<<24)|(ret[2]<<16)|(ret[1]<<8)|(ret[0]<<0)) / Hand.nand_ppb;
+	end_block = ((ret[3] << 24) |
+		     (ret[2] << 16) |
+		     (ret[1] << 8)  | 
+		     (ret[0] << 0)) / Hand.nand_ppb;
 	printf("\n Operation end position : %d ",end_block);
-	if ( !Hand.nand_force_erase )     //not force erase ,show bad block infomation
-	{
+	if (!hand.nand_force_erase) {	/* not force erase, show bad block infomation */
 		printf("\n There are marked bad blocks :%d ",end_block - start_blk - blk_num );
-	}
-	else                              //force erase ,no bad block infomation can show
-	{
+	} else {			/* force erase, no bad block infomation can show */
 		printf("\n Force erase ,no bad block infomation !" );
 	}
 #endif
