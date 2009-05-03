@@ -67,6 +67,9 @@ void usb_ingenic_cleanup(struct ingenic_dev *ingenic_dev);
 int usb_send_data_address_to_ingenic(struct ingenic_dev *ingenic_dev, 
 				     unsigned int stage_addr);
 int usb_send_data_to_ingenic(struct ingenic_dev *ingenic_dev);
+int usb_send_data_length_to_ingenic(struct ingenic_dev *ingenic_dev,
+				    int len);
+int usb_ingenic_nand_ops(struct ingenic_dev *ingenic_dev, int ops);
 
 #endif	/* __INGENIC_USB_H__ */
 

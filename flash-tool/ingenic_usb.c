@@ -195,7 +195,7 @@ int usb_ingenic_flush_cache(struct ingenic_dev *ingenic_dev)
 	return 1;
 }
 
-int usb_send_data_length_to_ingenic(struct ingenic_dev *ingenic_dev)
+int usb_send_data_length_to_ingenic(struct ingenic_dev *ingenic_dev, int len)
 {
 	int status;
 	/* tell the device the length of the file to be uploaded */
@@ -203,7 +203,7 @@ int usb_send_data_length_to_ingenic(struct ingenic_dev *ingenic_dev)
           /* bmRequestType */ USB_ENDPOINT_OUT | USB_TYPE_VENDOR | USB_RECIP_DEVICE,
           /* bRequest      */ VR_SET_DATA_LENGTH,
           /* wValue        */ 0,
-          /* wIndex        */ ingenic_dev->file_len,
+          /* wIndex        */ len,
           /* Data          */ 0,
           /* wLength       */ 0,
                               USB_TIMEOUT);
