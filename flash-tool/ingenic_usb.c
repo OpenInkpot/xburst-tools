@@ -300,3 +300,23 @@ void usb_ingenic_cleanup(struct ingenic_dev *ingenic_dev)
 	if (ingenic_dev->usb_handle)
 		usb_close(ingenic_dev->usb_handle);
 }
+
+int usb_ingenic_nand_ops(struct ingenic_dev *ingenic_dev, int ops)
+{
+	int status;
+	status = usb_control_msg(ingenic_dev->usb_handle,
+          /* bmRequestType */ USB_ENDPOINT_OUT | USB_TYPE_VENDOR | USB_RECIP_DEVICE,
+          /* bRequest      */ VR_NAND_OPS,
+          /* wValue        */ ops & 0xffff,
+          /* wIndex        */ 0,
+          /* Data          */ 0,
+          /* wLength       */ 0,
+                              USB_TIMEOUT);
+
+	if (status != 0) {
+		fprintf(stderr, "Error - can't set Ingenic device nand ops: %i\n", status);
+		return -1;
+	}
+
+	return status;
+}

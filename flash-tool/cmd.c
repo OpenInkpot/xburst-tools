@@ -19,9 +19,6 @@
  * Boston, MA  02110-1301, USA
  */
 
-#include "ingenic_usb.h"
-#include "usb_boot_defines.h"
-
 #include <stdio.h>
 #include <string.h>
 #include <unistd.h>
@@ -33,6 +30,8 @@
 #include <ctype.h>
 #include "cmd.h"
 #include "ingenic_cfg.h"
+#include "ingenic_usb.h"
+#include "usb_boot_defines.h"
 
 extern int com_argc;
 extern char com_argv[MAX_ARGC][MAX_COMMAND_LENGTH];
@@ -202,9 +201,10 @@ int nand_erase(struct nand_in_t *nand_in)
 		printf("\n Erasing No.%d device No.%d flash......",
 		       nand_in->dev, i);
 
-		JZ4740_USB_SET_DATA_ADDRESS(start_blk, hDevice);
-		JZ4740_USB_SET_DATA_LENGTH(blk_num, hDevice);
-		unsigned short temp = ((i<<4) & 0xff0) + NAND_ERASE;
+		usb_send_data_address_to_ingenic(&ingenic_dev, start_blk);
+		ingenic_dev->file_len = blk_num;
+		usb_send_data_to_ingenic(&ingenic_dev);
+		unsigned short temp = ((i << 4) & 0xff0) + NAND_ERASE;
 		JZ4740_USB_NAND_OPS(temp,hDevice);
 		ReadFile(hDevice, ret, 8, &nRead, NULL);
 		printf(" Finish!");
@@ -239,7 +239,7 @@ int nand_program_file(struct nand_in_t *nand_in,
 #if 0
 	/* nand_out->status = (unsigned char *)malloc(nand_in->max_chip * sizeof(unsigned char)); */
 	nand_out->status = status_buf;
-	for (i=0;i<nand_in->max_chip;i++)
+	for (i=0; i<nand_in->max_chip; i++)
 		(nand_out->status)[i] = 0; /* set all status to fail */
 #endif
 	fp = fopen(fname,"rb");
@@ -267,7 +267,7 @@ int nand_program_file(struct nand_in_t *nand_in,
 	n_in.cs_map = nand_in->cs_map;
 	n_in.dev = nand_in->dev;
 	n_in.max_chip = nand_in->max_chip;
-	if (nand_erase(&n_in)!=1)
+	if (nand_erase(&n_in) != 1)
 		return -1;
 	if (nand_in->option == NO_OOB)
 		transfer_size = (hand.nand_ppb * hand.nand_ps);
@@ -295,7 +295,7 @@ int nand_program_file(struct nand_in_t *nand_in,
 		printf("\n No.%d Programming...",k+1);
 		nand_in->length = code_len; /* code length,not page number! */
 		nand_in->buf = code_buf;
-		start_page = nand_program_check(nand_in,&n_out);
+		start_page = nand_program_check(nand_in, &n_out);
 		if ( start_page - nand_in->start > hand.nand_ppb ) 
 			printf("\n Skip a old bad block !");
 		nand_in->start = start_page;
@@ -313,16 +313,16 @@ int nand_program_file(struct nand_in_t *nand_in,
 
 	if (j) {
 		j += hand.nand_ps - (j % hand.nand_ps);
-		memset(code_buf,0,j); /* set all to null */
-		fread(code_buf,1,j,fp); /* read code from file to buffer */
+		memset(code_buf, 0, j); /* set all to null */
+		fread(code_buf, 1, j, fp); /* read code from file to buffer */
 		nand_in->length = j;
 		nand_in->buf = code_buf;
 		printf("\n No.%d Programming...",k+1);
-		start_page = nand_program_check(nand_in,&n_out);
+		start_page = nand_program_check(nand_in, &n_out);
 		if ( start_page - nand_in->start > hand.nand_ppb ) 
 			printf(" Skip a old bad block !");
 #if 0
-		for (i=0;i<nand_in->max_chip;i++) {
+		for (i=0; i < nand_in->max_chip; i++) {
 			(nand_out->status)[i] = (nand_out->status)[i] * (n_out.status)[i];
 		}
 #endif
