@@ -161,10 +161,13 @@ int command_handle(char *buf)
 {
 	int cmd = command_interpret(buf);
 
-	if (!cmd) return -1;
+	if (!cmd)
+		return -1;
+
 	switch (cmd) {
 	case 11:
-		return nprog();
+		nprog();
+		break;
 	case 12:
 		handle_help();
 		break;
@@ -173,12 +176,14 @@ int command_handle(char *buf)
 		break;
 	case 16:		/* exit */
 		printf("\n exiting inflash software\n");
-		exit(EXIT_SUCCESS);
+		return -1;	/* return -1 to break the main.c while
+				 * then run usb_ingenic_cleanup*/
 	case 20:
-		return boot(STAGE1_FILE_PATH, STAGE2_FILE_PATH);
+		boot(STAGE1_FILE_PATH, STAGE2_FILE_PATH);
+		break;
 	default:
 		printf("\n Command not support!");
-		return -1;
+		break;
 	}
 
 	return 1;

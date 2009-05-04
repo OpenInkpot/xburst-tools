@@ -41,6 +41,7 @@ static void help(void)
 	printf("Usage: inflash [options] ...(must run as root)\n"
 		"  -h --help\t\t\tPrint this help message\n"
 		"  -v --version\t\t\tPrint the version number\n"
+		"  -c --command\t\t\tDirect run the command\n"
 		);
 }
 
@@ -52,6 +53,7 @@ static void print_version(void)
 static struct option opts[] = {
 	{ "help", 0, 0, 'h' },
 	{ "version", 0, 0, 'v' },
+	{ "command", 1, 0, 'c' },
 	{ 0, 0, 0, 0 }
 };
 
@@ -60,9 +62,13 @@ int main(int argc, char **argv)
 	printf("inflash - (C) 2009\n"
 	       "This program is Free Software and has ABSOLUTELY NO WARRANTY\n\n");
 
+	int command = 0;
+	char com_buf[256];
+	memset(com_buf, '\n', 256);
+
 	while (1) {
 		int c, option_index = 0;
-		c = getopt_long(argc, argv, "hv", opts,
+		c = getopt_long(argc, argv, "hvc:", opts,
 				&option_index);
 		if (c == -1)
 			break;
@@ -74,11 +80,18 @@ int main(int argc, char **argv)
 		case 'v':
 			print_version();
 			exit(EXIT_SUCCESS);
+		case 'c':
+			command = 1;
+			strcpy(com_buf, optarg);
+			break;
 		default:
 			help();
 			exit(2);
 		}
 	}
+
+	printf("\n Welcome!"
+	       "\n Ingenic Tools Software!");
 
 	if ((getuid()) || (getgid())) {
 		fprintf(stderr, "Error - you must be root to run '%s'\n", argv[0]);
@@ -91,17 +104,21 @@ int main(int argc, char **argv)
 	if (parse_configure(&hand, CONFIG_FILE_PATH) < 1)
 		return EXIT_FAILURE;
 
-	char com_buf[256];
-	printf("\n Welcome!");
-	printf("\n Ingenic Tools Software!");
+	if (command) {
+		command_handle(com_buf);
+		printf("\n");
+		goto out;
+	}
 
 	while (1) {
 		printf("\n inflash :> ");
 		if (!command_input(com_buf)) 
 			continue;
-		command_handle(com_buf);
+		if (command_handle(com_buf) == -1 )
+			break;
 	}
 
+out:
 	usb_ingenic_cleanup(&ingenic_dev);
 	return EXIT_SUCCESS;
 }
