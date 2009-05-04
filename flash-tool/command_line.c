@@ -64,7 +64,7 @@ static const char COMMAND[][30]=
 	"run"
 };
 
-int handle_help(void)
+static int handle_help(void)
 {
 	printf("\n Command support in current version:"
 	       "\n help          print this help;"
@@ -91,13 +91,13 @@ int handle_help(void)
 	return 1;
 }
 
-int handle_version(void)
+static int handle_version(void)
 {
 	printf("\n USB Boot Software current version: %s", CURRENT_VERSION);	
 	return 1;
 }
 
-int handle_fconfig(void)
+static int handle_fconfig(void)
 {
 	if (com_argc < 3) {
 		printf("\n Usage:"
@@ -110,7 +110,7 @@ int handle_fconfig(void)
 	return 1;
 }
 
-int command_input(char *buf)
+int command_input(char *buf) 	/* read command from stdin */
 {
 	char *cptr;
 	cptr = fgets(buf, 256, stdin);
@@ -159,7 +159,7 @@ int command_interpret(char * com_buf)
 
 int command_handle(char *buf)
 {
-	int cmd = command_interpret(buf);
+	int cmd = command_interpret(buf); /* get the command index */
 
 	if (!cmd)
 		return -1;

@@ -20,13 +20,8 @@
  */
 
 #include <stdio.h>
-#include <getopt.h>
-#include <unistd.h>
 #include <stdlib.h>
-#include <errno.h>
-#include <fcntl.h>
-#include <sys/types.h>
-#include <sys/stat.h>
+#include <getopt.h>
 #include "usb.h"
 #include "config.h"
 #include "command_line.h"
@@ -104,7 +99,7 @@ int main(int argc, char **argv)
 	if (parse_configure(&hand, CONFIG_FILE_PATH) < 1)
 		return EXIT_FAILURE;
 
-	if (command) {
+	if (command) {		/* direct run command */
 		command_handle(com_buf);
 		printf("\n");
 		goto out;
@@ -122,4 +117,3 @@ out:
 	usb_ingenic_cleanup(&ingenic_dev);
 	return EXIT_SUCCESS;
 }
-

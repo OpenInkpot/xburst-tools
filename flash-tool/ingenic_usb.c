@@ -3,6 +3,7 @@
  *
  * (C) Copyright 2009
  * Author: Marek Lindner <lindner_marek@yahoo.de>
+ * Author: Xiangfu liu <xiangfu.z@gmail.com>
  *
  * This program is free software; you can redistribute it and/or
  * modify it under the terms of the GNU General Public License
@@ -115,11 +116,6 @@ int usb_ingenic_init(struct ingenic_dev *ingenic_dev)
 		fprintf(stderr, "Error - can't open Ingenic device: %s\n", usb_strerror());
 		goto out;
 	}
-
-	/* if (usb_set_configuration(ingenic_dev->usb_handle, 1) < 0) { */
-	/* 	fprintf(stderr, "Error - can't set Ingenic configuration: %s\n", usb_strerror()); */
-	/* 	goto out; */
-	/* } */
 
 	if (get_ingenic_interface(ingenic_dev) < 1) {
 		fprintf(stderr, "Error - can't find Ingenic interface\n");

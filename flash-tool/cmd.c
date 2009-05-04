@@ -212,11 +212,6 @@ int nand_program_check(struct nand_in_t *nand_in,
 		(nand_out->status)[i] = 0; /* set all status to fail */
 #endif
 
-	/* if (handle_Open(nand_in->dev)==-1) { */
-	/* 	printf("\n Can not connect device!"); */
-	/* 	return -1; */
-	/* } needs change*/
-
 	if (usb_get_ingenic_cpu(&ingenic_dev) < 3) {
 		printf("\n Device unboot! Boot it first!");
 		return -1;
@@ -450,11 +445,11 @@ int nand_program_file(struct nand_in_t *nand_in,
 		(nand_out->status)[i] = 1; /* set all status to success! */
 #endif
 	for (k = 0; k < m; k++)	{
-		if (nand_in->option == NO_OOB) {
+		if (nand_in->option == NO_OOB)
 			page_num = transfer_size / hand.nand_ps;
-		} else {
+		else
 			page_num = transfer_size / (hand.nand_ps + hand.nand_os);
-		}
+
 		code_len = transfer_size;
 		fread(code_buf, 1, code_len, fp); /* read code from file to buffer */
 		printf("\n No.%d Programming...",k+1);
