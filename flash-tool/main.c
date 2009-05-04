@@ -86,7 +86,7 @@ int main(int argc, char **argv)
 	}
 
 	if (usb_ingenic_init(&ingenic_dev) < 1)
-		return EXIT_FAILURE;
+	 	return EXIT_FAILURE;
 
 	if (parse_configure(&hand, CONFIG_FILE_PATH) < 1)
 		return EXIT_FAILURE;

@@ -116,10 +116,10 @@ int usb_ingenic_init(struct ingenic_dev *ingenic_dev)
 		goto out;
 	}
 
-	if (usb_set_configuration(ingenic_dev->usb_handle, 1) < 0) {
-		fprintf(stderr, "Error - can't set Ingenic configuration: %s\n", usb_strerror());
-		goto out;
-	}
+	/* if (usb_set_configuration(ingenic_dev->usb_handle, 1) < 0) { */
+	/* 	fprintf(stderr, "Error - can't set Ingenic configuration: %s\n", usb_strerror()); */
+	/* 	goto out; */
+	/* } */
 
 	if (get_ingenic_interface(ingenic_dev) < 1) {
 		fprintf(stderr, "Error - can't find Ingenic interface\n");
@@ -240,6 +240,21 @@ int usb_send_data_to_ingenic(struct ingenic_dev *ingenic_dev)
 	int status;
 	status = usb_bulk_write(ingenic_dev->usb_handle,
 	/* endpoint         */ INGENIC_OUT_ENDPOINT,
+	/* bulk data        */ ingenic_dev->file_buff,
+	/* bulk data length */ ingenic_dev->file_len,
+				USB_TIMEOUT);
+	if (status < ingenic_dev->file_len) {
+		fprintf(stderr, "Error - can't send bulk data to Ingenic CPU: %i\n", status);
+		return -1;
+	}
+	return 1;
+}
+
+int usb_read_data_from_ingenic(struct ingenic_dev *ingenic_dev)
+{
+	int status;
+	status = usb_bulk_read(ingenic_dev->usb_handle,
+	/* endpoint         */ INGENIC_IN_ENDPOINT,
 	/* bulk data        */ ingenic_dev->file_buff,
 	/* bulk data length */ ingenic_dev->file_len,
 				USB_TIMEOUT);

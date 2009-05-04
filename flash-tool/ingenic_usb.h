@@ -24,6 +24,7 @@
 #include <stdint.h>
 
 #define INGENIC_OUT_ENDPOINT	0x01
+#define INGENIC_IN_ENDPOINT	0x81
 
 #define VR_GET_CPU_INFO		0x00
 #define VR_SET_DATA_ADDRESS	0x01
@@ -57,7 +58,7 @@ struct ingenic_dev {
 	uint8_t interface;
 	char cpu_info_buff[9];
 	char *file_buff;
-	int file_len;
+	unsigned int file_len;
 };
 
 int usb_ingenic_init(struct ingenic_dev *ingenic_dev);
@@ -70,6 +71,7 @@ int usb_send_data_to_ingenic(struct ingenic_dev *ingenic_dev);
 int usb_send_data_length_to_ingenic(struct ingenic_dev *ingenic_dev,
 				    int len);
 int usb_ingenic_nand_ops(struct ingenic_dev *ingenic_dev, int ops);
+int usb_read_data_from_ingenic(struct ingenic_dev *ingenic_dev);
 
 #endif	/* __INGENIC_USB_H__ */
 
