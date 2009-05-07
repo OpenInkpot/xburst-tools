@@ -110,16 +110,6 @@ static int handle_fconfig(void)
 	return 1;
 }
 
-int command_input(char *buf) 	/* read command from stdin */
-{
-	char *cptr;
-	cptr = fgets(buf, 256, stdin);
-
-        if (cptr != NULL) 
-		return 1;
-	return 0;
-}
-
 int command_interpret(char * com_buf)
 {
 	char *buf = com_buf;

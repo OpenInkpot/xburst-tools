@@ -193,7 +193,8 @@ int nand_markbad(struct nand_in_t *nand_in)
 }
 
 int nand_program_check(struct nand_in_t *nand_in,
-		       struct nand_out_t *nand_out)
+		       struct nand_out_t *nand_out,
+		       unsigned int *start_page)
 {
 	unsigned int i,page_num,cur_page;
 	unsigned short temp;
@@ -329,7 +330,8 @@ int nand_program_check(struct nand_in_t *nand_in,
 
 	}
 	/* handle_Close(); */
-	return cur_page;
+	*start_page = cur_page;
+	return 0;
 }
 
 int nand_erase(struct nand_in_t *nand_in)
@@ -367,7 +369,6 @@ int nand_erase(struct nand_in_t *nand_in)
 		ingenic_dev.file_buff = ret;
 		ingenic_dev.file_len = 8;
 		usb_read_data_from_ingenic(&ingenic_dev);
-		/* ReadFile(hDevice, ret, 8, &nRead, NULL); need to change*/
 		printf(" Finish!");
 	}
 	/* handle_Close(); need to change */
@@ -455,7 +456,9 @@ int nand_program_file(struct nand_in_t *nand_in,
 		printf("\n No.%d Programming...",k+1);
 		nand_in->length = code_len; /* code length,not page number! */
 		nand_in->buf = code_buf;
-		start_page = nand_program_check(nand_in, &n_out);
+		if ( nand_program_check(nand_in, &n_out, &start_page) == -1)
+			return -1;
+
 		if ( start_page - nand_in->start > hand.nand_ppb ) 
 			printf("\n Skip a old bad block !");
 		nand_in->start = start_page;
@@ -478,8 +481,11 @@ int nand_program_file(struct nand_in_t *nand_in,
 		nand_in->length = j;
 		nand_in->buf = code_buf;
 		printf("\n No.%d Programming...",k+1);
-		start_page = nand_program_check(nand_in, &n_out);
-		if ( start_page - nand_in->start > hand.nand_ppb ) 
+
+		if (nand_program_check(nand_in, &n_out, &start_page) == -1) 
+			return -1;
+
+		if (start_page - nand_in->start > hand.nand_ppb)
 			printf(" Skip a old bad block !");
 #if 0
 		for (i=0; i < nand_in->max_chip; i++) {

@@ -58,8 +58,9 @@ int main(int argc, char **argv)
 	       "This program is Free Software and has ABSOLUTELY NO WARRANTY\n\n");
 
 	int command = 0;
+	char *cptr;
 	char com_buf[256];
-	memset(com_buf, '\n', 256);
+	memset(com_buf, 0, 256);
 
 	while (1) {
 		int c, option_index = 0;
@@ -107,8 +108,10 @@ int main(int argc, char **argv)
 
 	while (1) {
 		printf("\n inflash :> ");
-		if (!command_input(com_buf)) 
+		cptr = fgets(com_buf, 256, stdin);
+		if (cptr == NULL) 
 			continue;
+
 		if (command_handle(com_buf) == -1 )
 			break;
 	}

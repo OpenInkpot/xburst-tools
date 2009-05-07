@@ -140,6 +140,7 @@ int usb_get_ingenic_cpu(struct ingenic_dev *ingenic_dev)
 	memset(&ingenic_dev->cpu_info_buff, 0, 
 	       ARRAY_SIZE(ingenic_dev->cpu_info_buff));
 
+	sleep(1);
 	status = usb_control_msg(ingenic_dev->usb_handle,
           /* bmRequestType */ USB_ENDPOINT_IN | USB_TYPE_VENDOR | USB_RECIP_DEVICE,
           /* bRequest      */ VR_GET_CPU_INFO,
@@ -275,7 +276,6 @@ int usb_ingenic_upload(struct ingenic_dev *ingenic_dev, int stage)
 	usb_send_data_to_ingenic(ingenic_dev);
 
 	if (stage == 2) {
-		sleep(1);
 		usb_get_ingenic_cpu(ingenic_dev);
 		usb_ingenic_flush_cache(ingenic_dev);
 	}
@@ -295,7 +295,6 @@ int usb_ingenic_upload(struct ingenic_dev *ingenic_dev, int stage)
 		goto out;
 	}
 
-	sleep(1);
 	usb_get_ingenic_cpu(ingenic_dev);
 	status = 1;
 
