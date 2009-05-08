@@ -199,8 +199,8 @@ int usb_send_data_length_to_ingenic(struct ingenic_dev *ingenic_dev, int len)
 	status = usb_control_msg(ingenic_dev->usb_handle,
           /* bmRequestType */ USB_ENDPOINT_OUT | USB_TYPE_VENDOR | USB_RECIP_DEVICE,
           /* bRequest      */ VR_SET_DATA_LENGTH,
-          /* wValue        */ 0,
-          /* wIndex        */ len,
+          /* wValue        */ STAGE_ADDR_MSB(len),
+          /* wIndex        */ STAGE_ADDR_LSB(len),
           /* Data          */ 0,
           /* wLength       */ 0,
                               USB_TIMEOUT);
@@ -251,7 +251,7 @@ int usb_read_data_from_ingenic(struct ingenic_dev *ingenic_dev)
 {
 	int status;
 	status = usb_bulk_read(ingenic_dev->usb_handle,
-	/* endpoint         */ INGENIC_IN_ENDPOINT,
+	/* endpoint         */ INGENIC_IN_ENDPOINT | USB_TYPE_VENDOR | USB_RECIP_DEVICE,
 	/* bulk data        */ ingenic_dev->file_buff,
 	/* bulk data length */ ingenic_dev->file_len,
 				USB_TIMEOUT);

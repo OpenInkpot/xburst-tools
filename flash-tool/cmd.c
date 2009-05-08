@@ -362,10 +362,16 @@ int nand_erase(struct nand_in_t *nand_in)
 		       nand_in->dev, i);
 
 		usb_send_data_address_to_ingenic(&ingenic_dev, start_blk);
-		ingenic_dev.file_len = blk_num;
-		usb_send_data_to_ingenic(&ingenic_dev);
+		usb_send_data_length_to_ingenic(&ingenic_dev, blk_num);
+
 		unsigned short temp = ((i << 4) & 0xff0) + NAND_ERASE;
 		usb_ingenic_nand_ops(&ingenic_dev, temp);
+
+		if (usb_get_ingenic_cpu(&ingenic_dev) < 3) {
+			printf("\n---debug----------------");
+			return -1;
+		}
+
 		ingenic_dev.file_buff = ret;
 		ingenic_dev.file_len = 8;
 		usb_read_data_from_ingenic(&ingenic_dev);
@@ -456,10 +462,10 @@ int nand_program_file(struct nand_in_t *nand_in,
 		printf("\n No.%d Programming...",k+1);
 		nand_in->length = code_len; /* code length,not page number! */
 		nand_in->buf = code_buf;
-		if ( nand_program_check(nand_in, &n_out, &start_page) == -1)
+		if (nand_program_check(nand_in, &n_out, &start_page) == -1)
 			return -1;
 
-		if ( start_page - nand_in->start > hand.nand_ppb ) 
+		if (start_page - nand_in->start > hand.nand_ppb)
 			printf("\n Skip a old bad block !");
 		nand_in->start = start_page;
 #if 0
