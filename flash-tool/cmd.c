@@ -106,9 +106,25 @@ out:
 	return res;
 }
 
-int boot(char *stage1_path, char *stage2_path){
+int init_cfg()
+{
+	ingenic_dev.file_buff = &hand;
+	ingenic_dev.file_len = sizeof(struct hand_t);
+	if (usb_send_data_to_ingenic(&ingenic_dev) != 1)
+		return -1;
 
-	int res = 0;
+	if (usb_ingenic_configration(&ingenic_dev, DS_hand) != 1)
+		return -1;
+
+	ingenic_dev.file_buff = ret;
+	ingenic_dev.file_len = 8;
+	if (usb_read_data_from_ingenic(&ingenic_dev) != 1)
+		return -1;
+
+	return 1;
+}
+
+int boot(char *stage1_path, char *stage2_path){
 	int status;
 
 	status = usb_get_ingenic_cpu(&ingenic_dev);
@@ -130,12 +146,12 @@ int boot(char *stage1_path, char *stage2_path){
 		hand.fw_args.cpu_id = 0x4750;
 		break;
 	default:
-		goto out;
+		return 1;
 	}
 
 	if (status) {
 		printf("Booted");
-		goto out;
+		return 1;
 	} else {
 		printf("Unboot");
 		printf("\n Now booting device");
@@ -143,37 +159,54 @@ int boot(char *stage1_path, char *stage2_path){
 		/* now we upload the usb boot stage1 */
 		printf("\n Upload usb boot stage1");
 		if (load_file(&ingenic_dev, stage1_path) < 1)
-			goto out;
+			return -1;
 
-		if (usb_ingenic_upload(&ingenic_dev, 1) < 1)
-			goto cleanup;
+		if (usb_ingenic_upload(&ingenic_dev, 1) < 1) {
+			if (ingenic_dev.file_buff)
+				free(ingenic_dev.file_buff);
+			return -1;
+		}
 
 		/* now we upload the usb boot stage2 */
 		sleep(1);
 		printf("\n Upload usb boot stage2");
-		if (load_file(&ingenic_dev, stage2_path) < 1)
-			goto cleanup;
+		if (load_file(&ingenic_dev, stage2_path) < 1) {
+			if (ingenic_dev.file_buff)
+				free(ingenic_dev.file_buff);
+			return -1;
+		}
 
-		if (usb_ingenic_upload(&ingenic_dev, 2) < 1)
-			goto cleanup;
+		if (usb_ingenic_upload(&ingenic_dev, 2) < 1) {
+			if (ingenic_dev.file_buff)
+				free(ingenic_dev.file_buff);
+			return -1;
+		}
 	}
+	sleep(1);
+	printf("\n Now configure Ingenic device");
+	(init_cfg() == 1) ?
+		printf("\n Configure success!"):
+		printf("\n Configure fail!");
 
-	res = 1;
-
-cleanup:
-	if (ingenic_dev.file_buff)
-		free(ingenic_dev.file_buff);
-out:
-	return res;
+	return 1;
 }
 
 /* nand function  */
+int error_check(unsigned char *org,unsigned char * obj,unsigned int size)
+{
+	unsigned int i;
+	for (i = 0; i < size; i++) {
+		if (org[i] != obj[i]) {
+			printf("\n Check Error! %d=%x:%x ", i, org[i], obj[i]);
+			return 0;
+		}
+	}
+	/* printf("\n Check pass"); */
+	return 1;
+}
+
 int nand_markbad(struct nand_in_t *nand_in)
 {
-	/* if (Handle_Open(nand_in->dev)==-1) { */
-	/* 	printf("\n Can not connect device!"); */
-	/* 	return -1; */
-	/* } */
 	if (usb_get_ingenic_cpu(&ingenic_dev) < 3) {
 		printf("\n Device unboot! Boot it first!");
 		return -1;
@@ -206,9 +239,7 @@ int nand_program_check(struct nand_in_t *nand_in,
 	}
 
 #if 0
-	/* nand_out->status = (unsigned char *)malloc(nand_in->max_chip * sizeof(unsigned char)); */
 	nand_out->status = status_buf;
-
 	for (i = 0; i < nand_in->max_chip; i++)
 		(nand_out->status)[i] = 0; /* set all status to fail */
 #endif
@@ -222,10 +253,6 @@ int nand_program_check(struct nand_in_t *nand_in,
 	usb_send_data_to_ingenic(&ingenic_dev);
 	/* WriteFile(hDevice, nand_in->buf, nand_in->length , &nWritten, NULL); */
 	/* dump_data(nand_in->buf, 100); */
-
-	/* WriteFile(hDevice, nand_in->buf, nand_in->length * hand.nand_ps, &nWritten, NULL); */
-	/* Send data to be program */
-	/* Only send once! */
 	for (i = 0; i < nand_in->max_chip; i++) {
 		if ((nand_in->cs_map)[i]==0) continue;
 			/* page_num = nand_in->length / hand.nand_ps +1; */
@@ -367,11 +394,6 @@ int nand_erase(struct nand_in_t *nand_in)
 		unsigned short temp = ((i << 4) & 0xff0) + NAND_ERASE;
 		usb_ingenic_nand_ops(&ingenic_dev, temp);
 
-		if (usb_get_ingenic_cpu(&ingenic_dev) < 3) {
-			printf("\n---debug----------------");
-			return -1;
-		}
-
 		ingenic_dev.file_buff = ret;
 		ingenic_dev.file_len = 8;
 		usb_read_data_from_ingenic(&ingenic_dev);
@@ -416,8 +438,8 @@ int nand_program_file(struct nand_in_t *nand_in,
 	}
 
 	printf("\n Programing No.%d device...",nand_in->dev);
-	fseek(fp,0,SEEK_END);
-	flen=ftell(fp);
+	fseek(fp, 0, SEEK_END);
+	flen = ftell(fp);
 	n_in.start = nand_in->start / hand.nand_ppb; 
 	if (nand_in->option == NO_OOB) {
 		if (flen % (hand.nand_ppb * hand.nand_ps) == 0) 
@@ -442,7 +464,7 @@ int nand_program_file(struct nand_in_t *nand_in,
 		transfer_size = (hand.nand_ppb * (hand.nand_ps + hand.nand_os));
 	m = flen / transfer_size;
 	j = flen % transfer_size;
-	fseek(fp,0,SEEK_SET);	/* file point return to begin */
+	fseek(fp, 0, SEEK_SET);	/* file point return to begin */
 	offset = 0; 
 	printf("\n Total size to send in byte is :%d", flen);
 	printf("\n Image type : %s", IMAGE_TYPE[nand_in->option]);
@@ -518,7 +540,7 @@ int nprog(void)
 		"\n \t-o:\twith oob no ecc"
 		"\n \t-e:\twith oob and ecc";
 	nand_in.buf = code_buf;
-	nand_in.check = NULL;
+	nand_in.check = error_check;
 	nand_in.dev = 0;
 	nand_in.cs_map = cs;
 	nand_in.max_chip =16;

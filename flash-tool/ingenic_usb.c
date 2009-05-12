@@ -205,10 +205,12 @@ int usb_send_data_length_to_ingenic(struct ingenic_dev *ingenic_dev, int len)
           /* wLength       */ 0,
                               USB_TIMEOUT);
 
-	if (status != 0)
+	if (status != 0) {
 		fprintf(stderr, "Error - can't set data length on Ingenic device: %i\n", status);
+		return -1;
+	}
 
-	return status;
+	return 1;
 }
 
 int usb_send_data_address_to_ingenic(struct ingenic_dev *ingenic_dev, unsigned int stage_addr)
@@ -229,7 +231,7 @@ int usb_send_data_address_to_ingenic(struct ingenic_dev *ingenic_dev, unsigned i
 		return -1;
 	}
 
-	return status;
+	return 1;
 }
 
 int usb_send_data_to_ingenic(struct ingenic_dev *ingenic_dev)
@@ -259,6 +261,7 @@ int usb_read_data_from_ingenic(struct ingenic_dev *ingenic_dev)
 		fprintf(stderr, "Error - can't send bulk data to Ingenic CPU: %i\n", status);
 		return -1;
 	}
+
 	return 1;
 }
 
@@ -328,5 +331,25 @@ int usb_ingenic_nand_ops(struct ingenic_dev *ingenic_dev, int ops)
 		return -1;
 	}
 
-	return status;
+	return 1;
+}
+
+int usb_ingenic_configration(struct ingenic_dev *ingenic_dev, int ops)
+{
+	int status;
+	status = usb_control_msg(ingenic_dev->usb_handle,
+          /* bmRequestType */ USB_ENDPOINT_OUT | USB_TYPE_VENDOR | USB_RECIP_DEVICE,
+          /* bRequest      */ VR_CONFIGRATION,
+          /* wValue        */ ops,
+          /* wIndex        */ 0,
+          /* Data          */ 0,
+          /* wLength       */ 0,
+                              USB_TIMEOUT);
+
+	if (status != 0) {
+		fprintf(stderr, "Error - can't init Ingenic configration: %i\n", status);
+		return -1;
+	}
+
+	return 1;
 }
