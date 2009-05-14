@@ -71,7 +71,7 @@ int usb_send_data_to_ingenic(struct ingenic_dev *ingenic_dev);
 int usb_send_data_length_to_ingenic(struct ingenic_dev *ingenic_dev,
 				    int len);
 int usb_ingenic_nand_ops(struct ingenic_dev *ingenic_dev, int ops);
-int usb_read_data_from_ingenic(struct ingenic_dev *ingenic_dev);
+int usb_read_data_from_ingenic(struct ingenic_dev *ingenic_dev, char *buff, int len);
 
 #endif	/* __INGENIC_USB_H__ */
 

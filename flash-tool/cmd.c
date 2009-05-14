@@ -116,9 +116,7 @@ int init_cfg()
 	if (usb_ingenic_configration(&ingenic_dev, DS_hand) != 1)
 		return -1;
 
-	ingenic_dev.file_buff = ret;
-	ingenic_dev.file_len = 8;
-	if (usb_read_data_from_ingenic(&ingenic_dev) != 1)
+	if (usb_read_data_from_ingenic(&ingenic_dev, ret, 8) != 1)
 		return -1;
 
 	return 1;
@@ -197,11 +195,10 @@ int error_check(unsigned char *org,unsigned char * obj,unsigned int size)
 	unsigned int i;
 	for (i = 0; i < size; i++) {
 		if (org[i] != obj[i]) {
-			printf("\n Check Error! %d=%x:%x ", i, org[i], obj[i]);
+			printf("\n Check Error! %d = %x : %x ", i, org[i], obj[i]);
 			return 0;
 		}
 	}
-	/* printf("\n Check pass"); */
 	return 1;
 }
 
@@ -211,17 +208,14 @@ int nand_markbad(struct nand_in_t *nand_in)
 		printf("\n Device unboot! Boot it first!");
 		return -1;
 	}
-	/* printf("mark bad block : %d \n",nand_in->start); */
+	printf("\n mark bad block : %d ",nand_in->start);
 	usb_send_data_address_to_ingenic(&ingenic_dev, nand_in->start);
 	usb_ingenic_nand_ops(&ingenic_dev, NAND_MARK_BAD);
-	ingenic_dev.file_buff = ret;
-	ingenic_dev.file_len = 8;
-	usb_read_data_from_ingenic(&ingenic_dev);
+	usb_read_data_from_ingenic(&ingenic_dev, ret, 8);
 	printf("\n Mark bad block at %d ",((ret[3] << 24) | 
 					   (ret[2] << 16) | 
-					   (ret[1] << 8) | 
+					   (ret[1] << 8)  | 
 					   (ret[0] << 0)) / hand.nand_ppb);
-	/* Handle_Close(); */
 	return 0;
 }
 
@@ -251,83 +245,51 @@ int nand_program_check(struct nand_in_t *nand_in,
 	ingenic_dev.file_buff = nand_in->buf;
 	ingenic_dev.file_len = nand_in->length;
 	usb_send_data_to_ingenic(&ingenic_dev);
-	/* WriteFile(hDevice, nand_in->buf, nand_in->length , &nWritten, NULL); */
 	/* dump_data(nand_in->buf, 100); */
 	for (i = 0; i < nand_in->max_chip; i++) {
 		if ((nand_in->cs_map)[i]==0) continue;
-			/* page_num = nand_in->length / hand.nand_ps +1; */
-			if (nand_in->option == NO_OOB) {
-				page_num = nand_in->length / hand.nand_ps;
-				if ((nand_in->length % hand.nand_ps) !=0) 
-					page_num++;
-				/*temp = ((i<<4) & 0xff0) + NAND_PROGRAM; */
-			} else {
-				page_num = nand_in->length / (hand.nand_ps + hand.nand_os);
-				if ((nand_in->length% (hand.nand_ps + hand.nand_os)) !=0) 
-					page_num++;
-				/* temp = ((i<<4) & 0xff0) + NAND_PROGRAM_OOB; */
-			}
-			temp = ((nand_in->option<<12) & 0xf000)  + ((i<<4) & 0xff0) + NAND_PROGRAM;	
-			usb_send_data_address_to_ingenic(&ingenic_dev, nand_in->start);
-			usb_send_data_length_to_ingenic(&ingenic_dev, page_num);
-			usb_ingenic_nand_ops(&ingenic_dev, temp);
-			ingenic_dev.file_buff = ret;
-			ingenic_dev.file_len = 8;
-			usb_read_data_from_ingenic(&ingenic_dev);
-			/* ReadFile(hDevice, ret, 8, &nRead, NULL); needs change */
-			printf(" Finish! ");
-		switch (nand_in->option)
-		{
+		/* page_num = nand_in->length / hand.nand_ps +1; */
+		if (nand_in->option == NO_OOB) {
+			page_num = nand_in->length / hand.nand_ps;
+			if ((nand_in->length % hand.nand_ps) !=0) 
+				page_num++;
+			/*temp = ((i<<4) & 0xff0) + NAND_PROGRAM; */
+		} else {
+			page_num = nand_in->length / (hand.nand_ps + hand.nand_os);
+			if ((nand_in->length% (hand.nand_ps + hand.nand_os)) !=0) 
+				page_num++;
+			/* temp = ((i<<4) & 0xff0) + NAND_PROGRAM_OOB; */
+		}
+		temp = ((nand_in->option << 12) & 0xf000)  + ((i<<4) & 0xff0) + NAND_PROGRAM;	
+		usb_send_data_address_to_ingenic(&ingenic_dev, nand_in->start);
+		usb_send_data_length_to_ingenic(&ingenic_dev, page_num);
+		usb_ingenic_nand_ops(&ingenic_dev, temp);
+		usb_read_data_from_ingenic(&ingenic_dev, ret, 8);
+		printf(" Finish! ");
+
+		usb_send_data_address_to_ingenic(&ingenic_dev, nand_in->start);
+		/* Read back to check! */
+		usb_send_data_length_to_ingenic(&ingenic_dev, page_num);
+
+		switch (nand_in->option) {
 		case OOB_ECC:
-			usb_send_data_address_to_ingenic(&ingenic_dev, nand_in->start);
-			/* Read back to check! */
-			usb_send_data_length_to_ingenic(&ingenic_dev, page_num);
-			temp = ((OOB_ECC<<12) & 0xf000) +((i<<4) & 0xff0) + NAND_READ;
-			usb_ingenic_nand_ops(&ingenic_dev, temp);
-			printf("Checking...");			
-			ingenic_dev.file_buff = check_buf;
-			ingenic_dev.file_len = page_num * (hand.nand_ps + hand.nand_os);
-			usb_read_data_from_ingenic(&ingenic_dev);
-			ingenic_dev.file_buff = ret;
-			ingenic_dev.file_len = 8;
-			usb_read_data_from_ingenic(&ingenic_dev);
-			/* ReadFile(hDevice, check_buf,  */
-			/* 	 page_num * (hand.nand_ps + hand.nand_os), &nRead, NULL); */
-			/* ReadFile(hDevice, ret, 8, &nRead, NULL); need change */
+			temp = ((OOB_ECC << 12) & 0xf000) +((i << 4) & 0xff0) + NAND_READ;
 			break;
-		case OOB_NO_ECC:/* do not support data verify */
-			usb_send_data_address_to_ingenic(&ingenic_dev, nand_in->start);
-			usb_send_data_length_to_ingenic(&ingenic_dev, page_num);
+		case OOB_NO_ECC:	/* do not support data verify */
 			temp = ((OOB_NO_ECC << 12) & 0xf000) + ((i << 4) & 0xff0) + NAND_READ;
-			usb_ingenic_nand_ops(&ingenic_dev, temp);
-			printf("Checking...");			
-			ingenic_dev.file_buff = check_buf;
-			ingenic_dev.file_len = page_num * (hand.nand_ps + hand.nand_os);
-			usb_read_data_from_ingenic(&ingenic_dev);
-			ingenic_dev.file_buff = ret;
-			ingenic_dev.file_len = 8;
-			usb_read_data_from_ingenic(&ingenic_dev);
-			/* ReadFile(hDevice, check_buf, page_num * (hand.nand_ps + hand.nand_os), &nRead, NULL); */
-			/* ReadFile(hDevice, ret, 8, &nRead, NULL); needs change*/
 			break;
 		case NO_OOB:
-			usb_send_data_address_to_ingenic(&ingenic_dev, nand_in->start);
-			usb_send_data_length_to_ingenic(&ingenic_dev, page_num);
 			temp = ((NO_OOB << 12) & 0xf000) + ((i << 4) & 0xff0) + NAND_READ;
-			usb_ingenic_nand_ops(&ingenic_dev, temp);
-			printf("Checking...");
-			ingenic_dev.file_buff = check_buf;
-			ingenic_dev.file_len = page_num * (hand.nand_ps + hand.nand_os);
-			usb_read_data_from_ingenic(&ingenic_dev);
-			ingenic_dev.file_buff = ret;
-			ingenic_dev.file_len = 8;
-			usb_read_data_from_ingenic(&ingenic_dev);
-			/* ReadFile(hDevice, check_buf, page_num * hand.nand_ps , &nRead, NULL); */
-			/* ReadFile(hDevice, ret, 8, &nRead, NULL); need change*/
 			break;
-		default:;
+		default:
+			;
 		}
-#if 1
+		usb_ingenic_nand_ops(&ingenic_dev, temp);
+		printf("Checking...");			
+		usb_read_data_from_ingenic(&ingenic_dev, check_buf, 
+					   page_num * (hand.nand_ps + hand.nand_os));
+		usb_read_data_from_ingenic(&ingenic_dev, ret, 8);
+
 		if (nand_in->start < 1 && hand.nand_ps == 4096 && hand.fw_args.cpu_id == 0x4740) {
 			/* (nand_out->status)[i] = 1; */
 			printf(" no check!");
@@ -335,28 +297,30 @@ int nand_program_check(struct nand_in_t *nand_in,
 			printf(" End at %d ",cur_page);
 			continue;
 		}
-#endif
-			if (nand_in->check(nand_in->buf, check_buf, nand_in->length)) {
-				/* (nand_out->status)[i] = 1; */
-				printf(" pass!");
-				cur_page = (ret[3]<<24)|(ret[2]<<16)|(ret[1]<<8)|(ret[0]<<0);
-				printf(" End at %d ",cur_page);
-			} else {
-				/* (nand_out->status)[i] = 0; */
-				printf(" fail!");
-				struct nand_in_t bad;
-				cur_page = (ret[3] << 24) | 
-					(ret[2] << 16) |
-					(ret[1] << 8) |
-					(ret[0] << 0);
-				printf(" End at %d ",cur_page);
-				bad.start = (cur_page - 1) / hand.nand_ppb;
-				if (cur_page % hand.nand_ppb==0)
-					nand_markbad(&bad);
-			}
+
+		if (nand_in->check(nand_in->buf, check_buf, nand_in->length)) {
+			/* (nand_out->status)[i] = 1; */
+			printf(" pass!");
+			cur_page = (ret[3] << 24) | 
+				(ret[2] << 16) |
+				(ret[1] << 8) |
+				(ret[0] << 0);
+			printf(" End at %d ",cur_page);
+		} else {
+			/* (nand_out->status)[i] = 0; */
+			printf(" fail!");
+			struct nand_in_t bad;
+			cur_page = (ret[3] << 24) | 
+				(ret[2] << 16) |
+				(ret[1] << 8) |
+				(ret[0] << 0);
+			printf(" End at %d ",cur_page);
+			bad.start = (cur_page - 1) / hand.nand_ppb;
+			if (cur_page % hand.nand_ppb == 0)
+				nand_markbad(&bad);
+		}
 
 	}
-	/* handle_Close(); */
 	*start_page = cur_page;
 	return 0;
 }
@@ -394,9 +358,7 @@ int nand_erase(struct nand_in_t *nand_in)
 		unsigned short temp = ((i << 4) & 0xff0) + NAND_ERASE;
 		usb_ingenic_nand_ops(&ingenic_dev, temp);
 
-		ingenic_dev.file_buff = ret;
-		ingenic_dev.file_len = 8;
-		usb_read_data_from_ingenic(&ingenic_dev);
+		usb_read_data_from_ingenic(&ingenic_dev, ret, 8);
 		printf(" Finish!");
 	}
 	/* handle_Close(); need to change */
@@ -425,7 +387,7 @@ int nand_program_file(struct nand_in_t *nand_in,
 	struct nand_in_t n_in;
 	struct nand_out_t n_out;
 
-#if 0
+#ifdef CONFIG_NAND_OUT
 	/* nand_out->status = (unsigned char *)malloc(nand_in->max_chip * sizeof(unsigned char)); */
 	nand_out->status = status_buf;
 	for (i=0; i<nand_in->max_chip; i++)
@@ -452,7 +414,7 @@ int nand_program_file(struct nand_in_t *nand_in,
 		else
 			n_in.length = flen / ((hand.nand_ps + hand.nand_os) * hand.nand_ppb) + 1;
 	}
-	/* printf(" length %d flen %d \n",n_in.length,flen); */
+	/* printf("\n length %d flen %d ", n_in.length, flen); */
 	n_in.cs_map = nand_in->cs_map;
 	n_in.dev = nand_in->dev;
 	n_in.max_chip = nand_in->max_chip;
@@ -469,7 +431,8 @@ int nand_program_file(struct nand_in_t *nand_in,
 	printf("\n Total size to send in byte is :%d", flen);
 	printf("\n Image type : %s", IMAGE_TYPE[nand_in->option]);
 	printf("\n It will cause %d times buffer transfer.", m + 1);
-#if 0
+
+#ifdef CONFIG_NAND_OUT
 	for (i = 0; i < nand_in->max_chip; i++)
 		(nand_out->status)[i] = 1; /* set all status to success! */
 #endif
@@ -490,7 +453,8 @@ int nand_program_file(struct nand_in_t *nand_in,
 		if (start_page - nand_in->start > hand.nand_ppb)
 			printf("\n Skip a old bad block !");
 		nand_in->start = start_page;
-#if 0
+
+#ifdef CONFIG_NAND_OUT
 		for (i = 0; i < nand_in->max_chip; i++) {
 			(nand_out->status)[i] = (nand_out->status)[i] * (n_out.status)[i];
 		}
@@ -515,7 +479,8 @@ int nand_program_file(struct nand_in_t *nand_in,
 
 		if (start_page - nand_in->start > hand.nand_ppb)
 			printf(" Skip a old bad block !");
-#if 0
+
+#ifdef CONFIG_NAND_OUT
 		for (i=0; i < nand_in->max_chip; i++) {
 			(nand_out->status)[i] = (nand_out->status)[i] * (n_out.status)[i];
 		}

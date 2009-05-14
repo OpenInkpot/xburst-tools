@@ -58,7 +58,9 @@ static int get_ingenic_interface(struct ingenic_dev *ingenic_dev)
 	struct usb_interface *usb_if;
 	int config_index, if_index, alt_index;
 
-	for (config_index = 0; config_index < ingenic_dev->usb_dev->descriptor.bNumConfigurations; config_index++) {
+	for (config_index = 0; 
+	     config_index < ingenic_dev->usb_dev->descriptor.bNumConfigurations; 
+	     config_index++) {
 		usb_config_desc = &ingenic_dev->usb_dev->config[config_index];
 
 		if (!usb_config_desc)
@@ -246,19 +248,20 @@ int usb_send_data_to_ingenic(struct ingenic_dev *ingenic_dev)
 		fprintf(stderr, "Error - can't send bulk data to Ingenic CPU: %i\n", status);
 		return -1;
 	}
+
 	return 1;
 }
 
-int usb_read_data_from_ingenic(struct ingenic_dev *ingenic_dev)
+int usb_read_data_from_ingenic(struct ingenic_dev *ingenic_dev, char *buff, int len)
 {
 	int status;
 	status = usb_bulk_read(ingenic_dev->usb_handle,
 	/* endpoint         */ INGENIC_IN_ENDPOINT | USB_TYPE_VENDOR | USB_RECIP_DEVICE,
-	/* bulk data        */ ingenic_dev->file_buff,
-	/* bulk data length */ ingenic_dev->file_len,
+	/* bulk data        */ buff,
+	/* bulk data length */ len,
 				USB_TIMEOUT);
-	if (status < ingenic_dev->file_len) {
-		fprintf(stderr, "Error - can't send bulk data to Ingenic CPU: %i\n", status);
+	if (status < len) {
+		fprintf(stderr, "Error - can't read bulk data from Ingenic CPU: %i\n", status);
 		return -1;
 	}
 
@@ -272,6 +275,7 @@ int usb_ingenic_upload(struct ingenic_dev *ingenic_dev, int stage)
 	unsigned int stage2_addr;
 	stage2_addr = total_size + 0x80000000;
 	stage2_addr -= CODE_SIZE;
+
 	int stage_addr = (stage == 1 ? 0x80002000 : stage2_addr);
 
 	usb_send_data_address_to_ingenic(ingenic_dev, stage_addr);
@@ -294,15 +298,15 @@ int usb_ingenic_upload(struct ingenic_dev *ingenic_dev, int stage)
                               USB_TIMEOUT);
 
 	if (status != 0) {
-		fprintf(stderr, "Error - can't start the uploaded binary on the Ingenic device: %i\n", status);
-		goto out;
+		fprintf(stderr, 
+			"Error - can't start the uploaded binary on the Ingenic device: %i\n", 
+			status);
+		return status;
 	}
 
 	usb_get_ingenic_cpu(ingenic_dev);
-	status = 1;
 
-out:
-	return status;
+	return 1;
 }
 
 void usb_ingenic_cleanup(struct ingenic_dev *ingenic_dev)
