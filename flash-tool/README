@@ -1,4 +1,4 @@
-inflash tools: flash image(linke u-Boot, kernel) to PI.
+inflash tools: flash image(like: u-Boot, kernel) to PI.
 
 to compile this program you need:
 	On Debian and Ubuntu, you'll need libusb-dev: sudo apt-get install libusb-dev  libconfuse-dev
