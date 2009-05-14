@@ -155,8 +155,11 @@ int command_handle(char *buf)
 		return -1;
 
 	switch (cmd) {
+	case 6:
+		nand_query();
+		break;
 	case 11:
-		nprog();
+		nand_prog();
 		break;
 	case 12:
 		handle_help();

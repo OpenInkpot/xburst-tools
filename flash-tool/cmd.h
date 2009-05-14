@@ -27,6 +27,7 @@
 #define MAX_COMMAND_LENGTH	100
 
 int boot(char *stage1_path, char *stage2_path);
-int nprog(void);
+int nand_prog(void);
+int nand_query(void);
 
 #endif  /* __CMD_H__ */

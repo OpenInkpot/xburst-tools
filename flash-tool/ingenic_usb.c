@@ -37,7 +37,8 @@ static int get_ingenic_device(struct ingenic_dev *ingenic_dev)
 	usb_busses = usb_get_busses();
 
 	for (usb_bus = usb_busses; usb_bus != NULL; usb_bus = usb_bus->next) {
-		for (usb_dev = usb_bus->devices; usb_dev != NULL; usb_dev = usb_dev->next) {
+		for (usb_dev = usb_bus->devices; usb_dev != NULL; 
+		     usb_dev = usb_dev->next) {
 
 			if ((usb_dev->descriptor.idVendor == VENDOR_ID) &&
 				(usb_dev->descriptor.idProduct == PRODUCT_ID)) {
@@ -66,13 +67,15 @@ static int get_ingenic_interface(struct ingenic_dev *ingenic_dev)
 		if (!usb_config_desc)
 			return 0;
 
-		for (if_index = 0; if_index < usb_config_desc->bNumInterfaces; if_index++) {
+		for (if_index = 0; if_index < usb_config_desc->bNumInterfaces; 
+		     if_index++) {
 			usb_if = &usb_config_desc->interface[if_index];
 
 			if (!usb_if)
 				return 0;
 
-			for (alt_index = 0; alt_index < usb_if->num_altsetting; alt_index++) {
+			for (alt_index = 0; alt_index < usb_if->num_altsetting;
+			     alt_index++) {
 				usb_if_desc = &usb_if->altsetting[alt_index];
 
 				if (!usb_if_desc)
@@ -80,7 +83,8 @@ static int get_ingenic_interface(struct ingenic_dev *ingenic_dev)
 
 				if ((usb_if_desc->bInterfaceClass == 0xff) &&
 					(usb_if_desc->bInterfaceSubClass == 0)) {
-					ingenic_dev->interface = usb_if_desc->bInterfaceNumber;
+					ingenic_dev->interface = 
+						usb_if_desc->bInterfaceNumber;
 					return 1;
 				}
 			}
@@ -109,13 +113,15 @@ int usb_ingenic_init(struct ingenic_dev *ingenic_dev)
 	}
 
 	if (num_ingenic > 1) {
-		fprintf(stderr, "Error - too many Ingenic devices found: %i\n", num_ingenic);
+		fprintf(stderr, "Error - too many Ingenic devices found: %i\n",
+			num_ingenic);
 		goto out;
 	}
 
 	ingenic_dev->usb_handle = usb_open(ingenic_dev->usb_dev);
 	if (!ingenic_dev->usb_handle) {
-		fprintf(stderr, "Error - can't open Ingenic device: %s\n", usb_strerror());
+		fprintf(stderr, "Error - can't open Ingenic device: %s\n",
+			usb_strerror());
 		goto out;
 	}
 
@@ -124,8 +130,10 @@ int usb_ingenic_init(struct ingenic_dev *ingenic_dev)
 		goto out;
 	}
 
-	if (usb_claim_interface(ingenic_dev->usb_handle, ingenic_dev->interface) < 0) {
-		fprintf(stderr, "Error - can't claim Ingenic interface: %s\n", usb_strerror());
+	if (usb_claim_interface(ingenic_dev->usb_handle, ingenic_dev->interface)
+	    < 0) {
+		fprintf(stderr, "Error - can't claim Ingenic interface: %s\n",
+			usb_strerror());
 		goto out;
 	}
 
@@ -144,7 +152,7 @@ int usb_get_ingenic_cpu(struct ingenic_dev *ingenic_dev)
 
 	sleep(1);
 	status = usb_control_msg(ingenic_dev->usb_handle,
-          /* bmRequestType */ USB_ENDPOINT_IN | USB_TYPE_VENDOR | USB_RECIP_DEVICE,
+          /* bmRequestType */ USB_ENDPOINT_IN | USB_TYPE_VENDOR |USB_RECIP_DEVICE,
           /* bRequest      */ VR_GET_CPU_INFO,
           /* wValue        */ 0,
           /* wIndex        */ 0,
@@ -153,12 +161,14 @@ int usb_get_ingenic_cpu(struct ingenic_dev *ingenic_dev)
                               USB_TIMEOUT);
 
 	if (status != sizeof(ingenic_dev->cpu_info_buff) - 1 ) {
-		fprintf(stderr, "Error - can't retrieve Ingenic CPU information: %i\n", status);
+		fprintf(stderr, "Error - "
+			"can't retrieve Ingenic CPU information: %i\n", status);
 		return status;
 	}
 
 	ingenic_dev->cpu_info_buff[8] = '\0';
-	printf("\n CPU data: %02x, %02x, %02x, %02x, %02x, %02x, %02x, %02x : %s\n",
+	printf("\n CPU data: "
+	       "%02x, %02x, %02x, %02x, %02x, %02x, %02x, %02x : %s\n",
 		ingenic_dev->cpu_info_buff[0], ingenic_dev->cpu_info_buff[1],
 		ingenic_dev->cpu_info_buff[2], ingenic_dev->cpu_info_buff[3],
 		ingenic_dev->cpu_info_buff[4], ingenic_dev->cpu_info_buff[5],
@@ -208,14 +218,16 @@ int usb_send_data_length_to_ingenic(struct ingenic_dev *ingenic_dev, int len)
                               USB_TIMEOUT);
 
 	if (status != 0) {
-		fprintf(stderr, "Error - can't set data length on Ingenic device: %i\n", status);
+		fprintf(stderr, "Error - "
+			"can't set data length on Ingenic device: %i\n", status);
 		return -1;
 	}
 
 	return 1;
 }
 
-int usb_send_data_address_to_ingenic(struct ingenic_dev *ingenic_dev, unsigned int stage_addr)
+int usb_send_data_address_to_ingenic(struct ingenic_dev *ingenic_dev, 
+				     unsigned int stage_addr)
 {
 	int status;
 	/* tell the device the RAM address to store the file */
@@ -229,7 +241,8 @@ int usb_send_data_address_to_ingenic(struct ingenic_dev *ingenic_dev, unsigned i
                               USB_TIMEOUT);
 
 	if (status != 0) {
-		fprintf(stderr, "Error - can't set the address on Ingenic device: %i\n", status);
+		fprintf(stderr, "Error - "
+			"can't set the address on Ingenic device: %i\n", status);
 		return -1;
 	}
 
@@ -245,23 +258,26 @@ int usb_send_data_to_ingenic(struct ingenic_dev *ingenic_dev)
 	/* bulk data length */ ingenic_dev->file_len,
 				USB_TIMEOUT);
 	if (status < ingenic_dev->file_len) {
-		fprintf(stderr, "Error - can't send bulk data to Ingenic CPU: %i\n", status);
+		fprintf(stderr, "Error - "
+			"can't send bulk data to Ingenic CPU: %i\n", status);
 		return -1;
 	}
 
 	return 1;
 }
 
-int usb_read_data_from_ingenic(struct ingenic_dev *ingenic_dev, char *buff, int len)
+int usb_read_data_from_ingenic(struct ingenic_dev *ingenic_dev,
+			       unsigned char *buff, unsigned int len)
 {
 	int status;
 	status = usb_bulk_read(ingenic_dev->usb_handle,
-	/* endpoint         */ INGENIC_IN_ENDPOINT | USB_TYPE_VENDOR | USB_RECIP_DEVICE,
+        /* endpoint         */ INGENIC_IN_ENDPOINT,
 	/* bulk data        */ buff,
 	/* bulk data length */ len,
 				USB_TIMEOUT);
 	if (status < len) {
-		fprintf(stderr, "Error - can't read bulk data from Ingenic CPU: %i\n", status);
+		fprintf(stderr, "Error - "
+			"can't read bulk data from Ingenic device:%i\n", status);
 		return -1;
 	}
 
@@ -279,7 +295,8 @@ int usb_ingenic_upload(struct ingenic_dev *ingenic_dev, int stage)
 	int stage_addr = (stage == 1 ? 0x80002000 : stage2_addr);
 
 	usb_send_data_address_to_ingenic(ingenic_dev, stage_addr);
-	printf("\n Download stage %d program and execute at 0x%08x ", stage, (stage_addr));
+	printf("\n Download stage %d program and execute at 0x%08x ", 
+	       stage, (stage_addr));
 	usb_send_data_to_ingenic(ingenic_dev);
 
 	if (stage == 2) {
@@ -298,9 +315,8 @@ int usb_ingenic_upload(struct ingenic_dev *ingenic_dev, int stage)
                               USB_TIMEOUT);
 
 	if (status != 0) {
-		fprintf(stderr, 
-			"Error - can't start the uploaded binary on the Ingenic device: %i\n", 
-			status);
+		fprintf(stderr, "Error - can't start the uploaded binary "
+			"on the Ingenic device: %i\n", status);
 		return status;
 	}
 
@@ -312,7 +328,8 @@ int usb_ingenic_upload(struct ingenic_dev *ingenic_dev, int stage)
 void usb_ingenic_cleanup(struct ingenic_dev *ingenic_dev)
 {
 	if ((ingenic_dev->usb_handle) && (ingenic_dev->interface))
-		usb_release_interface(ingenic_dev->usb_handle, ingenic_dev->interface);
+		usb_release_interface(ingenic_dev->usb_handle, 
+				      ingenic_dev->interface);
 
 	if (ingenic_dev->usb_handle)
 		usb_close(ingenic_dev->usb_handle);
@@ -331,7 +348,8 @@ int usb_ingenic_nand_ops(struct ingenic_dev *ingenic_dev, int ops)
                               USB_TIMEOUT);
 
 	if (status != 0) {
-		fprintf(stderr, "Error - can't set Ingenic device nand ops: %i\n", status);
+		fprintf(stderr, "Error - "
+			"can't set Ingenic device nand ops: %i\n", status);
 		return -1;
 	}
 
@@ -351,7 +369,8 @@ int usb_ingenic_configration(struct ingenic_dev *ingenic_dev, int ops)
                               USB_TIMEOUT);
 
 	if (status != 0) {
-		fprintf(stderr, "Error - can't init Ingenic configration: %i\n", status);
+		fprintf(stderr, "Error - "
+			"can't init Ingenic configration: %i\n", status);
 		return -1;
 	}
 
