@@ -1,7 +1,7 @@
 #include "jz4750.h"
 #include "nandflash.h"
 #include "usb_boot.h"
-#include "hand.h"
+#include "usb_boot_defines.h"
 
 #define dprintf(n...)
 

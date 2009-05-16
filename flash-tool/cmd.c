@@ -110,6 +110,7 @@ out:
 	return res;
 }
 
+/* after upload stage2. must init device */
 int init_cfg()
 {
 	if (usb_get_ingenic_cpu(&ingenic_dev) < 3) {
@@ -526,6 +527,14 @@ int nand_program_file(struct nand_in_t *nand_in,
 	return 1;
 }
 
+int nand_program_file_planes(struct nand_in_t *nand_in,
+		      struct nand_out_t *nand_out,
+		      char *fname)
+{
+	printf(" \n not implement yet !");
+	return -1;
+}
+
 int init_nand_in(void)
 {
 	nand_in.buf = code_buf;
@@ -574,9 +583,9 @@ int nand_prog(void)
 		printf("%s", help);
 
 	if (hand.nand_plane > 1)
-		;/* nand_program_file_planes(&nand_in,&nand_out, image_file); */
+		nand_program_file_planes(&nand_in, &nand_out, image_file);
 	else
-		nand_program_file(&nand_in,&nand_out, image_file);
+		nand_program_file(&nand_in, &nand_out, image_file);
 
 #ifdef CONFIG_NAND_OUT
 	printf("\n Flash check result:");
@@ -584,16 +593,7 @@ int nand_prog(void)
 		printf(" %d", (nand_out.status)[i]);
 #endif
 
-	printf("\n nprog %d %s %d %d %d", nand_in.start,
-	       image_file,
-	       nand_in.dev,
-	       (nand_in.cs_map)[atoi(com_argv[4])],
-	       nand_in.option);
-
-	printf("\n not implement yet!! just test");
-
 	return 1;
-
 }
 
 int nand_query(void)

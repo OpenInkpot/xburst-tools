@@ -4,7 +4,7 @@
 #include "usb.h" 
 #include "error.h"
 #include "usb_boot.h"
-#include "hand.h"
+#include "usb_boot_defines.h"
 #include "nandflash.h"
 #include "udc.h"
 #define dprintf(x) serial_puts(x)

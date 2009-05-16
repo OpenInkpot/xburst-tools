@@ -1,8 +1,7 @@
 /*  special main file!
  *  do not edit!
  */
-//#include "jz4740.h"
-#include "hand.h"
+#include "usb_boot_defines.h"
 
 extern void usb_main();
 unsigned int start_addr,got_start,got_end;
