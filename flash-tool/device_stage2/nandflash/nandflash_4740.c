@@ -49,7 +49,7 @@ static volatile unsigned char *cmdport = (volatile unsigned char *)0xb8008000;
 
 static int bus = 8, row = 2, pagesize = 2048, oobsize = 64, ppb = 128;
 static int bad_block_pos,bad_block_page,force_erase,ecc_pos,wp_pin;
-extern struct hand_t Hand;
+extern struct hand Hand;
 //static u8 data_buf[2048] = {0};
 static u8 oob_buf[256] = {0};
 extern u16 handshake_PKT[4];

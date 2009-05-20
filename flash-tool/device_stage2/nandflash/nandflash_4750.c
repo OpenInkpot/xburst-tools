@@ -39,7 +39,7 @@ static int oobecc = 0;           /* Whether the oob data of the binary contains 
 static int bad_block_page = 127; /* Specify the page number of badblock flag inside a block */
 static u32 bad_block_pos = 0;    /* Specify the badblock flag offset inside the oob */
 static u8 oob_buf[256] = {0};
-extern struct hand_t Hand;
+extern struct hand Hand;
 extern u16 handshake_PKT[4];
 
 static inline void __nand_sync(void)

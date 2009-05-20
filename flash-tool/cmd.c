@@ -38,10 +38,10 @@ extern int com_argc;
 extern char com_argv[MAX_ARGC][MAX_COMMAND_LENGTH];
 
 struct ingenic_dev ingenic_dev;
-struct hand_t hand;
+struct hand hand;
 
-static struct nand_in_t nand_in;
-static struct nand_out_t nand_out;
+static struct nand_in nand_in;
+static struct nand_out nand_out;
 unsigned int total_size;
 unsigned char code_buf[4 * 512 * 1024];
 unsigned char check_buf[4 * 512 * 1024];
@@ -100,7 +100,7 @@ static int load_file(struct ingenic_dev *ingenic_dev, const char *file_path)
 
 	/* write args to code */
 	memcpy(ingenic_dev->file_buff + 8, &hand.fw_args, 
-	       sizeof(struct fw_args_t));
+	       sizeof(struct fw_args));
 
 	res = 1;
 
@@ -214,7 +214,7 @@ int error_check(unsigned char *org,unsigned char * obj,unsigned int size)
 	return 1;
 }
 
-int nand_markbad(struct nand_in_t *nand_in)
+int nand_markbad(struct nand_in *nand_in)
 {
 	if (usb_get_ingenic_cpu(&ingenic_dev) < 3) {
 		printf("\n Device unboot! Boot it first!");
@@ -231,8 +231,8 @@ int nand_markbad(struct nand_in_t *nand_in)
 	return 0;
 }
 
-int nand_program_check(struct nand_in_t *nand_in,
-		       struct nand_out_t *nand_out,
+int nand_program_check(struct nand_in *nand_in,
+		       struct nand_out *nand_out,
 		       unsigned int *start_page)
 {
 	unsigned int i,page_num,cur_page;
@@ -340,7 +340,7 @@ int nand_program_check(struct nand_in_t *nand_in,
 		} else {
 			/* (nand_out->status)[i] = 0; */
 			printf(" fail!");
-			struct nand_in_t bad;
+			struct nand_in bad;
 			cur_page = (ret[3] << 24) | 
 				(ret[2] << 16) |
 				(ret[1] << 8) |
@@ -356,7 +356,7 @@ int nand_program_check(struct nand_in_t *nand_in,
 	return 0;
 }
 
-int nand_erase(struct nand_in_t *nand_in)
+int nand_erase(struct nand_in *nand_in)
 {
 	unsigned int start_blk, blk_num, end_block;
 	int i;
@@ -408,8 +408,8 @@ int nand_erase(struct nand_in_t *nand_in)
 	return 1;
 }
 
-int nand_program_file(struct nand_in_t *nand_in,
-		      struct nand_out_t *nand_out,
+int nand_program_file(struct nand_in *nand_in,
+		      struct nand_out *nand_out,
 		      char *fname)
 {
 
@@ -417,8 +417,8 @@ int nand_program_file(struct nand_in_t *nand_in,
 	unsigned int start_page = 0, page_num, code_len, offset, transfer_size;
 	FILE *fp;
 	unsigned char status_buf[32];
-	struct nand_in_t n_in;
-	struct nand_out_t n_out;
+	struct nand_in n_in;
+	struct nand_out n_out;
 
 #ifdef CONFIG_NAND_OUT
 	/* nand_out->status = (unsigned char *)malloc(nand_in->max_chip * sizeof(unsigned char)); */
@@ -527,8 +527,8 @@ int nand_program_file(struct nand_in_t *nand_in,
 	return 1;
 }
 
-int nand_program_file_planes(struct nand_in_t *nand_in,
-		      struct nand_out_t *nand_out,
+int nand_program_file_planes(struct nand_in *nand_in,
+		      struct nand_out *nand_out,
 		      char *fname)
 {
 	printf(" \n not implement yet !");

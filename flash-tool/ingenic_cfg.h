@@ -26,8 +26,8 @@
 
 #define CONFIG_FILE_PATH "usb_boot.cfg"
 
-int hand_init_def(struct hand_t *hand);
-int check_dump_cfg(struct hand_t *hand);
-int parse_configure(struct hand_t *hand, char * file_path);
+int hand_init_def(struct hand *hand);
+int check_dump_cfg(struct hand *hand);
+int parse_configure(struct hand *hand, char * file_path);
 
 #endif	/*__INGENIC_CFG_H__ */

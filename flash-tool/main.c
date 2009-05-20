@@ -29,7 +29,7 @@
 #include "ingenic_cfg.h"
 
 extern struct ingenic_dev ingenic_dev;
-extern struct hand_t hand;
+extern struct hand hand;
 
 static void help(void)
 {
@@ -62,7 +62,7 @@ int main(int argc, char **argv)
 	char com_buf[256];
 	memset(com_buf, 0, 256);
 
-	while (1) {
+	while(1) {
 		int c, option_index = 0;
 		c = getopt_long(argc, argv, "hvc:", opts,
 				&option_index);

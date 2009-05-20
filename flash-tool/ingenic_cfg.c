@@ -25,7 +25,7 @@
 
 extern unsigned int total_size;
 
-int hand_init_def(struct hand_t *hand)
+int hand_init_def(struct hand *hand)
 {
 	/* nand flash info */
 	/* hand.nand_start=0; */ /* important !!!! */
@@ -55,7 +55,7 @@ int hand_init_def(struct hand_t *hand)
 	return 1;
 }
 
-int check_dump_cfg(struct hand_t *hand)
+int check_dump_cfg(struct hand *hand)
 {
 	printf("\n Now checking whether all configure args valid: ");
 	/* check PLL */
@@ -131,7 +131,7 @@ int check_dump_cfg(struct hand_t *hand)
 	return 1;
 }
 
-int parse_configure(struct hand_t *hand, char * file_path)
+int parse_configure(struct hand *hand, char * file_path)
 {
 	hand_init_def(hand);
 

@@ -22,7 +22,7 @@ u32 (*nand_mark_bad) (int bad);
 void (*nand_enable) (unsigned int csn);
 void (*nand_disable) (unsigned int csn);
 
-struct hand_t Hand,*Hand_p;
+struct hand Hand,*Hand_p;
 extern u32 Bulk_out_buf[BULK_OUT_BUF_SIZE];
 extern u32 Bulk_in_buf[BULK_IN_BUF_SIZE];
 extern u16 handshake_PKT[4];
@@ -48,9 +48,9 @@ void dump_data(unsigned int *p, int size)
 
 void config_hand()
 {
-	struct hand_t *hand_p;
-	hand_p=(struct hand_t *)Bulk_out_buf;
-	memcpy(&Hand, (unsigned char *)Bulk_out_buf, sizeof(struct hand_t));
+	struct hand *hand_p;
+	hand_p=(struct hand *)Bulk_out_buf;
+	memcpy(&Hand, (unsigned char *)Bulk_out_buf, sizeof(struct hand));
 
 #if 0
 	Hand.nand_bw=hand_p->nand_bw;

@@ -27,15 +27,15 @@
 #define CODE_SIZE  ( 4 * 1024 * 1024 )
 /* #define START_ADDR ( 0x80000000 + SDRAM_SIZE - CODE_SIZE ) */
 
-#define NAND_MAX_BLK_NUM  10000000	/* ((Hand.nand_pn / Hand.nand_ppb) + 1) */
-#define NAND_MAX_PAGE_NUM 1073740824	/*Hand.nand_pn */
-#define NAND_SECTION_NUM 23
-#define MAX_TRANSFER_SIZE 0x100000
-#define MAX_LOAD_SIZE 0x3000
-#define NAND_MAX_BYTE_NUM (Hand.nand_pn * Hand.nand_ps)
+#define NAND_MAX_BLK_NUM	10000000 /*((Hand.nand_pn / Hand.nand_ppb) + 1)*/
+#define NAND_MAX_PAGE_NUM	1073740824	/*Hand.nand_pn */
+#define NAND_SECTION_NUM	23
+#define MAX_TRANSFER_SIZE	0x100000
+#define MAX_LOAD_SIZE	0x3000
+#define NAND_MAX_BYTE_NUM	(Hand.nand_pn * Hand.nand_ps)
 #define	IOCTL_INBUF_SIZE	512
 #define	IOCTL_OUTBUF_SIZE	512
-#define MAX_DEV_NUM 16 
+#define MAX_DEV_NUM	16
 
 enum CPUTYPE {
 	JZ4740,
@@ -92,7 +92,7 @@ enum DATA_STRUCTURE_OB {
 	DS_hand
 };
 
-struct fw_args_t {
+struct fw_args {
 	/* CPU ID */
 	unsigned int  cpu_id;
 
@@ -122,7 +122,7 @@ struct fw_args_t {
 	/* unsigned char align2; */
 } __attribute__((packed));
 
-struct hand_t {
+struct hand {
 
 	/* nand flash info */
 	int pt;             	/* cpu type */
@@ -141,10 +141,10 @@ struct hand_t {
 	unsigned int nand_wppin;
 	unsigned int nand_bpc;		/* block number per chip */
 
-	struct fw_args_t fw_args;
+	struct fw_args fw_args;
 } __attribute__((packed));
 
-struct nand_in_t {
+struct nand_in {
 	unsigned char dev;
 	unsigned char max_chip;
 	unsigned char *buf;
@@ -156,11 +156,11 @@ struct nand_in_t {
 	int (* check) (unsigned char *,unsigned char *,unsigned int);
 };
 
-struct nand_out_t {
+struct nand_out {
 	unsigned char *status;
 };
 
-struct sdram_in_t {
+struct sdram_in {
 	unsigned char dev;
 	unsigned char *buf;
 	unsigned int start;
