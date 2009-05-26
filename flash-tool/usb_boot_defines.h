@@ -116,16 +116,11 @@ struct fw_args {
 	unsigned char pin_num;
 	unsigned int  start;
 	unsigned int  size;
-
-	/* for align */
-	/* unsigned char align1; */
-	/* unsigned char align2; */
 } __attribute__((packed));
 
 struct hand {
-
 	/* nand flash info */
-	int pt;             	/* cpu type */
+	int pt;				/* cpu type */
 	unsigned int nand_bw;		/* bus width */
 	unsigned int nand_rc;		/* row cycle */
 	unsigned int nand_ps;		/* page size */

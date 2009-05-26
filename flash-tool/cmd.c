@@ -59,11 +59,6 @@ static int load_file(struct ingenic_dev *ingenic_dev, const char *file_path)
 	struct stat fstat;
 	int fd, status, res = -1;
 
-	if (ingenic_dev->file_buff)
-		free(ingenic_dev->file_buff);
-
-	ingenic_dev->file_buff = NULL;
-
 	status = stat(file_path, &fstat);
 
 	if (status < 0) {
@@ -73,14 +68,7 @@ static int load_file(struct ingenic_dev *ingenic_dev, const char *file_path)
 	}
 
 	ingenic_dev->file_len = fstat.st_size;
-	ingenic_dev->file_buff = malloc(ingenic_dev->file_len);
-
-	if (!ingenic_dev->file_buff) {
-		fprintf(stderr, "Error - "
-			"can't allocate memory to read file '%s': %s\n", 
-			file_path, strerror(errno));
-		return -1;
-	}
+	ingenic_dev->file_buff = code_buf;
 
 	fd = open(file_path, O_RDONLY);
 
@@ -169,26 +157,18 @@ int boot(char *stage1_path, char *stage2_path){
 		if (load_file(&ingenic_dev, stage1_path) < 1)
 			return -1;
 
-		if (usb_ingenic_upload(&ingenic_dev, 1) < 1) {
-			if (ingenic_dev.file_buff)
-				free(ingenic_dev.file_buff);
+		if (usb_ingenic_upload(&ingenic_dev, 1) < 1)
 			return -1;
-		}
 
 		/* now we upload the usb boot stage2 */
 		sleep(1);
 		printf("\n Upload usb boot stage2");
-		if (load_file(&ingenic_dev, stage2_path) < 1) {
-			if (ingenic_dev.file_buff)
-				free(ingenic_dev.file_buff);
+		if (load_file(&ingenic_dev, stage2_path) < 1)
 			return -1;
-		}
 
-		if (usb_ingenic_upload(&ingenic_dev, 2) < 1) {
-			if (ingenic_dev.file_buff)
-				free(ingenic_dev.file_buff);
+		if (usb_ingenic_upload(&ingenic_dev, 2) < 1)
 			return -1;
-		}
+
 		printf("\n Boot success!");
 	}
 	sleep(1);
