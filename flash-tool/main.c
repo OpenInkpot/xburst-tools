@@ -54,8 +54,9 @@ static struct option opts[] = {
 
 int main(int argc, char **argv)
 {
-	printf("inflash - (C) 2009\n"
-	       "This program is Free Software and has ABSOLUTELY NO WARRANTY\n\n");
+	printf(" inflash - (C) 2009"
+	       "\n Ingenic Tools Software!"
+	       "\n This program is Free Software and has ABSOLUTELY NO WARRANTY\n");
 
 	int command = 0;
 	char *cptr;
@@ -85,9 +86,6 @@ int main(int argc, char **argv)
 			exit(2);
 		}
 	}
-
-	printf("\n Welcome!"
-	       "\n Ingenic Tools Software!");
 
 	if ((getuid()) || (getgid())) {
 		fprintf(stderr, "Error - you must be root to run '%s'\n", argv[0]);

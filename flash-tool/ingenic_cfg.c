@@ -120,14 +120,15 @@ int check_dump_cfg(struct hand *hand)
 		total_size / 0x100000, 2 * (hand->fw_args.bank_num + 1), 
 	       16 * (2 - hand->fw_args.bus_width));
 
-	/* printf("\n Nand page size %d, ECC offset %d, ",
-		hand->nand_ps,hand->nand_eccpos);
+	printf("\n Nand page size %d, "
+	       "ECC offset %d, "
+	       "bad block ID %d, "
+	       "use %d plane mode\n",
+	       hand->nand_ps,
+	       hand->nand_eccpos,
+	       hand->nand_bbpage,
+	       hand->nand_plane);
 
-	printf("bad block ID %d, ",hand->nand_bbpage);
-
-	printf("use %d plane mode",hand->nand_plane); */
-
-	printf("\n");
 	return 1;
 }
 
