@@ -215,9 +215,8 @@ int nand_program_check(struct nand_in *nand_in,
 		       struct nand_out *nand_out,
 		       unsigned int *start_page)
 {
-	unsigned int i,page_num,cur_page;
+	unsigned int i, page_num, cur_page;
 	unsigned short temp;
-	unsigned char status_buf[32];
 
 	if (nand_in->length > (unsigned int)MAX_TRANSFER_SIZE) {
 		printf("\n Buffer size too long!");
@@ -225,6 +224,7 @@ int nand_program_check(struct nand_in *nand_in,
 	}
 
 #ifdef CONFIG_NAND_OUT
+	unsigned char status_buf[32];
 	nand_out->status = status_buf;
 	for (i = 0; i < nand_in->max_chip; i++)
 		(nand_out->status)[i] = 0; /* set all status to fail */
@@ -395,26 +395,34 @@ int nand_program_file(struct nand_in *nand_in,
 
 	int flen, m, j, k;
 	unsigned int start_page = 0, page_num, code_len, offset, transfer_size;
-	FILE *fp;
-	unsigned char status_buf[32];
+	int fd, status;
+	struct stat fstat;
 	struct nand_in n_in;
 	struct nand_out n_out;
 
 #ifdef CONFIG_NAND_OUT
-	/* nand_out->status = (unsigned char *)malloc(nand_in->max_chip * sizeof(unsigned char)); */
+	unsigned char status_buf[32];
 	nand_out->status = status_buf;
 	for (i=0; i<nand_in->max_chip; i++)
 		(nand_out->status)[i] = 0; /* set all status to fail */
 #endif
-	fp = fopen(fname,"rb");
-	if (fp == NULL) {
-		printf("\n Can not open file !");
-		return 0;
+	status = stat(fname, &fstat);
+
+	if (status < 0) {
+		fprintf(stderr, "Error - can't get file size from '%s': %s\n",
+			fname, strerror(errno));
+		return -1;
+	}
+	flen = fstat.st_size;
+
+	fd = open(fname, O_RDONLY);
+	if (fd < 0) {
+		fprintf(stderr, "Error - can't open file '%s': %s\n", 
+			fname, strerror(errno));
+		return -1;
 	}
 
 	printf("\n Programing No.%d device...",nand_in->dev);
-	fseek(fp, 0, SEEK_END);
-	flen = ftell(fp);
 	n_in.start = nand_in->start / hand.nand_ppb; 
 	if (nand_in->option == NO_OOB) {
 		if (flen % (hand.nand_ppb * hand.nand_ps) == 0) 
@@ -442,16 +450,16 @@ int nand_program_file(struct nand_in *nand_in,
 		transfer_size = (hand.nand_ppb * (hand.nand_ps + hand.nand_os));
 	m = flen / transfer_size;
 	j = flen % transfer_size;
-	fseek(fp, 0, SEEK_SET);	/* file point return to begin */
-	offset = 0; 
 	printf("\n Total size to send in byte is :%d", flen);
 	printf("\n Image type : %s", IMAGE_TYPE[nand_in->option]);
-	printf("\n It will cause %d times buffer transfer.", m + 1);
+	printf("\n It will cause %d times buffer transfer.", j == 0 ? m : m + 1);
 
 #ifdef CONFIG_NAND_OUT
 	for (i = 0; i < nand_in->max_chip; i++)
 		(nand_out->status)[i] = 1; /* set all status to success! */
 #endif
+
+	offset = 0; 
 	for (k = 0; k < m; k++)	{
 		if (nand_in->option == NO_OOB)
 			page_num = transfer_size / hand.nand_ps;
@@ -459,7 +467,13 @@ int nand_program_file(struct nand_in *nand_in,
 			page_num = transfer_size / (hand.nand_ps + hand.nand_os);
 
 		code_len = transfer_size;
-		fread(code_buf, 1, code_len, fp);
+		status = read(fd, code_buf, code_len);
+		if (status < code_len) {
+			fprintf(stderr, "Error - can't read file '%s': %s\n", 
+				fname, strerror(errno));
+			return -1;
+		}
+
 		/* read code from file to buffer */
 		printf("\n No.%d Programming...",k+1);
 		nand_in->length = code_len; /* code length,not page number! */
@@ -478,16 +492,25 @@ int nand_program_file(struct nand_in *nand_in,
 		}
 #endif
 		offset += code_len ;
-		fseek(fp,offset,SEEK_SET);
+		//lseek(fd, offset, SEEK_SET);
 	}
 
 	if (j) {
+		code_len = j;
 		j += hand.nand_ps - (j % hand.nand_ps);
 		memset(code_buf, 0, j);		/* set all to null */
-		fread(code_buf, 1, j, fp);/* read code from file to buffer */
+
+		status = read(fd, code_buf, j);
+
+		if (status < code_len) {
+			fprintf(stderr, "Error - can't read file '%s': %s\n", 
+				fname, strerror(errno));
+			return -1;
+		}
+
 		nand_in->length = j;
 		nand_in->buf = code_buf;
-		printf("\n No.%d Programming...",k+1);
+		printf("\n No.%d Programming...", k+1);
 
 		if (nand_program_check(nand_in, &n_out, &start_page) == -1) 
 			return -1;
@@ -503,7 +526,7 @@ int nand_program_file(struct nand_in *nand_in,
 #endif
 	}
 	
-	fclose(fp);
+	close(fd);
 	return 1;
 }
 

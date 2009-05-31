@@ -21,6 +21,6 @@
 #ifndef __CONFIG_H__
 #define __CONFIG_H__
 
-#define CURRENT_VERSION		"1.0"
+#define CURRENT_VERSION		"1.0.0"
 
 #endif	/* __CONFIG_H__ */
