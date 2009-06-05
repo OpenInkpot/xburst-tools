@@ -9,12 +9,16 @@
 
 FLASH_TOOL_PATH = ..
 
-CC	:= mipsel-linux-gcc
-AR	:= mipsel-linux-ar rcsv
-LD	:= mipsel-linux-ld
-OBJCOPY	:= mipsel-linux-objcopy
-NM		:= mipsel-linux-nm
-OBJDUMP	:= mipsel-linux-objdump
+ifeq ($(CROSS_COMPILE),)
+$(error CROSS_COMPILE variable not set)
+endif
+
+CC	:= $(CROSS_COMPILE)gcc
+AR	:= $(CROSS_COMPILE)ar rcsv
+LD	:= $(CROSS_COMPILE)ld
+OBJCOPY	:= $(CROSS_COMPILE)objcopy
+NM	:= $(CROSS_COMPILE)nm
+OBJDUMP	:= $(CROSS_COMPILE)objdump
 
 CFLAGS	:= -mips32 -O2  -FPIC \
 		-fno-exceptions -ffunction-sections \

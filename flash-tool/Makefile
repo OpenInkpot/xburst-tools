@@ -32,17 +32,22 @@ endif
 STAGE1_PATH = ./device_stage1
 STAGE2_PATH = ./device_stage2
 
+CROSS_COMPILE ?= mipsel-linux-
+
 CC = 		gcc
 CFLAGS +=	-pedantic -Wall -W -O1 -g3 -std=gnu99
 LDFLAGS +=	-lusb -lconfuse
 BINARY_NAME =	inflash
+TARGETS = $(BINARY_NAME) stage1 stage2
 
 SRC_C= main.c ingenic_cfg.c ingenic_usb.c cmd.c command_line.c
 SRC_H= ingenic_cfg.h ingenic_usb.h usb_boot_defines.h \
 	command_line.h cmd.h config.h
 SRC_O= $(SRC_C:.c=.o)
 
-$(BINARY_NAME):	$(SRC_O) $(SRC_H) Makefile stage1 stage2
+default: $(TARGETS)
+
+$(BINARY_NAME):	$(SRC_O) $(SRC_H) Makefile
 	$(Q_LD)$(CC) -o $@ $(SRC_O) $(LDFLAGS)
 
 .c.o:
@@ -51,13 +56,13 @@ $(BINARY_NAME):	$(SRC_O) $(SRC_H) Makefile stage1 stage2
 
 # for the device stage
 stage1:
-	make -C $(STAGE1_PATH)
+	make CROSS_COMPILE=$(CROSS_COMPILE) -C $(STAGE1_PATH)
 
 stage2:
-	make -C $(STAGE2_PATH)
+	make CROSS_COMPILE=$(CROSS_COMPILE) -C $(STAGE2_PATH)
 
 clean:
-	make clean -C $(STAGE1_PATH)
-	make clean -C $(STAGE2_PATH)
+	make CROSS_COMPILE=$(CROSS_COMPILE) -C $(STAGE1_PATH) clean
+	make CROSS_COMPILE=$(CROSS_COMPILE) -C $(STAGE2_PATH) clean
 	rm -f $(BINARY_NAME) *.o *~
 	rm -f `find . -name '*.d' -print`

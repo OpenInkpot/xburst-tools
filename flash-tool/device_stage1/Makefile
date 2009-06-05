@@ -20,7 +20,9 @@
 
 FLASH_TOOL_PATH = ..
 
-CROSS_COMPILE ?= mipsel-linux-
+ifeq ($(CROSS_COMPILE),)
+$(error CROSS_COMPILE variable not set)
+endif
 
 CFLAGS	:= -O2 -mips32 -fno-pic -mno-abicalls -I..
 LDFLAGS	:= -nostdlib -EL -T target.ld 
