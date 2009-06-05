@@ -29,6 +29,9 @@ ifndef V
 endif
 endif
 
+STAGE1_PATH = ./device_stage1
+STAGE2_PATH = ./device_stage2
+
 CC = 		gcc
 CFLAGS +=	-pedantic -Wall -W -O1 -g3 -std=gnu99
 LDFLAGS +=	-lusb -lconfuse
@@ -46,6 +49,15 @@ $(BINARY_NAME):	$(SRC_O) $(SRC_H) Makefile
 	$(Q_CC)$(CC) $(CFLAGS) $(EXTRA_CFLAGS) -MD -c $< -o $@
 -include $(SRC_C:.c=.d)
 
+# for the device stage
+stage1:
+	make -C $(STAGE1_PATH)
+
+stage2:
+	make -C $(STAGE2_PATH)
+
 clean:
+	make clean -C $(STAGE1_PATH)
+	make clean -C $(STAGE2_PATH)
 	rm -f $(BINARY_NAME) *.o *~
 	rm -f `find . -name '*.d' -print`
