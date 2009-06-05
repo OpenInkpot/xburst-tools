@@ -20,7 +20,7 @@
 
 FLASH_TOOL_PATH = ..
 
-CROSS	:= mipsel-linux-
+CROSS_COMPILE ?= mipsel-linux-
 
 CFLAGS	:= -O2 -mips32 -fno-pic -mno-abicalls -I..
 LDFLAGS	:= -nostdlib -EL -T target.ld 
@@ -30,18 +30,18 @@ OBJS	= head.o main.o common.o board_4740.o board_4750.o debug.o
 all: fw.bin
 
 fw.bin: fw.elf
-	$(CROSS)objcopy -O binary $< $@
-	$(CROSS)objdump -D $< > fw.dump
-	$(CROSS)objdump -h $< > fw.map
-	$(CROSS)nm -n $< > System.map
+	$(CROSS_COMPILE)objcopy -O binary $< $@
+	$(CROSS_COMPILE)objdump -D $< > fw.dump
+	$(CROSS_COMPILE)objdump -h $< > fw.map
+	$(CROSS_COMPILE)nm -n $< > System.map
 	cp fw.bin $(FLASH_TOOL_PATH)
 
 fw.elf: $(OBJS)
-	$(CROSS)ld $(LDFLAGS) $(OBJS) -o $@
+	$(CROSS_COMPILE)ld $(LDFLAGS) $(OBJS) -o $@
 .c.o:
-	$(CROSS)gcc $(CFLAGS) -c $< -o $@
+	$(CROSS_COMPILE)gcc $(CFLAGS) -c $< -o $@
 .S.o:
-	$(CROSS)gcc $(CFLAGS) -c $< -o $@
+	$(CROSS_COMPILE)gcc $(CFLAGS) -c $< -o $@
 clean:
 	rm -f *.o *.elf *.bin *.dump *.map
 	rm -f *~
