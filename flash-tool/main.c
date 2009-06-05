@@ -22,7 +22,6 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <getopt.h>
-#include "usb.h"
 #include "config.h"
 #include "command_line.h"
 #include "ingenic_usb.h"
