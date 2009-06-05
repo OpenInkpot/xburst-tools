@@ -42,7 +42,7 @@ SRC_H= ingenic_cfg.h ingenic_usb.h usb_boot_defines.h \
 	command_line.h cmd.h config.h
 SRC_O= $(SRC_C:.c=.o)
 
-$(BINARY_NAME):	$(SRC_O) $(SRC_H) Makefile
+$(BINARY_NAME):	$(SRC_O) $(SRC_H) Makefile stage1 stage2
 	$(Q_LD)$(CC) -o $@ $(SRC_O) $(LDFLAGS)
 
 .c.o:

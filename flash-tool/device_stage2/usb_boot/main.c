@@ -6,7 +6,7 @@
 extern void usb_main();
 unsigned int start_addr,got_start,got_end;
 extern unsigned int UART_BASE;
-struct fw_args_t * fw_args;
+struct fw_args *fw_args;
 
 void c_main(void)
 {
@@ -38,7 +38,7 @@ void c_main(void)
 		*((volatile unsigned int *)(addr)) += offset;   //add offset to correct all GOT
 	}
 
-	fw_args = (struct fw_args_t *)(start_addr + 0x8);       //get the fw args from memory
+	fw_args = (struct fw_args *)(start_addr + 0x8);       //get the fw args from memory
 	if ( fw_args->use_uart > 3 ) fw_args->use_uart = 0;
 	UART_BASE = 0xB0030000 + fw_args->use_uart * 0x1000;
 
