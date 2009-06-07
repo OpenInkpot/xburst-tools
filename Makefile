@@ -29,9 +29,6 @@ DL_PATH=$(TOOLCHAIN_PATH)/dl
 INSTALL_PATH=install
 PATCHES_PATH=$(TOOLCHAIN_PATH)/patches
 GLIBC_PATCHES_PATH=$(PATCHES_PATH)/glibc
-USBBOOT_PATH=usb-boot
-USBBOOT_STAGE1_PATH=$(USBBOOT_PATH)/stage1
-USBBOOT_STAGE2_PATH=$(USBBOOT_PATH)/stage2
 
 BINUTILS_PACKAGE=$(BINUTILS_VER).tar.bz2
 BINUTILS_URL= \
@@ -141,17 +138,6 @@ u-boot:
 	make pi_config && \
 	make
 
-### usb-boot
-.PHONY: usb-boot
-usb-boot: flash-tool usb-boot-stage
-
-flash-tool: usb-boot-stage
-	make -C flash-tool
-
-usb-boot-stage:
-	make -C $(USBBOOT_STAGE1_PATH)
-	make -C $(USBBOOT_STAGE2_PATH)
-
 ### kernel
 .PHONY: kernel
 kernel:
@@ -161,14 +147,16 @@ kernel:
 	make pi_defconfig && \
 	make uImage
 
+### flash-boot
+.PHONY: flash-tool
+flash-tool:
+	make -C ./flash-tool
+
 ### clean up
 distclean: clean clean-toolchain
 
 clean:
 	make clean -C flash-tool
-	make clean -C $(USBBOOT_STAGE1_PATH)
-	make clean -C $(USBBOOT_STAGE2_PATH)
-	rm flash-tool/*.bin
 
 clean-toolchain: clean-glibc
 	rm -rf $(TOOLCHAIN_PATH)/$(BINUTILS_VER) binutils
