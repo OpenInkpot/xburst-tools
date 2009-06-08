@@ -22,6 +22,8 @@
 #ifndef __CMD_H__
 #define __CMD_H__
 
+#include "usb_boot_defines.h"
+
 #define COMMAND_NUM 31
 #define MAX_ARGC	10
 #define MAX_COMMAND_LENGTH	100
@@ -29,5 +31,6 @@
 int boot(char *stage1_path, char *stage2_path);
 int nand_prog(void);
 int nand_query(void);
+int nand_erase(struct nand_in *nand_in);
 
 #endif  /* __CMD_H__ */

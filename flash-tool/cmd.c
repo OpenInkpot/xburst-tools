@@ -40,7 +40,7 @@ extern char com_argv[MAX_ARGC][MAX_COMMAND_LENGTH];
 struct ingenic_dev ingenic_dev;
 struct hand hand;
 
-static struct nand_in nand_in;
+struct nand_in nand_in;
 static struct nand_out nand_out;
 unsigned int total_size;
 unsigned char code_buf[4 * 512 * 1024];
@@ -544,6 +544,8 @@ int init_nand_in(void)
 	nand_in.check = error_check;
 	nand_in.dev = 0;
 	nand_in.cs_map = cs;
+	memset(nand_in.cs_map, 0, MAX_DEV_NUM);
+
 	nand_in.max_chip = 16;
 	return 0;
 }
@@ -561,7 +563,6 @@ int nand_prog(void)
 		"\n \t-n:\tno oob"
 		"\n \t-o:\twith oob no ecc"
 		"\n \t-e:\twith oob and ecc";
-	init_nand_in();
 
 	if (com_argc != 6) {
 		printf("\n not enough argument.");
@@ -569,8 +570,7 @@ int nand_prog(void)
 		return 0;
 	}
 
-	for (i = 0; i < MAX_DEV_NUM; i++)
-		(nand_in.cs_map)[i] = 0;
+	init_nand_in();
 
 	nand_in.start = atoi(com_argv[1]);
 	image_file = com_argv[2];
@@ -612,9 +612,6 @@ int nand_query(void)
 		return -1;
 	}
 	init_nand_in();
-
-	for (i = 0; i < MAX_DEV_NUM; i++)
-		(nand_in.cs_map)[i] = 0;
 
 	nand_in.dev = atoi(com_argv[1]);
 	(nand_in.cs_map)[atoi(com_argv[2])] = 1;

@@ -27,6 +27,7 @@
 #include "cmd.h"
 #include "config.h"
  
+extern struct nand_in nand_in;
 int com_argc;
 char com_argv[MAX_ARGC][MAX_COMMAND_LENGTH];
 
@@ -42,7 +43,7 @@ static const char COMMAND[][30]=
 	"nerase",
 	"nread",
 	"nreadraw",
-	"nreadoob",
+	"nreadoob", /* index 10 */
 	"nprog",
 	"help",
 	"version",
@@ -52,7 +53,7 @@ static const char COMMAND[][30]=
 	"readnand",
 	"gpios",
 	"gpioc",
-	"boot",
+	"boot", /* index 20 */
 	"list",
 	"select",
 	"unselect",
@@ -110,6 +111,37 @@ static int handle_fconfig(void)
 	return 1;
 }
 
+/* need transfer two para :blk_num ,start_blk */
+int handle_nerase(void)
+{
+	int i;
+	if (com_argc < 5) {
+		printf("\n Usage:");
+		printf(" nerase (1) (2) (3) (4) ");
+		printf("\n 1:start block number"
+		       "\n 2:block length"
+		       "\n 3:device index number"
+		       "\n 4:flash chip index number");
+		return -1;
+	}
+
+	init_nand_in();
+
+	nand_in.start = atoi(com_argv[1]);
+	nand_in.length = atoi(com_argv[2]);
+	nand_in.dev = atoi(com_argv[3]);
+	if (atoi(com_argv[4]) >= MAX_DEV_NUM) {
+		printf("\n Flash index number overflow!");
+		return -1;
+	}
+	(nand_in.cs_map)[atoi(com_argv[4])] = 1;
+
+	if (nand_erase(&nand_in) < 1)
+		return -1;
+
+	return 1;
+}
+
 int command_interpret(char * com_buf)
 {
 	char *buf = com_buf;
@@ -157,6 +189,9 @@ int command_handle(char *buf)
 	switch (cmd) {
 	case 6:
 		nand_query();
+		break;
+	case 7:	
+		handle_nerase();
 		break;
 	case 11:
 		nand_prog();
