@@ -7,7 +7,9 @@
 # published by the Free Software Foundation.
 # 
 
-FLASH_TOOL_PATH = ..
+FLASH_TOOL_BIN_PATH = ../bin
+FLASH_TOOL_SRC_PATH = ../src
+
 
 ifeq ($(CROSS_COMPILE),)
 $(error CROSS_COMPILE variable not set)
@@ -48,7 +50,7 @@ HEADS	:= $(SOCDIR)/head.S
 
 CFLAGS += -I$(SOCDIR)/include -I$(USBBOOTDIR)/usb_boot	\
 	-I$(USBBOOTDIR)/nandflash -I$(USBBOOTDIR)/include	\
-	-I..
+	-I$(FLASH_TOOL_SRC_PATH)
 
 OBJS	:= $(addsuffix .o , $(basename $(notdir $(SOURCES))))
 HEADO	:= $(addsuffix .o , $(basename $(notdir $(HEADS))))
@@ -64,6 +66,7 @@ all: $(APP)
 	$(OBJDUMP) -D $(APP) > $(TARGET).dump
 	$(NM) $(APP) | sort > $(TARGET).sym
 	$(OBJDUMP) -h $(APP) > $(TARGET).map
+	mkdir -p $(FLASH_TOOL_BIN_PATH)
 	cp usb_boot.bin $(FLASH_TOOL_PATH)
 
 $(APP): $(HEADO) $(OBJS) $(EXTLIBS) 

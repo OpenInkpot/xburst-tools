@@ -25,7 +25,7 @@
 #include "usb_boot_defines.h"
 #include "ingenic_usb.h"
 #include "cmd.h"
-#include "config.h"
+#include "inflash_version.h"
  
 extern struct nand_in nand_in;
 int com_argc;
@@ -94,7 +94,7 @@ static int handle_help(void)
 
 static int handle_version(void)
 {
-	printf("\n USB Boot Software current version: %s", CURRENT_VERSION);	
+	printf("\n USB Boot Software current version: %s", INFLASH_VERSION);
 	return 1;
 }
 

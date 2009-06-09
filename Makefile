@@ -42,6 +42,13 @@ GLIBC_PORTS_URL=ftp://ftp.gnu.org/gnu/glibc/$(GLIBC_PORTS_PACKAGE)
 KERNEL_HEADERS_PACKAGE=$(KERNEL_HEADERS_VER).tar.bz2
 KERNEL_HEADERS_URL=
 
+# for the device stage
+FLASH_TOOL_PATH = ./flash-tool
+FLASH_TOOL_BIN_PATH = $(FLASH_TOOL_PATH)/bin
+STAGE1_PATH = $(FLASH_TOOL_PATH)/device_stage1
+STAGE2_PATH = $(FLASH_TOOL_PATH)/device_stage2
+CROSS_COMPILE ?= mipsel-linux-
+
 CFLAGS="-O2"
 
 export PATH:=$(PWD)/install/bin:$(PATH)
@@ -149,8 +156,20 @@ kernel:
 
 ### flash-boot
 .PHONY: flash-tool
-flash-tool:
-	make -C ./flash-tool
+flash-tool: #stage1 stage2
+	mkdir -p $(FLASH_TOOL_BIN_PATH)
+	cp $(FLASH_TOOL_PATH)/usb_boot.cfg $(FLASH_TOOL_BIN_PATH)
+	cd $(FLASH_TOOL_PATH) && \
+	./autogen.sh && \
+	./configure && \
+	make
+	cp $(FLASH_TOOL_PATH)/src/inflash $(FLASH_TOOL_BIN_PATH)
+
+stage1:
+	make CROSS_COMPILE=$(CROSS_COMPILE) -C $(STAGE1_PATH)
+
+stage2:
+	make CROSS_COMPILE=$(CROSS_COMPILE) -C $(STAGE2_PATH)
 
 ### clean up
 distclean: clean clean-toolchain

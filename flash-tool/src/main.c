@@ -22,7 +22,7 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <getopt.h>
-#include "config.h"
+#include "inflash_version.h"
 #include "command_line.h"
 #include "ingenic_usb.h"
 #include "ingenic_cfg.h"
@@ -42,7 +42,7 @@ static void help(void)
 
 static void print_version(void)
 {
-	printf("inflash version: %s\n", CURRENT_VERSION);
+	printf("inflash version: %s\n", INFLASH_VERSION);
 }
 
 static struct option opts[] = {

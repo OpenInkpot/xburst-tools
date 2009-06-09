@@ -18,13 +18,14 @@
 # Foundation, Inc., 51 Franklin Street, Fifth Floor,
 # Boston, MA  02110-1301, USA
 
-FLASH_TOOL_PATH = ..
+FLASH_TOOL_BIN_PATH = ../bin
+FLASH_TOOL_SRC_PATH = ../src
 
 ifeq ($(CROSS_COMPILE),)
 $(error CROSS_COMPILE variable not set)
 endif
 
-CFLAGS	:= -O2 -mips32 -fno-pic -mno-abicalls -I..
+CFLAGS	:= -O2 -mips32 -fno-pic -mno-abicalls -I$(FLASH_TOOL_SRC_PATH)
 LDFLAGS	:= -nostdlib -EL -T target.ld 
 
 OBJS	= head.o main.o common.o board_4740.o board_4750.o debug.o
@@ -36,7 +37,8 @@ fw.bin: fw.elf
 	$(CROSS_COMPILE)objdump -D $< > fw.dump
 	$(CROSS_COMPILE)objdump -h $< > fw.map
 	$(CROSS_COMPILE)nm -n $< > System.map
-	cp fw.bin $(FLASH_TOOL_PATH)
+	mkdir -p $(FLASH_TOOL_BIN_PATH)
+	cp fw.bin $(FLASH_TOOL_BIN_PATH)
 
 fw.elf: $(OBJS)
 	$(CROSS_COMPILE)ld $(LDFLAGS) $(OBJS) -o $@
