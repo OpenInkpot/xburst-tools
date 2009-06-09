@@ -1,4 +1,18 @@
-inflash tools: flash image(like: u-Boot, kernel) to PI.
+Ingenic Usb Boot Tools
+	 flash image(like: u-Boot, kernel) to PI.
 
-to compile this program you need:
-	On Debian and Ubuntu, you'll need libusb-dev: sudo apt-get install libusb-dev  libconfuse-dev
+= compile =
+On Debian and Ubuntu, you'll need libusb-dev
+	sudo apt-get install libusb-dev  libconfuse-dev
+
+= run =
+inflash you need device stage1(fw.bin), stage2(usb_boot.bin)
+and usb_boot.cfg for the device configure.
+
+
+= shell =
+#!/bin/bash
+
+sudo ./inflash -c "boot"
+sudo ./inflash -c "nprog 0 u-boot-nand.bin 0 0 -n"
+# sudo ./inflash -c "nprog 2048 uImage 0 0 -n"
