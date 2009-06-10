@@ -156,7 +156,7 @@ kernel:
 
 ### flash-boot
 .PHONY: flash-tool
-flash-tool: #stage1 stage2
+flash-tool: stage1 stage2
 	mkdir -p $(FLASH_TOOL_BIN_PATH)
 	cp $(FLASH_TOOL_PATH)/usb_boot.cfg $(FLASH_TOOL_BIN_PATH)
 	cd $(FLASH_TOOL_PATH) && \

@@ -1,84 +1,82 @@
-# 
-# 
+#  
 # Copyright (C) 2006 Ingenic Semiconductor Inc.
-# By Lucifer
+# By Lucifer 
+#
 # This program is free software; you can redistribute it and/or modify
-# it under the terms of the GNU General Public License version 2 as
+# it under the terms of the GNU General Public License version 2 as 
 # published by the Free Software Foundation.
-# 
+#  
 
-FLASH_TOOL_BIN_PATH = ../bin
+FLASH_TOOL_BIN_PATH = ../bin 
 FLASH_TOOL_SRC_PATH = ../src
 
-
 ifeq ($(CROSS_COMPILE),)
-$(error CROSS_COMPILE variable not set)
+$(error CROSS_COMPILE variable not set) 
 endif
 
 CC	:= $(CROSS_COMPILE)gcc
-AR	:= $(CROSS_COMPILE)ar rcsv
+AR	:= $(CROSS_COMPILE)ar rcsv 
 LD	:= $(CROSS_COMPILE)ld
-OBJCOPY	:= $(CROSS_COMPILE)objcopy
+OBJCOPY	:= $(CROSS_COMPILE)objcopy 
 NM	:= $(CROSS_COMPILE)nm
-OBJDUMP	:= $(CROSS_COMPILE)objdump
+OBJDUMP	:= $(CROSS_COMPILE)objdump 
 
-CFLAGS	:= -mips32 -O2  -FPIC \
+CFLAGS	:= -mips32 -O2  -FPIC \ 
 		-fno-exceptions -ffunction-sections \
-		-fomit-frame-pointer -msoft-float -G 0
+		-fomit-frame-pointer -msoft-float -G 0 
 
-#CFLAGS	:= -mips32 -O2  -FPIC -mno-abicalls -fno-builtin \
+#CFLAGS	:= -mips32 -O2  -FPIC -mno-abicalls -fno-builtin \ 
 
-LDFLAGS	:= -nostdlib -T target.ld $(CFLAGS)
+LDFLAGS	:= -nostdlib -T target.ld $(CFLAGS) 
 
-LIBS		:= -lstdc++ -lc -lm -lgcc
+LIBS		:= -lstdc++ -lc -lm -lgcc 
 
-USBBOOTDIR	:= .
+USBBOOTDIR	:= . 
 
-LIBDIR	:= 
+LIBDIR	:=  
 
-#SOURCES += $(wildcard $(USBBOOTDIR)/usb_boot/*.c) 
+#SOURCES += $(wildcard $(USBBOOTDIR)/usb_boot/*.c)  
 
 SOURCES :=	./usb_boot/main.c	\
 		./usb_boot/udc.c	\
 		./usb_boot/cache.c	\
 		./usb_boot/serial.c	\
-		./usb_boot/boothandler.c
+		./usb_boot/boothandler.c 
 SOURCES += $(wildcard $(USBBOOTDIR)/nandflash/*.c) 
-SOURCES += $(wildcard $(USBBOOTDIR)/usb_boot/*.S)
+SOURCES += $(wildcard $(USBBOOTDIR)/usb_boot/*.S) 
 
-HEADS	:= $(SOCDIR)/head.S 
+HEADS	:= $(SOCDIR)/head.S  
 
-CFLAGS += -I$(SOCDIR)/include -I$(USBBOOTDIR)/usb_boot	\
+CFLAGS += -I$(SOCDIR)/include -I$(USBBOOTDIR)/usb_boot	\ 
 	-I$(USBBOOTDIR)/nandflash -I$(USBBOOTDIR)/include	\
-	-I$(FLASH_TOOL_SRC_PATH)
+	-I$(FLASH_TOOL_SRC_PATH) 
 
-OBJS	:= $(addsuffix .o , $(basename $(notdir $(SOURCES))))
-HEADO	:= $(addsuffix .o , $(basename $(notdir $(HEADS))))
+OBJS	:= $(addsuffix .o , $(basename $(notdir $(SOURCES)))) 
+HEADO	:= $(addsuffix .o , $(basename $(notdir $(HEADS)))) 
 
-TARGET := usb_boot
-APP	:= $(TARGET).elf 
+TARGET := usb_boot 
+APP	:= $(TARGET).elf  
 
 VPATH	:= $(ARCHDIR) $(SOCDIR) $(OSDIR) $(USBBOOTDIR)/usb_boot  \
-	$(USBBOOTDIR)/norflash $(USBBOOTDIR)/nandflash 
+	$(USBBOOTDIR)/norflash $(USBBOOTDIR)/nandflash  
 
-all: $(APP)
-	$(OBJCOPY) -O binary $(APP) $(TARGET).bin
-	$(OBJDUMP) -D $(APP) > $(TARGET).dump
-	$(NM) $(APP) | sort > $(TARGET).sym
-	$(OBJDUMP) -h $(APP) > $(TARGET).map
-	mkdir -p $(FLASH_TOOL_BIN_PATH)
-	cp usb_boot.bin $(FLASH_TOOL_PATH)
+all: $(APP) 
+	$(OBJCOPY) -O binary $(APP) $(TARGET).bin 
+	$(OBJDUMP) -D $(APP) > $(TARGET).dump 
+	$(NM) $(APP) | sort > $(TARGET).sym 
+	$(OBJDUMP) -h $(APP) > $(TARGET).map 
+	mkdir -p $(FLASH_TOOL_BIN_PATH) 
+	cp $(TARGET).bin $(FLASH_TOOL_BIN_PATH) 
 
-$(APP): $(HEADO) $(OBJS) $(EXTLIBS) 
-	$(CC) $(LDFLAGS) $^ -o $@
+$(APP): $(HEADO) $(OBJS) $(EXTLIBS)  
+	$(CC) $(LDFLAGS) $^ -o $@ 
 
-.c.o:
-	$(CC) $(CFLAGS) -o $@ -c $<
-.cpp.o:
-	$(CC) $(CFLAGS) -fno-rtti -fvtable-gc -o $@ -c $<
-.S.o:
-	$(CC) $(CFLAGS) -o $@ -c $<
+.c.o: 
+	$(CC) $(CFLAGS) -o $@ -c $< 
+.cpp.o: 
+	$(CC) $(CFLAGS) -fno-rtti -fvtable-gc -o $@ -c $< 
+.S.o: 
+	$(CC) $(CFLAGS) -o $@ -c $< 
 
-clean:
+clean: 
 	rm -fr *.o $(APP) $(OBJS) core $(OTHER) *.sym *.map *.dump *.bin *.lib *.~ *.\#
-
