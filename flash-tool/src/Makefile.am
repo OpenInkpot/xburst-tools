@@ -1,5 +1,4 @@
 AM_CFLAGS = -pedantic -Wall -W -O1 -g3 -std=gnu99 -lusb -lconfuse
-AM_LDFLAGS = -lusb -lconfuse
 
 inflash_version.h:
 	echo -e '#ifndef INFLASH_VERSION' \
