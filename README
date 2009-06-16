@@ -18,3 +18,20 @@ PMP. Incorporates the XBurst CPU core based on leading
 micro-architecture technology, this processor provides high integration, 
 high performance and a low power consumption solution for embedded devices.
 
+Boot up
+The Jz4740 can be set to boot from NOR or NAND.
+If booted from NAND, the CPU fetches the first page from NAND and uses the first 4 bytes on it to know how the NAND chip should be treated (16/8-bit bus, 2/3 row cycles).
+After that it copies the first 8kB from NAND and copies it to the I-Cache for execution.
+
+Ingenic Media Extension Instruction Set
+According to the MXU User Guide, the XBurst processor supports additional instructions called the Ingenic Media Extension Instruction Set (they call it an SIMD instruction set).
+
+Excerpt from the PDF:
+Processors (such as the Jz4740) have 60 extra SIMD commands used for the optimization of multimedia codecs such as MPEG4, H264, VC-1, RMVB, ... and other multimedia decoder algorithms that can be optimized using the MXU.
+
+Image Processing Unit
+The Jz4740 also has an IPU which has the following features:
+
+    * Video frame resize
+    * Color space conversion: 420/444/422 YUV to RGB convert 
+
