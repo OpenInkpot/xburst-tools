@@ -11,3 +11,10 @@ We want port Openmoko to Pi, All free software
 3. you need a "RS-232 <--> TTL" converter to 
    get the correct output date
 
+CPU Jz4740:
+
+Jz4740 is a multimedia application processor targeted at mobile devices 
+PMP. Incorporates the XBurst CPU core based on leading 
+micro-architecture technology, this processor provides high integration, 
+high performance and a low power consumption solution for embedded devices.
+
