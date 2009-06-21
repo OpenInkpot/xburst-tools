@@ -1,12 +1,8 @@
 /*
- * cache.c
- *
  * Handle operation of Jz CPU's cache
  *
- * Author: Seeger Chin
- * e-mail: seeger.chin@gmail.com
- *
  * Copyright (C) 2006 Ingenic Semiconductor Inc.
+ * Author: Seeger Chin <seeger.chin@gmail.com>
  * 
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License version 2 as

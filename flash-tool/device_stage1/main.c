@@ -1,6 +1,4 @@
 /*
- * main.c
- *
  * Main routine of the firmware.
  *
  * Copyright (C) 2009 PI
