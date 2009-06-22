@@ -1,24 +1,19 @@
-This package was debianized by xiangfu <xiangfu@unknown> on
+This package was debianized by Xiangfu Liu<xiangfu.z@gmail.com> on
 Mon, 22 Jun 2009 22:48:14 +0800.
 
-It was downloaded from <url://example.com>
+It was downloaded from <http://code.google.com/p/pi-project/>
 
-Upstream Author(s):
+Upstream Author(s): Xiangfu Liu <xiangfu.z@gmail.com>
 
-    <put author's name and email here>
-    <likewise for another author>
 
-Copyright:
-
-    <Copyright (C) 2009 Xiangfu Liu>
-    <likewise for another author>
-
-License:
-
-    <Put the license of the package here indented by 4 spaces>
-
-The Debian packaging is copyright 2009, xiangfu <xiangfu@unknown> and
+The Debian packaging is copyright 2009, xiangfu <xiangfu.z@gmail.com> and
 is licensed under the GPL, see `/usr/share/common-licenses/GPL'.
+
+You are free to distribute this software under the terms of
+the GNU General Public License  either version 3 of the License,
+or (at your option) any later version.
+On Debian systems, the complete text of the GNU General Public
+License can be found in the file `/usr/share/common-licenses/GPL-3'.
 
 # Please also look if there are files or directories which have a
 # different copyright/license attached and list them here.

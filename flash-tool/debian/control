@@ -2,10 +2,14 @@ Source: inflash
 Section: misc
 Priority: extra
 Maintainer: Xiangfu Liu <xiangfu.z@gmail.com>
-Build-Depends: debhelper (>= 7)
+Build-Depends: debhelper (>= 7) libusb (>= 0.1.4) libconfuse0
 Standards-Version: 3.8.0
 Homepage: http://code.google.com/p/pi-project/
 Package: inflash
 Architecture: any
-Depends: 
-Description: host tools for Ingenic CPU device usb boot.
+Depends: ${shlibs:Depends}
+Description: host tool for Ingenic CPU device usb boot.
+ inflash is a host tool for Ingenic CPU device usb boot.
+ it's can flash bootloader, kernel, rootfs to Ingenic CPU
+ device. also have some test function for Ingenic CPU 
+ device.
