@@ -1,0 +1,5 @@
+inflash (1.0.0-1) unstable; urgency=low
+
+  * Initial release (Closes: #nnnn)  <nnnn is the bug number of your ITP>
+
+ -- xiangfu <xiangfu@unknown>  Mon, 22 Jun 2009 22:48:14 +0800
