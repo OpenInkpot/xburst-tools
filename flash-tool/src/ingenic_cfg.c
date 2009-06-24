@@ -93,6 +93,8 @@ int check_dump_cfg(struct hand *hand)
 	/* check NAND */
 	if ( hand->nand_ps < 2048 && hand->nand_os > 16 ) {
 		printf("\n PAGESIZE or OOBSIZE setting invalid!");
+		printf("\n PAGESIZE is %d,\t OOBSIZE is %d", 
+		       hand->nand_ps, hand->nand_os);
 		return 0;
 	}
 	if ( hand->nand_ps < 2048 && hand->nand_ppb > 32 ) {
@@ -102,6 +104,8 @@ int check_dump_cfg(struct hand *hand)
 
 	if ( hand->nand_ps > 512 && hand->nand_os <= 16 ) {
 		printf("\n PAGESIZE or OOBSIZE setting invalid!");
+		printf("\n PAGESIZE is %d,\t OOBSIZE is %d", 
+		       hand->nand_ps, hand->nand_os);
 		return 0;
 	}
 	if ( hand->nand_ps > 512 && hand->nand_ppb < 64 ) {
