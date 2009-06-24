@@ -4,7 +4,8 @@ Priority: extra
 Maintainer: Xiangfu Liu <xiangfu.z@gmail.com>
 Build-Depends: debhelper (>= 7), libusb-dev, libconfuse-dev
 Standards-Version: 3.8.0
-Homepage: http://code.google.com/p/pi-project/
+Homepage: http://code.google.com/p/pi-project
+
 Package: inflash
 Architecture: any
 Depends: ${shlibs:Depends}, libusb, libconfuse
