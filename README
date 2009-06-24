@@ -1,6 +1,13 @@
-Pi is a Chinese device. 
-We want port Openmoko to Pi, All free software
+=Cross toolchain=
+you can get the cross toolchain at:
+  http://www.openmobilefree.net/other/file/mipseltools-gcc412-glibc261.tar.bz2
+  ftp://ftp.ingenic.cn/3sw/01linux/00toolchain/mipseltools-gcc412-glibc261.tar.bz2
+  ftp://ftp.ingenic.cn/3sw/01linux/00toolchain/jz-crosstools-src.tar.bz2
 
+or you can build is from source:
+  make toolchain
+
+=Serial Console=
 1. open the case
 
 2. take off the cover of PCB
@@ -11,8 +18,7 @@ We want port Openmoko to Pi, All free software
 3. you need a "RS-232 <--> TTL" converter to 
    get the correct output date
 
-CPU Jz4740:
-
+=CPU Jz4740=
 Jz4740 is a multimedia application processor targeted at mobile devices 
 PMP. Incorporates the XBurst CPU core based on leading 
 micro-architecture technology, this processor provides high integration, 
