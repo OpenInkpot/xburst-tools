@@ -296,42 +296,31 @@ int nand_program_check(struct nand_in *nand_in,
 			;
 		}
 
+		cur_page = (ret[3] << 24) | (ret[2] << 16) |  (ret[1] << 8) | 
+			(ret[0] << 0);
+
 		if (nand_in->start < 1 && 
 		    hand.nand_ps == 4096 && 
 		    hand.fw_args.cpu_id == 0x4740) {
 			/* (nand_out->status)[i] = 1; */
-			printf(" no check!");
-			cur_page = (ret[3] << 24) | 
-				(ret[2] << 16) | 
-				(ret[1] << 8) | 
-				(ret[0] << 0);
-			printf(" End at %d ",cur_page);
+			printf(" no check! End at %d ",cur_page);
 			continue;
 		}
 
 		if (nand_in->check(nand_in->buf, check_buf, nand_in->length)) {
 			/* (nand_out->status)[i] = 1; */
-			printf(" pass!");
-			cur_page = (ret[3] << 24) | 
-				(ret[2] << 16) |
-				(ret[1] << 8) |
-				(ret[0] << 0);
-			printf(" End at %d ",cur_page);
+			printf(" pass! End at %d ",cur_page);
 		} else {
 			/* (nand_out->status)[i] = 0; */
-			printf(" fail!");
+			printf(" fail! End at %d ",cur_page);
+
 			struct nand_in bad;
-			cur_page = (ret[3] << 24) | 
-				(ret[2] << 16) |
-				(ret[1] << 8) |
-				(ret[0] << 0);
-			printf(" End at %d ",cur_page);
 			bad.start = (cur_page - 1) / hand.nand_ppb;
 			if (cur_page % hand.nand_ppb == 0)
 				nand_markbad(&bad);
 		}
-
 	}
+
 	*start_page = cur_page;
 	return 0;
 }
