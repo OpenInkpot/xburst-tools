@@ -9,7 +9,9 @@ BUILT_SOURCES = inflash_version.h
 bin_PROGRAMS = inflash
 inflash_SOURCES = cmd.c  command_line.c  ingenic_cfg.c  \
 	ingenic_usb.c  main.c
+prefix = /usr
 
 datadir = /usr/share/inflash
-data_DATA = ../device_stage1/fw.bin ../device_stage2/usb_boot.bin
+data_DATA = ../device_stage1/fw.bin ../device_stage2/usb_boot.bin \
+	usb_boot.cfg
 EXTRA_DIST = $(datadir)
