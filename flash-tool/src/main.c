@@ -36,7 +36,7 @@ static void help(void)
 	       "  -h --help\t\t\tPrint this help message\n"
 	       "  -v --version\t\t\tPrint the version number\n"
 	       "  -c --command\t\t\tDirect run the command\n"
-	       "Report bugs to <xiangfu.z@gmail.com>."
+	       "Report bugs to <xiangfu.z@gmail.com>.\n"
 		);
 }
 

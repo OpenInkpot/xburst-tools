@@ -19,7 +19,9 @@
  * Boston, MA  02110-1301, USA
  */
 
+#include <errno.h>
 #include <confuse.h>
+#include <unistd.h>   
 #include "ingenic_cfg.h"
 #include "usb_boot_defines.h"
 
@@ -33,6 +35,7 @@ int hand_init_def(struct hand *hand)
 	hand->nand_bw = 8;
 	hand->nand_rc = 3;
 	hand->nand_ps = 2048;
+	hand->nand_os = 64;
 	hand->nand_ppb = 64;
 	hand->nand_eccpos = 6;
 	hand->nand_bbpage = 0;
@@ -138,6 +141,12 @@ int check_dump_cfg(struct hand *hand)
 
 int parse_configure(struct hand *hand, char * file_path)
 {
+	if (access(file_path, F_OK)) {
+		fprintf(stderr, "Error - can't read file: %s\n",
+			file_path, strerror(errno));
+		return -1;
+	}
+
 	hand_init_def(hand);
 
 	cfg_opt_t opts[] = {
@@ -178,8 +187,12 @@ int parse_configure(struct hand *hand, char * file_path)
 
 	cfg_t *cfg;
 	cfg = cfg_init(opts, 0);
-	if (cfg_parse(cfg, file_path) == CFG_PARSE_ERROR)
+	if (cfg_parse(cfg, file_path) == CFG_PARSE_ERROR) {
+		fprintf(stderr, "Error - can't read file: %s\n",
+			file_path, strerror(errno));
 		return -1;
+	}
+
 	cfg_free(cfg);
 
 	hand->fw_args.cpu_id = 0x4740;
