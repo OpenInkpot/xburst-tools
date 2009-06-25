@@ -133,8 +133,8 @@ int check_dump_cfg(struct hand *hand)
 int parse_configure(struct hand *hand, char * file_path)
 {
 	if (access(file_path, F_OK)) {
-		fprintf(stderr, "Error - can't read file %s: %s\n",
-			file_path, strerror(errno));
+		fprintf(stderr, "Error - can't read configure file %s.\n",
+			file_path);
 		return -1;
 	}
 
@@ -178,11 +178,8 @@ int parse_configure(struct hand *hand, char * file_path)
 
 	cfg_t *cfg;
 	cfg = cfg_init(opts, 0);
-	if (cfg_parse(cfg, file_path) == CFG_PARSE_ERROR) {
-		fprintf(stderr, "Error - can't read file %s: %s\n",
-			file_path, strerror(errno));
+	if (cfg_parse(cfg, file_path) == CFG_PARSE_ERROR)
 		return -1;
-	}
 
 	cfg_free(cfg);
 
