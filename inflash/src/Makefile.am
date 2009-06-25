@@ -12,6 +12,6 @@ inflash_SOURCES = cmd.c  command_line.c  ingenic_cfg.c  \
 prefix = /usr
 
 datadir = /usr/share/inflash
-data_DATA = ../xburst_stage1/xburst_stage1.bin ../xburst_stage2/usb_boot.bin \
+data_DATA = ../xburst_stage1/xburst_stage1.bin ../device_stage2/usb_boot.bin \
 	usb_boot.cfg
 EXTRA_DIST = $(datadir)
