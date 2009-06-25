@@ -201,7 +201,7 @@ int nand_program_check(struct nand_in *nand_in,
 		       struct nand_out *nand_out,
 		       unsigned int *start_page)
 {
-	unsigned int i, page_num, cur_page;
+	unsigned int i, page_num, cur_page = -1;
 	unsigned short temp;
 
 	if (nand_in->length > (unsigned int)MAX_TRANSFER_SIZE) {
@@ -527,7 +527,6 @@ int init_nand_in(void)
 
 int nand_prog(void)
 {
-	unsigned int i;
 	char *image_file;
 	char *help = "\n Usage: nprog (1) (2) (3) (4) (5)"
 		"\n (1)\tstart page number"
@@ -567,6 +566,7 @@ int nand_prog(void)
 
 #ifdef CONFIG_NAND_OUT
 	printf("\n Flash check result:");
+	int i;
 	for (i = 0; i < 16; i++)
 		printf(" %d", (nand_out.status)[i]);
 #endif
@@ -621,13 +621,12 @@ int nand_query(void)
 	return 1;
 }
 
-
 int nand_read(int mode)
 {
 	unsigned int i,j;
 	unsigned int start_addr, length, page_num;
 	unsigned char csn;
-	unsigned short temp;
+	unsigned short temp = 0;
 
 	if (com_argc < 5) {
 		printf("\n Usage:");
@@ -649,8 +648,8 @@ int nand_read(int mode)
 	nand_in.length= atoi(com_argv[2]);
 	nand_in.dev = atoi(com_argv[3]);
 
-	start_addr = nand_in->start;
-	length = nand_in->length;
+	start_addr = nand_in.start;
+	length = nand_in.length;
 
 	if (start_addr > NAND_MAX_PAGE_NUM || length > NAND_MAX_PAGE_NUM ) {
 		printf("\n Page number overflow!");
@@ -660,14 +659,14 @@ int nand_read(int mode)
 		printf("\n Device unboot! Boot it first!");
 		return -1;
 	}
-	for (i = 0; i < nand_in->max_chip; i++) 
-		if ((nand_in->cs_map)[i] != 0) 
+	for (i = 0; i < nand_in.max_chip; i++) 
+		if ((nand_in.cs_map)[i] != 0) 
 			break;
-	if (i>=nand_in->max_chip) return 1;
+	if (i >= nand_in.max_chip) return 1;
 	csn = i;
-	printf("\n Reading from No.%d device No.%d flash....",nand_in->dev,csn);
+	printf("\n Reading from No.%d device No.%d flash....",nand_in.dev,csn);
 
-	page_num = length / Hand.nand_ps +1;
+	page_num = length / hand.nand_ps +1;
 
 	usb_send_data_address_to_ingenic(&ingenic_dev, start_addr);
 	usb_send_data_length_to_ingenic(&ingenic_dev, page_num);
@@ -684,17 +683,17 @@ int nand_read(int mode)
 		break;
 	default:
 		printf("\n unknow mode!");
-		break;
+		return -1;
 	}
 
 	usb_ingenic_nand_ops(&ingenic_dev, temp);
 
-	usb_read_data_from_ingenic(&ingenic_dev, nand_in->buf, page_num * hand.nand_ps);
+	usb_read_data_from_ingenic(&ingenic_dev, nand_in.buf, page_num * hand.nand_ps);
 
 	for (j=0;j<length;j++) 
 	{
 		if (j % 16 == 0) printf("\n 0x%08x :",j);
-		printf("%02x ",(nand_in->buf)[j]);
+		printf("%02x ",(nand_in.buf)[j]);
 	}
 
 	usb_read_data_from_ingenic(&ingenic_dev, ret, 8);
