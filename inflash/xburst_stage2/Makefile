@@ -28,13 +28,9 @@ LIBS	:= -lstdc++ -lc -lm -lgcc
 
 USBBOOTDIR	:= .
 
-CFLAGS += -I$(USBBOOTDIR)/usb_boot \
-	-I$(USBBOOTDIR)/nandflash -I$(USBBOOTDIR)/include \
-	-I$(FLASH_TOOL_SRC_PATH)
+CFLAGS += -I$(USBBOOTDIR)/include -I$(FLASH_TOOL_SRC_PATH)
 
 OBJS	:= main.o udc.o cache.o serial.o boothandler.o nandflash_4740.o nandflash_4750.o
-
-VPATH	:= $(USBBOOTDIR)/usb_boot $(USBBOOTDIR)/nandflash
 
 all: xburst_stage2.elf
 	$(OBJCOPY) -O binary xburst_stage2.elf xburst_stage2.bin
