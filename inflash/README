@@ -14,6 +14,10 @@ modify it under the terms of the GNU General Public License
 as published by the Free Software Foundation; either version
 3 of the License, or (at your option) any later version.
 
+inflash is the Linux version of a Windows utility from Ingenic called 'usbboot'.
+Homepage: http://www.ingenic.cn/eng/productServ/kfyd/compiler/pffaqContents.aspx#questionAnchor8
+Manual: ftp://ftp.ingenic.cn/3sw/00tools/usb_boot/manual/USB_Boot_Tool_Manual_1.4_EN.pdf
+
 Build Requirements: libusb-dev, libconfuse-dev
 
 Build and Installation:
@@ -28,6 +32,7 @@ Build and Installation:
 Configuration file: /usr/share/inflash/inflash.cfg
 
 Examples:
+  sudo inflash     (invoking inflash without options will let you enter commands at the inflash prompt)
   sudo inflash -c "boot"
   sudo inflash -c "nprog 0 u-boot-nand.bin 0 0 -n"
   sudo inflash -c "nprog 2048 uImage 0 0 -n"

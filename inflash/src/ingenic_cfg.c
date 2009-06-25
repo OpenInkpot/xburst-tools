@@ -118,11 +118,13 @@ int check_dump_cfg(struct hand *hand)
 	       16 * (2 - hand->fw_args.bus_width));
 
 	printf("\n Nand page size %d, "
-	       "ECC offset %d, "
-	       "bad block ID %d, "
+	       "ECC offset in OOB %d, "
+	       "bad block offset in OOB %d, "
+	       "bad block page %d, "
 	       "use %d plane mode\n",
 	       hand->nand_ps,
 	       hand->nand_eccpos,
+	       hand->nand_bbpos,
 	       hand->nand_bbpage,
 	       hand->nand_plane);
 	return 1;
@@ -164,12 +166,12 @@ int parse_configure(struct hand *hand, char * file_path)
 		CFG_SIMPLE_INT("NAND_FORCEERASE", &hand->nand_force_erase),
 		CFG_SIMPLE_INT("NAND_OOBSIZE", &hand->nand_os),
 		CFG_SIMPLE_INT("NAND_ECCPOS", &hand->nand_eccpos),
-		CFG_SIMPLE_INT("NAND_BADBLACKPOS", &hand->nand_bbpos),
-		CFG_SIMPLE_INT("NAND_BADBLACKPAGE", &hand->nand_bbpage),
+		CFG_SIMPLE_INT("NAND_BADBLOCKPOS", &hand->nand_bbpos),
+		CFG_SIMPLE_INT("NAND_BADBLOCKPAGE", &hand->nand_bbpage),
 		CFG_SIMPLE_INT("NAND_PLANENUM", &hand->nand_plane),
 		CFG_SIMPLE_INT("NAND_BCHBIT", &hand->nand_bchbit),
 		CFG_SIMPLE_INT("NAND_WPPIN", &hand->nand_wppin),
-		CFG_SIMPLE_INT("NAND_BLOCKPERCHIP", &hand->nand_bbpage),
+		CFG_SIMPLE_INT("NAND_BLOCKPERCHIP", &hand->nand_bpc),
 
 		CFG_END()
 	};
