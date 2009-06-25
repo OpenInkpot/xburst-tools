@@ -7,14 +7,14 @@
 # 3 of the License, or (at your option) any later version.
 #
 
-FLASH_TOOL_BIN_PATH = ../bin
-FLASH_TOOL_SRC_PATH = ../src
+INFLASH_SRC_PATH = ../src
+XBURST_INCLUDE_PATH = ../xburst_include
 
 ifeq ($(CROSS_COMPILE),)
 $(error CROSS_COMPILE variable not set, should point to .../mipsel-openwrt-linux-)
 endif
 
-CFLAGS	:= -O2 -mips32 -fno-pic -mno-abicalls -I$(FLASH_TOOL_SRC_PATH)
+CFLAGS	:= -O2 -mips32 -fno-pic -mno-abicalls -I$(INFLASH_SRC_PATH) -I$(XBURST_INCLUDE_PATH)
 LDFLAGS	:= -nostdlib -EL -T target.ld 
 
 OBJS	= head.o main.o common.o board_4740.o board_4750.o debug.o

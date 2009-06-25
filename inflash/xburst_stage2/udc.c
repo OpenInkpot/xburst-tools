@@ -44,7 +44,6 @@ static u32 fifosize[] = {
 	MAX_EP0_SIZE, MAX_EP1_SIZE
 };
 
-#if 1
 void *memset(void *s, int c, size_t count)
 {
 	char *xs = s;
@@ -63,7 +62,6 @@ void *memcpy(void *dest, const void *src, size_t count)
 		*tmp++ = *s++;
 	return dest;
 }
-#endif
 
 static void udcReadFifo(u8 *ptr, int size)
 {

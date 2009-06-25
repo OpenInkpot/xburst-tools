@@ -19,7 +19,7 @@
  * Boston, MA  02110-1301, USA
  */
 
-#include"jz4740.h"
+#include "jz4740.h"
 #include "usb.h" 
 #include "error.h"
 #include "usb_boot.h"
@@ -46,8 +46,8 @@ extern u32 Bulk_out_buf[BULK_OUT_BUF_SIZE];
 extern u32 Bulk_in_buf[BULK_IN_BUF_SIZE];
 extern u16 handshake_PKT[4];
 extern udc_state;
-extern void *memset(void *, int , size_t);
-extern void *memcpy(void *, const void *, size_t);
+extern void *memset(void *s, int c, size_t count);
+extern void *memcpy(void *dest, const void *src, size_t count);
 
 u32 ret_dat;
 u32 start_addr;  //program operation start address or sector

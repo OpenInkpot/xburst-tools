@@ -8,7 +8,8 @@
 # 2 of the License, or (at your option) any later version.
 #
 
-FLASH_TOOL_SRC_PATH = ../src
+INFLASH_SRC_PATH = ../src
+XBURST_INCLUDE_PATH = ../xburst_include
 
 ifeq ($(CROSS_COMPILE),)
 $(error CROSS_COMPILE variable not set, should point to .../mipsel-openwrt-linux-)
@@ -22,13 +23,10 @@ NM	:= $(CROSS_COMPILE)nm
 OBJDUMP	:= $(CROSS_COMPILE)objdump
 
 CFLAGS	:= -mips32 -O2 -fno-exceptions -ffunction-sections \
-	-fomit-frame-pointer -msoft-float -G 0
+	-fomit-frame-pointer -msoft-float -G 0 \
+	-I$(XBURST_INCLUDE_PATH) -I$(INFLASH_SRC_PATH)
 LDFLAGS	:= -nostdlib -T target.ld $(CFLAGS)
 LIBS	:= -lstdc++ -lc -lm -lgcc
-
-USBBOOTDIR	:= .
-
-CFLAGS += -I$(USBBOOTDIR)/include -I$(FLASH_TOOL_SRC_PATH)
 
 OBJS	:= main.o udc.o cache.o serial.o boothandler.o nandflash_4740.o nandflash_4750.o
 
