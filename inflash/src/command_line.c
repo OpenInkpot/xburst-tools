@@ -1,22 +1,10 @@
 /*
- * "Ingenic flash tool" - flash the Ingenic CPU via USB
- *
- * (C) Copyright 2009
- * Author: Xiangfu Liu <xiangfu.z@gmail.com>
+ * Authors: Xiangfu Liu <xiangfu.z@gmail.com>
  *
  * This program is free software; you can redistribute it and/or
  * modify it under the terms of the GNU General Public License
- * version 3 as published by the Free Software Foundation.
- *
- * This program is distributed in the hope that it will be useful,
- * but WITHOUT ANY WARRANTY; without even the implied warranty of
- * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
- * GNU General Public License for more details.
- *
- * You should have received a copy of the GNU General Public License
- * along with this program; if not, write to the Free Software
- * Foundation, Inc., 51 Franklin Street, Fifth Floor,
- * Boston, MA  02110-1301, USA
+ * as published by the Free Software Foundation; either version
+ * 3 of the License, or (at your option) any later version.
  */
 
 #include <stdio.h>
@@ -98,23 +86,9 @@ static int handle_version(void)
 	return 1;
 }
 
-static int handle_fconfig(void)
-{
-	if (com_argc < 3) {
-		printf("\n Usage:"
-		       " fconfig (1) (2) "
-		       "\n 1:configration file name"
-		       "\n 2:deivce index number");
-		return -1;
-	}
-	/* usb_infenic_config(atoi(com_argv[2]),com_argv[1]); */
-	return 1;
-}
-
 /* need transfer two para :blk_num ,start_blk */
 int handle_nerase(void)
 {
-	int i;
 	if (com_argc < 5) {
 		printf("\n Usage:");
 		printf(" nerase (1) (2) (3) (4) ");
