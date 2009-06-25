@@ -25,7 +25,8 @@ static void help(void)
 	printf("Usage: inflash [options] ...(must run as root)\n"
 	       "  -h --help\t\t\tPrint this help message\n"
 	       "  -v --version\t\t\tPrint the version number\n"
-	       "  -c --command\t\t\tDirect run the command\n"
+	       "  -c --command\t\t\tDirect run the command\n\n"
+	       "  <run without options to enter commands via inflash prompt>\n\n"
 	       "Report bugs to <xiangfu.z@gmail.com>.\n"
 		);
 }
@@ -49,7 +50,7 @@ int main(int argc, char **argv)
 	char com_buf[256] = {0};
 
 	printf("\n inflash - Ingenic XBurst USB Boot Utility"
-	       "\n (c) 2009 Ingenic Semiconductor Inc., Xiangfu Liu, Marek Lindner, Wolfgang Spraul"
+	       "\n (c) 2009 Ingenic Semiconductor Inc., Qi Hardware Inc., Xiangfu Liu, Marek Lindner"
 	       "\n This program is Free Software and comes with ABSOLUTELY NO WARRANTY."
                "\n\n");
 
