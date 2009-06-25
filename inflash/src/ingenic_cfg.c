@@ -107,17 +107,17 @@ int check_dump_cfg(struct hand *hand)
 	printf(" YES\n");
 
 	printf("Current device information:\n");
-	printf(" CPU is Jz%x",hand->fw_args.cpu_id);
-	printf("\n Crystal work at %dMHz, the CCLK up to %dMHz and PMH_CLK up to %dMHz",
+	printf("CPU type is Ingenic XBurst Jz%x\n",hand->fw_args.cpu_id);
+	printf("Crystal work at %dMHz, the CCLK up to %dMHz and PMH_CLK up to %dMHz\n",
 		hand->fw_args.ext_clk,
 		(unsigned int)hand->fw_args.cpu_speed * hand->fw_args.ext_clk,
 		((unsigned int)hand->fw_args.cpu_speed * hand->fw_args.ext_clk) / hand->fw_args.phm_div);
 
-	printf("\n Total SDRAM size is %d MB, work in %d bank and %d bit mode",
+	printf("SDRAM Total size is %d MB, work in %d bank and %d bit mode\n",
 		total_size / 0x100000, 2 * (hand->fw_args.bank_num + 1), 
 	       16 * (2 - hand->fw_args.bus_width));
 
-	printf("\n Nand page size %d, "
+	printf("Nand page size %d, "
 	       "ECC offset in OOB %d, "
 	       "bad block offset in OOB %d, "
 	       "bad block page %d, "

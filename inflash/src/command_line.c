@@ -55,7 +55,7 @@ static const char COMMAND[][30]=
 
 static int handle_help(void)
 {
-	printf("\n Command support in current version:"
+	printf("\n command support in current version:"
 	       "\n help          print this help;"
 	       "\n boot          boot device and make it in stage2;"
 	       "\n list          show current device number can connect;"
@@ -128,19 +128,15 @@ int command_interpret(char * com_buf)
 			while ( *(++buf) == ' ' );
 			com_argv[i][j] = '\0';
 			i++;
-			if (i > MAX_ARGC) {
-				printf("\n Para is too much! About!");
-				return 0;
-			}
-			j=0;
+			if (i > MAX_ARGC)
+				return COMMAND_NUM + 1;
+			j = 0;
 			continue;
 		} else {
 			com_argv[i][j] = *buf;
 			j++;
-			if (j > MAX_COMMAND_LENGTH) {
-				printf("\n Para is too long! About!");
-				return 0;
-			}
+			if (j > MAX_COMMAND_LENGTH)
+				return COMMAND_NUM + 1;
 		}
 		buf++;
 	}
@@ -193,7 +189,7 @@ int command_handle(char *buf)
 		boot(STAGE1_FILE_PATH, STAGE2_FILE_PATH);
 		break;
 	default:
-		printf("\n Command not support!");
+		printf("\n command not support or input error!");
 		break;
 	}
 

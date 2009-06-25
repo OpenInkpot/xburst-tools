@@ -155,12 +155,7 @@ int usb_get_ingenic_cpu(struct ingenic_dev *ingenic_dev)
 	}
 
 	ingenic_dev->cpu_info_buff[8] = '\0';
-	printf(" CPU data: "
-	       "%02x, %02x, %02x, %02x, %02x, %02x, %02x, %02x : %s\n",
-		ingenic_dev->cpu_info_buff[0], ingenic_dev->cpu_info_buff[1],
-		ingenic_dev->cpu_info_buff[2], ingenic_dev->cpu_info_buff[3],
-		ingenic_dev->cpu_info_buff[4], ingenic_dev->cpu_info_buff[5],
-		ingenic_dev->cpu_info_buff[6], ingenic_dev->cpu_info_buff[7],
+	printf(" CPU data: %s\n",
 		ingenic_dev->cpu_info_buff);
 
 	if (!strcmp(ingenic_dev->cpu_info_buff,"JZ4740V1")) return 1;

@@ -49,10 +49,9 @@ int main(int argc, char **argv)
 	char *cptr;
 	char com_buf[256] = {0};
 
-	printf("\n inflash - Ingenic XBurst USB Boot Utility"
-	       "\n (c) 2009 Ingenic Semiconductor Inc., Qi Hardware Inc., Xiangfu Liu, Marek Lindner"
-	       "\n This program is Free Software and comes with ABSOLUTELY NO WARRANTY."
-               "\n\n");
+	printf("inflash - Ingenic XBurst USB Boot Utility\n"
+	       "(c) 2009 Ingenic Semiconductor Inc., Qi Hardware Inc., Xiangfu Liu, Marek Lindner\n"
+	       "This program is Free Software and comes with ABSOLUTELY NO WARRANTY.\n\n");
 
 	while(1) {
 		int c, option_index = 0;
@@ -96,7 +95,7 @@ int main(int argc, char **argv)
 	}
 
 	while (1) {
-		printf("\n inflash :> ");
+		printf("\ninflash :> ");
 		cptr = fgets(com_buf, 256, stdin);
 		if (cptr == NULL) 
 			continue;

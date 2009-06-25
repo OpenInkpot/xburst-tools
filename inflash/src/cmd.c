@@ -105,7 +105,7 @@ void init_cfg()
 	if (usb_read_data_from_ingenic(&ingenic_dev, ret, 8) != 1)
 		goto xout;
 
-	printf("Configuring XBurst CPU succeeded.\n");
+	printf(" Configuring XBurst CPU succeeded.\n");
 	return;
 xout:
 	printf("Configuring XBurst CPU failed.\n");
@@ -137,10 +137,10 @@ int boot(char *stage1_path, char *stage2_path){
 	}
 
 	if (status) {
-		printf("Already booted.");
+		printf(" Already booted.");
 		return 1;
 	} else {
-		printf("CPU not yet booted, now booting...\n");
+		printf(" CPU not yet booted, now booting...\n");
 
 		/* now we upload the boot stage1 */
 		printf(" Loading stage1 from '%s'\n", stage1_path);
@@ -151,7 +151,7 @@ int boot(char *stage1_path, char *stage2_path){
 			return -1;
 
 		/* now we upload the boot stage2 */
-		sleep(1);
+		usleep(100);
 		printf(" Loading stage2 from '%s'\n", stage2_path);
 		if (load_file(&ingenic_dev, stage2_path) < 1)
 			return -1;
@@ -159,9 +159,9 @@ int boot(char *stage1_path, char *stage2_path){
 		if (usb_ingenic_upload(&ingenic_dev, 2) < 1)
 			return -1;
 
-		printf("Booted successfully!\n");
+		printf(" Booted successfully!\n");
 	}
-	sleep(1);
+	usleep(100);
 	init_cfg();
 	return 1;
 }
