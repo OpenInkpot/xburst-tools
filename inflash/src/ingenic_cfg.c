@@ -49,7 +49,7 @@ int hand_init_def(struct hand *hand)
 
 int check_dump_cfg(struct hand *hand)
 {
-	printf("\n Now checking whether all configure args valid: ");
+	printf("Now checking whether all configure args valid:");
 	/* check PLL */
 	if (hand->fw_args.ext_clk > 27 || hand->fw_args.ext_clk < 12) {
 		printf("\n EXTCLK setting invalid!");
@@ -103,9 +103,10 @@ int check_dump_cfg(struct hand *hand)
 	if ( hand->nand_ps > 512 && hand->nand_ppb < 64 ) {
 		printf("\n PAGESIZE or PAGEPERBLOCK setting invalid!");
 		return 0;
-	}	       
+	}
+	printf(" YES\n");
 
-	printf("\n Current device information:");
+	printf("Current device information:\n");
 	printf(" CPU is Jz%x",hand->fw_args.cpu_id);
 	printf("\n Crystal work at %dMHz, the CCLK up to %dMHz and PMH_CLK up to %dMHz",
 		hand->fw_args.ext_clk,
@@ -124,7 +125,6 @@ int check_dump_cfg(struct hand *hand)
 	       hand->nand_eccpos,
 	       hand->nand_bbpage,
 	       hand->nand_plane);
-
 	return 1;
 }
 

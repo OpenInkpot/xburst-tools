@@ -44,14 +44,14 @@ static struct option opts[] = {
 
 int main(int argc, char **argv)
 {
-	printf(" inflash - (C) 2009"
-	       "\n Ingenic Tools Software!"
-	       "\n This program is Free Software and has ABSOLUTELY NO WARRANTY\n");
-
 	int command = 0;
 	char *cptr;
-	char com_buf[256];
-	memset(com_buf, 0, 256);
+	char com_buf[256] = {0};
+
+	printf("\n inflash - Ingenic XBurst USB Boot Utility"
+	       "\n (c) 2009 Ingenic Semiconductor Inc., Xiangfu Liu, Marek Lindner, Wolfgang Spraul"
+	       "\n This program is Free Software and comes with ABSOLUTELY NO WARRANTY."
+               "\n\n");
 
 	while(1) {
 		int c, option_index = 0;

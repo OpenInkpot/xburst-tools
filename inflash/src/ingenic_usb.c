@@ -96,31 +96,31 @@ int usb_ingenic_init(struct ingenic_dev *ingenic_dev)
 	num_ingenic = get_ingenic_device(ingenic_dev);
 
 	if (num_ingenic == 0) {
-		fprintf(stderr, "Error - no Ingenic device found\n");
+		fprintf(stderr, "Error - no XBurst device found\n");
 		goto out;
 	}
 
 	if (num_ingenic > 1) {
-		fprintf(stderr, "Error - too many Ingenic devices found: %i\n",
+		fprintf(stderr, "Error - too many XBurst devices found: %i\n",
 			num_ingenic);
 		goto out;
 	}
 
 	ingenic_dev->usb_handle = usb_open(ingenic_dev->usb_dev);
 	if (!ingenic_dev->usb_handle) {
-		fprintf(stderr, "Error - can't open Ingenic device: %s\n",
+		fprintf(stderr, "Error - can't open XBurst device: %s\n",
 			usb_strerror());
 		goto out;
 	}
 
 	if (get_ingenic_interface(ingenic_dev) < 1) {
-		fprintf(stderr, "Error - can't find Ingenic interface\n");
+		fprintf(stderr, "Error - can't find XBurst interface\n");
 		goto out;
 	}
 
 	if (usb_claim_interface(ingenic_dev->usb_handle, ingenic_dev->interface)
 	    < 0) {
-		fprintf(stderr, "Error - can't claim Ingenic interface: %s\n",
+		fprintf(stderr, "Error - can't claim XBurst interface: %s\n",
 			usb_strerror());
 		goto out;
 	}
@@ -150,12 +150,12 @@ int usb_get_ingenic_cpu(struct ingenic_dev *ingenic_dev)
 
 	if (status != sizeof(ingenic_dev->cpu_info_buff) - 1 ) {
 		fprintf(stderr, "Error - "
-			"can't retrieve Ingenic CPU information: %i\n", status);
+			"can't retrieve XBurst CPU information: %i\n", status);
 		return status;
 	}
 
 	ingenic_dev->cpu_info_buff[8] = '\0';
-	printf("\n CPU data: "
+	printf(" CPU data: "
 	       "%02x, %02x, %02x, %02x, %02x, %02x, %02x, %02x : %s\n",
 		ingenic_dev->cpu_info_buff[0], ingenic_dev->cpu_info_buff[1],
 		ingenic_dev->cpu_info_buff[2], ingenic_dev->cpu_info_buff[3],
@@ -283,7 +283,7 @@ int usb_ingenic_upload(struct ingenic_dev *ingenic_dev, int stage)
 	int stage_addr = (stage == 1 ? 0x80002000 : stage2_addr);
 
 	usb_send_data_address_to_ingenic(ingenic_dev, stage_addr);
-	printf("\n Download stage %d program and execute at 0x%08x ", 
+	printf(" Download stage %d program and execute at 0x%08x\n", 
 	       stage, (stage_addr));
 	usb_send_data_to_ingenic(ingenic_dev);
 
