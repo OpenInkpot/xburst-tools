@@ -167,6 +167,15 @@ int command_handle(char *buf)
 	case 7:	
 		handle_nerase();
 		break;
+	case 8:	/* nread */
+		nand_read(NAND_READ);
+		break;
+	case 9:	/* nreadraw */
+		nand_read(NAND_READ_RAW);
+		break;
+	case 10: /* nreadoob */
+		nand_read(NAND_READ_OOB);
+		break;
 	case 11:
 		nand_prog();
 		break;

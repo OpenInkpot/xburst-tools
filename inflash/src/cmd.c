@@ -620,3 +620,86 @@ int nand_query(void)
 
 	return 1;
 }
+
+
+int nand_read(int mode)
+{
+	unsigned int i,j;
+	unsigned int start_addr, length, page_num;
+	unsigned char csn;
+	unsigned short temp;
+
+	if (com_argc < 5) {
+		printf("\n Usage:");
+		printf(" nread (1) (2) (3) (4) ");
+		printf("\n 1:start page number"
+		       "\n 2:length in byte"
+		       "\n 3:device index number"
+		       "\n 4:flash index number ");
+		return -1;
+	}
+	init_nand_in();
+
+	if (atoi(com_argv[4]) >= MAX_DEV_NUM) {
+		printf("\n Flash index number overflow!");
+		return -1;
+	}
+	(nand_in.cs_map)[atoi(com_argv[4])] = 1;
+	nand_in.start = atoi(com_argv[1]);
+	nand_in.length= atoi(com_argv[2]);
+	nand_in.dev = atoi(com_argv[3]);
+
+	start_addr = nand_in->start;
+	length = nand_in->length;
+
+	if (start_addr > NAND_MAX_PAGE_NUM || length > NAND_MAX_PAGE_NUM ) {
+		printf("\n Page number overflow!");
+		return -1;
+	}
+	if (usb_get_ingenic_cpu(&ingenic_dev) < 3) {
+		printf("\n Device unboot! Boot it first!");
+		return -1;
+	}
+	for (i = 0; i < nand_in->max_chip; i++) 
+		if ((nand_in->cs_map)[i] != 0) 
+			break;
+	if (i>=nand_in->max_chip) return 1;
+	csn = i;
+	printf("\n Reading from No.%d device No.%d flash....",nand_in->dev,csn);
+
+	page_num = length / Hand.nand_ps +1;
+
+	usb_send_data_address_to_ingenic(&ingenic_dev, start_addr);
+	usb_send_data_length_to_ingenic(&ingenic_dev, page_num);
+
+	switch(mode) {
+	case NAND_READ:
+		temp = ((NO_OOB<<12) & 0xf000) + ((csn<<4) & 0xff0) + NAND_READ;
+		break;
+	case NAND_READ_OOB:
+		temp = ((csn<<4) & 0xff0) + NAND_READ_OOB;
+		break;
+	case NAND_READ_RAW:
+		temp = ((NO_OOB<<12) & 0xf000) + ((csn<<4) & 0xff0) + NAND_READ_RAW;
+		break;
+	default:
+		printf("\n unknow mode!");
+		break;
+	}
+
+	usb_ingenic_nand_ops(&ingenic_dev, temp);
+
+	usb_read_data_from_ingenic(&ingenic_dev, nand_in->buf, page_num * hand.nand_ps);
+
+	for (j=0;j<length;j++) 
+	{
+		if (j % 16 == 0) printf("\n 0x%08x :",j);
+		printf("%02x ",(nand_in->buf)[j]);
+	}
+
+	usb_read_data_from_ingenic(&ingenic_dev, ret, 8);
+	printf("\n Operation end position : %d ",
+	       (ret[3]<<24)|(ret[2]<<16)|(ret[1]<<8)|(ret[0]<<0));
+
+	return 1;
+}
