@@ -1,18 +1,24 @@
-Ingenic Usb Boot Tools
-	 flash image(like: u-Boot, kernel) to PI.
+*
+* inflash
+*
+* Utility to respond to Ingenic XBurst USB boot protocol, provide
+* initial boot stages and ability to access NAND on device.
+*
 
-= compile =
-On Debian and Ubuntu, you'll need libusb-dev
-	sudo apt-get install libusb-dev  libconfuse-dev
+Authors: Xiangfu Liu <xiangfu.z@gmail.com>
+         Marek Lindner <lindner_marek@yahoo.de>
+         Wolfgang Spraul <wolfgang@qi-hardware.com>
 
-= run =
-inflash you need device stage1(fw.bin), stage2(usb_boot.bin)
-and usb_boot.cfg for the device configure.
+This program is free software; you can redistribute it and/or
+modify it under the terms of the GNU General Public License
+as published by the Free Software Foundation; either version
+3 of the License, or (at your option) any later version.
 
+Build Requirements: libusb-dev, libconfuse-dev
 
-= shell =
-#!/bin/bash
+To run inflash you need device stage 1 (fw.bin), stage 2 (usb_boot.bin)
+and usb_boot.cfg for device configuration.
 
 sudo ./inflash -c "boot"
 sudo ./inflash -c "nprog 0 u-boot-nand.bin 0 0 -n"
-# sudo ./inflash -c "nprog 2048 uImage 0 0 -n"
+sudo ./inflash -c "nprog 2048 uImage 0 0 -n"
