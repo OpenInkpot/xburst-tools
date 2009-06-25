@@ -1,17 +1,17 @@
 #
-# Copyright (C) 2006 Ingenic Semiconductor Inc.
-# By Lucifer
+# Authors: Lucifer at Ingenic Semiconductor Inc.
+#          Xiangfu Liu <xiangfu.z@gmail.com>
 #
-# This program is free software; you can redistribute it and/or modify
-# it under the terms of the GNU General Public License version 2 as
-# published by the Free Software Foundation.
+# This program is free software; you can redistribute it and/or
+# modify it under the terms of the GNU General Public License
+# as published by the Free Software Foundation; either version
+# 2 of the License, or (at your option) any later version.
 #
 
-FLASH_TOOL_BIN_PATH = ../bin
 FLASH_TOOL_SRC_PATH = ../src
 
 ifeq ($(CROSS_COMPILE),)
-$(error CROSS_COMPILE variable not set)
+$(error CROSS_COMPILE variable not set, should point to .../mipsel-openwrt-linux-)
 endif
 
 CC	:= $(CROSS_COMPILE)gcc
@@ -21,54 +21,38 @@ OBJCOPY	:= $(CROSS_COMPILE)objcopy
 NM	:= $(CROSS_COMPILE)nm
 OBJDUMP	:= $(CROSS_COMPILE)objdump
 
-CFLAGS	:= -mips32 -O2  -FPIC \
-		-fno-exceptions -ffunction-sections \
-		-fomit-frame-pointer -msoft-float -G 0
-
-#CFLAGS	:= -mips32 -O2  -FPIC -mno-abicalls -fno-builtin \
-
+CFLAGS	:= -mips32 -O2 -fno-exceptions -ffunction-sections \
+	-fomit-frame-pointer -msoft-float -G 0
 LDFLAGS	:= -nostdlib -T target.ld $(CFLAGS)
-
-LIBS		:= -lstdc++ -lc -lm -lgcc
+LIBS	:= -lstdc++ -lc -lm -lgcc
 
 USBBOOTDIR	:= .
-
-LIBDIR	:=
-
-#SOURCES += $(wildcard $(USBBOOTDIR)/usb_boot/*.c)
 
 SOURCES :=	./usb_boot/main.c	\
 		./usb_boot/udc.c	\
 		./usb_boot/cache.c \
 		./usb_boot/serial.c \
-		./usb_boot/boothandler.c
-SOURCES += $(wildcard $(USBBOOTDIR)/nandflash/*.c)
-SOURCES += $(wildcard $(USBBOOTDIR)/usb_boot/*.S)
+		./usb_boot/boothandler.c \
+		./nandflash/nandflash_4740.c \
+		./nandflash/nandflash_4750.c
 
-HEADS	:= $(SOCDIR)/head.S
-
-CFLAGS += -I$(SOCDIR)/include -I$(USBBOOTDIR)/usb_boot \
+CFLAGS += -I$(USBBOOTDIR)/usb_boot \
 	-I$(USBBOOTDIR)/nandflash -I$(USBBOOTDIR)/include \
 	-I$(FLASH_TOOL_SRC_PATH)
 
 OBJS	:= $(addsuffix .o , $(basename $(notdir $(SOURCES))))
-HEADO	:= $(addsuffix .o , $(basename $(notdir $(HEADS))))
 
-TARGET := usb_boot
-APP	:= $(TARGET).elf
+APP	:= xburst_stage2.elf
 
-VPATH	:= $(ARCHDIR) $(SOCDIR) $(OSDIR) $(USBBOOTDIR)/usb_boot \
-	$(USBBOOTDIR)/norflash $(USBBOOTDIR)/nandflash
+VPATH	:= $(USBBOOTDIR)/usb_boot $(USBBOOTDIR)/nandflash
 
 all: $(APP)
-	$(OBJCOPY) -O binary $(APP) $(TARGET).bin
-	$(OBJDUMP) -D $(APP) > $(TARGET).dump
-	$(NM) $(APP) | sort > $(TARGET).sym
-	$(OBJDUMP) -h $(APP) > $(TARGET).map
-	mkdir -p $(FLASH_TOOL_BIN_PATH)
-	cp $(TARGET).bin $(FLASH_TOOL_BIN_PATH)
+	$(OBJCOPY) -O binary $(APP) xburst_stage2.bin
+	$(OBJDUMP) -D $(APP) > xburst_stage2.dump
+	$(NM) $(APP) | sort > xburst_stage2.sym
+	$(OBJDUMP) -h $(APP) > xburst_stage2.map
 
-$(APP): $(HEADO) $(OBJS) $(EXTLIBS)
+$(APP): head.o $(OBJS)
 	$(CC) $(LDFLAGS) $^ -o $@
 
 .c.o:
@@ -79,4 +63,5 @@ $(APP): $(HEADO) $(OBJS) $(EXTLIBS)
 	$(CC) $(CFLAGS) -o $@ -c $<
 
 clean:
-	rm -fr *.o $(APP) $(OBJS) core $(OTHER) *.sym *.map *.dump *.bin *.lib *~ *.\#
+	rm -f $(addprefix xburst_stage2., bin dump elf map sym)
+	rm -f $(OBJS)
