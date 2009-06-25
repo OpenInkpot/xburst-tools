@@ -12,7 +12,7 @@
 
 #include "usb_boot_defines.h"
 
-#define CONFIG_FILE_PATH "/usr/share/inflash/usb_boot.cfg"
+#define CONFIG_FILE_PATH "/usr/share/inflash/inflash.cfg"
 
 int hand_init_def(struct hand *hand);
 int check_dump_cfg(struct hand *hand);

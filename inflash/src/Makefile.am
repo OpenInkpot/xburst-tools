@@ -13,7 +13,7 @@ prefix = /usr
 
 datadir = /usr/share/inflash
 data_DATA = ../xburst_stage1/xburst_stage1.bin ../xburst_stage2/xburst_stage2.bin \
-	usb_boot.cfg
+	inflash.cfg
 EXTRA_DIST = $(datadir)
 
 ../xburst_stage1/xburst_stage1.bin:

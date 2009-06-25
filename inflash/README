@@ -16,9 +16,18 @@ as published by the Free Software Foundation; either version
 
 Build Requirements: libusb-dev, libconfuse-dev
 
-To run inflash you need device stage 1 (fw.bin), stage 2 (usb_boot.bin)
-and usb_boot.cfg for device configuration.
+Build and Installation:
+  ./autogen.sh
+  ./configure
+  make
+  make install
+    *) make install will install the 'inflash' binary to /usr/bin/inflash
+       and the stage 1 and 2 bootloaders as well as inflash.cfg configuration
+       file into /usr/share/inflash
 
-sudo ./inflash -c "boot"
-sudo ./inflash -c "nprog 0 u-boot-nand.bin 0 0 -n"
-sudo ./inflash -c "nprog 2048 uImage 0 0 -n"
+Configuration file: /usr/share/inflash/inflash.cfg
+
+Examples:
+  sudo inflash -c "boot"
+  sudo inflash -c "nprog 0 u-boot-nand.bin 0 0 -n"
+  sudo inflash -c "nprog 2048 uImage 0 0 -n"
