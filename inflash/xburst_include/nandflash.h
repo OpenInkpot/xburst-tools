@@ -19,13 +19,11 @@
 #ifndef __NANDLIB_H__
 #define __NANDLIB_H__
 
+#include "typedef.h"
+
 #ifndef NULL
 #define NULL	0
 #endif
-
-#define u8	unsigned char
-#define u16	unsigned short
-#define u32	unsigned int
 
 /*  Jz4740 nandflash interface */
 unsigned int nand_query_4740(u8 *);

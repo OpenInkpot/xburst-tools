@@ -41,3 +41,8 @@ The Jz4740 also has an IPU which has the following features:
     * Video frame resize
     * Color space conversion: 420/444/422 YUV to RGB convert 
 
+=debian package=
+1. run 'dh_make'
+2. edit the file under 'debian' folder (create by 'dh_make')
+3. run 'dpkg-buildpackage -rfakeroot' to create the deb package and source 
+   package

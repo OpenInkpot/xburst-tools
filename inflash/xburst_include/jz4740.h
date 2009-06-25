@@ -18,15 +18,10 @@
  * Foundation, Inc., 51 Franklin Street, Fifth Floor,
  * Boston, MA  02110-1301, USA
  */
-
 #ifndef __JZ4740_H__
 #define __JZ4740_H__
 
-typedef unsigned int size_t;
-typedef unsigned char u8;
-typedef unsigned short u16;
-typedef unsigned int u32;
-
+#include "typedef.h"
 
 #ifndef __ASSEMBLY__
 #define UCOS_CSP 0
@@ -4863,7 +4858,6 @@ do{                                 \
       while(!__rtc_write_ready());  \
       (REG_RTC_HSPR = n );        \
 }while(0)
-
 
 #endif /* !__ASSEMBLY__ */
 

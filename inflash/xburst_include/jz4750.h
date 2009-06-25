@@ -22,12 +22,10 @@
 #ifndef __JZ4750_H__
 #define __JZ4750_H__
 
+#include "typedef.h"
+
 #ifndef __ASSEMBLY__
 #define UCOS_CSP 0
-
-typedef unsigned char u8;
-typedef unsigned short u16;
-typedef unsigned int u32;
 
 #if 0
 #if UCOS_CSP

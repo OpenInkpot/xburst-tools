@@ -43,10 +43,10 @@ KERNEL_HEADERS_PACKAGE=$(KERNEL_HEADERS_VER).tar.bz2
 KERNEL_HEADERS_URL=
 
 # for the device stage
-FLASH_TOOL_PATH = ./flash-tool
+FLASH_TOOL_PATH = ./inflash
 FLASH_TOOL_BIN_PATH = $(FLASH_TOOL_PATH)/bin
-STAGE1_PATH = $(FLASH_TOOL_PATH)/device_stage1
-STAGE2_PATH = $(FLASH_TOOL_PATH)/device_stage2
+STAGE1_PATH = $(FLASH_TOOL_PATH)/xburst_stage1
+STAGE2_PATH = $(FLASH_TOOL_PATH)/xburst_stage2
 CROSS_COMPILE ?= mipsel-linux-
 
 CFLAGS="-O2"
@@ -155,8 +155,8 @@ kernel:
 	make uImage
 
 ### flash-boot
-.PHONY: flash-tool
-flash-tool: stage1 stage2
+.PHONY: inflash
+inflash: stage1 stage2
 	mkdir -p $(FLASH_TOOL_BIN_PATH)
 	cp $(FLASH_TOOL_PATH)/src/usb_boot.cfg $(FLASH_TOOL_BIN_PATH)
 	cd $(FLASH_TOOL_PATH) && \
@@ -172,10 +172,14 @@ stage2:
 	make CROSS_COMPILE=$(CROSS_COMPILE) -C $(STAGE2_PATH)
 
 ### clean up
-distclean: clean clean-toolchain
+distclean: clean clean-inflash clean-toolchain
 
 clean:
-	make clean -C flash-tool
+
+clean-inflash:
+	make clean CROSS_COMPILE=$(CROSS_COMPILE) -C $(STAGE1_PATH)
+	make clean CROSS_COMPILE=$(CROSS_COMPILE) -C $(STAGE2_PATH)
+	make clean -C $(FLASH_TOOL_PATH)
 
 clean-toolchain: clean-glibc
 	rm -rf $(TOOLCHAIN_PATH)/$(BINUTILS_VER) binutils
