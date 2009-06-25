@@ -28,31 +28,21 @@ LIBS	:= -lstdc++ -lc -lm -lgcc
 
 USBBOOTDIR	:= .
 
-SOURCES :=	./usb_boot/main.c	\
-		./usb_boot/udc.c	\
-		./usb_boot/cache.c \
-		./usb_boot/serial.c \
-		./usb_boot/boothandler.c \
-		./nandflash/nandflash_4740.c \
-		./nandflash/nandflash_4750.c
-
 CFLAGS += -I$(USBBOOTDIR)/usb_boot \
 	-I$(USBBOOTDIR)/nandflash -I$(USBBOOTDIR)/include \
 	-I$(FLASH_TOOL_SRC_PATH)
 
-OBJS	:= $(addsuffix .o , $(basename $(notdir $(SOURCES))))
-
-APP	:= xburst_stage2.elf
+OBJS	:= main.o udc.o cache.o serial.o boothandler.o nandflash_4740.o nandflash_4750.o
 
 VPATH	:= $(USBBOOTDIR)/usb_boot $(USBBOOTDIR)/nandflash
 
-all: $(APP)
-	$(OBJCOPY) -O binary $(APP) xburst_stage2.bin
-	$(OBJDUMP) -D $(APP) > xburst_stage2.dump
-	$(NM) $(APP) | sort > xburst_stage2.sym
-	$(OBJDUMP) -h $(APP) > xburst_stage2.map
+all: xburst_stage2.elf
+	$(OBJCOPY) -O binary xburst_stage2.elf xburst_stage2.bin
+	$(OBJDUMP) -D xburst_stage2.elf > xburst_stage2.dump
+	$(NM) xburst_stage2.elf | sort > xburst_stage2.sym
+	$(OBJDUMP) -h xburst_stage2.elf > xburst_stage2.map
 
-$(APP): head.o $(OBJS)
+xburst_stage2.elf: head.o $(OBJS)
 	$(CC) $(LDFLAGS) $^ -o $@
 
 .c.o:
@@ -64,4 +54,4 @@ $(APP): head.o $(OBJS)
 
 clean:
 	rm -f $(addprefix xburst_stage2., bin dump elf map sym)
-	rm -f $(OBJS)
+	rm -f head.o $(OBJS)
