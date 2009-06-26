@@ -506,8 +506,8 @@ u32 nand_read_4740(void *buf, u32 startpage, u32 pagenum, int option)
 				if (stat & EMC_NFINTS_UNCOR) {
 					if (flag)
 					{
-//						serial_puts("\nUncorrectable error occurred\n");
-//						serial_put_hex(cur_page);
+						serial_puts("\nUncorrectable error occurred\n");
+						serial_put_hex(cur_page);
 						handshake_PKT[3] = 1;
 					}
 				}

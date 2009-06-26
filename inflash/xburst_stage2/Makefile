@@ -15,20 +15,26 @@ ifeq ($(CROSS_COMPILE),)
 $(error CROSS_COMPILE variable not set, should point to .../mipsel-openwrt-linux-)
 endif
 
-CC	:= $(CROSS_COMPILE)gcc
-AR	:= $(CROSS_COMPILE)ar rcsv
-LD	:= $(CROSS_COMPILE)ld
-OBJCOPY	:= $(CROSS_COMPILE)objcopy
-NM	:= $(CROSS_COMPILE)nm
-OBJDUMP	:= $(CROSS_COMPILE)objdump
+CC	= $(CROSS_COMPILE)gcc
+AR	= $(CROSS_COMPILE)ar rcsv
+LD	= $(CROSS_COMPILE)ld
+OBJCOPY	= $(CROSS_COMPILE)objcopy
+NM	= $(CROSS_COMPILE)nm
+OBJDUMP	= $(CROSS_COMPILE)objdump
 
-CFLAGS	:= -mips32 -O2 -fno-exceptions -ffunction-sections \
-	-fomit-frame-pointer -msoft-float -G 0 \
+DEBUG_CFLAGS = -g -Wa,-a=$(basename $@).lst
+# Wolfgang saw data corruptions in stage2 when dealing with ECC data on random writes
+# to NAND. Disabling the unit-at-a-time optimization reproducibly fixed the bug.
+# The compiler may be optimizing in a way that conflicts with how the hardware ECC
+# registers work. Since other register accesses might be affected too it seems the best
+# is to disable this optimization right now.
+CFLAGS	= -mips32 -O2 -fno-exceptions -fno-unit-at-a-time -fno-zero-initialized-in-bss \
+	-ffunction-sections -fomit-frame-pointer -msoft-float -G 0 $(DEBUG_CFLAGS) \
 	-I$(XBURST_INCLUDE_PATH) -I$(INFLASH_SRC_PATH)
-LDFLAGS	:= -nostdlib -T target.ld $(CFLAGS)
-LIBS	:= -lstdc++ -lc -lm -lgcc
+LDFLAGS	= -nostdlib -T target.ld $(CFLAGS)
+LIBS	= -lstdc++ -lc -lm -lgcc
 
-OBJS	:= main.o udc.o cache.o serial.o boothandler.o nandflash_4740.o nandflash_4750.o
+OBJS	= main.o udc.o cache.o serial.o boothandler.o nandflash_4740.o nandflash_4750.o
 
 all: xburst_stage2.elf
 	$(OBJCOPY) -O binary xburst_stage2.elf xburst_stage2.bin
@@ -48,4 +54,4 @@ xburst_stage2.elf: head.o $(OBJS)
 
 clean:
 	rm -f $(addprefix xburst_stage2., bin dump elf map sym)
-	rm -f head.o $(OBJS)
+	rm -f head.o $(OBJS) $(OBJS:.o=.lst)
