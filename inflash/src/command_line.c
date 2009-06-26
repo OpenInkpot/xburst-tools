@@ -115,7 +115,7 @@ int handle_nerase(void)
 		printf("\n 1:start block number"
 		       "\n 2:block length"
 		       "\n 3:device index number"
-		       "\n 4:flash chip index number");
+		       "\n 4:flash chip index number\n");
 		return -1;
 	}
 
@@ -144,7 +144,7 @@ int handle_nmark(void)
 		printf(" nerase (1) (2) (3) ");
 		printf("\n 1:bad block number"
 		       "\n 2:device index number"
-		       "\n 3:flash chip index number ");
+		       "\n 3:flash chip index number\n");
 		return -1;
 	}
 	init_nand_in();
@@ -171,7 +171,7 @@ int handle_memtest(void)
 		printf(" memtest (1) [2] [3] ");
 		printf("\n 1:device index number"
 		       "\n 2:SDRAM start address"
-		       "\n 3:test size      ");
+		       "\n 3:test size\n");
 		return -1;
 	}
 
@@ -188,6 +188,20 @@ int handle_memtest(void)
 		size = 0;
 	}
 	debug_memory(atoi(com_argv[1]), start, size);
+	return 1;
+}
+
+int handle_gpio(int mode)
+{
+	if (com_argc < 3) {
+		printf("\n Usage:"
+		       " gpios (1) (2) "
+		       "\n 1:GPIO pin number"
+		       "\n 2:device index number\n");
+		return -1;
+	}
+
+	debug_gpio(atoi(com_argv[2]), mode, atoi(com_argv[1]));
 	return 1;
 }
 
@@ -263,6 +277,12 @@ int command_handle(char *buf)
 		printf("\n exiting inflash software\n");
 		return -1;	/* return -1 to break the main.c while
 				 * then run usb_ingenic_cleanup*/
+	case 18:
+		handle_gpio(2);
+		break;
+	case 19:
+		handle_gpio(3);
+		break;
 	case 20:
 		boot(STAGE1_FILE_PATH, STAGE2_FILE_PATH);
 		break;
@@ -273,7 +293,7 @@ int command_handle(char *buf)
 		handle_memtest();
 		break;
 	default:
-		printf("\n command not support or input error!");
+		printf("\n command not support or input error!\n");
 		break;
 	}
 

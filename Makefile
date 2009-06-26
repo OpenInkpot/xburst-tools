@@ -47,7 +47,7 @@ FLASH_TOOL_PATH = ./inflash
 FLASH_TOOL_BIN_PATH = $(FLASH_TOOL_PATH)/bin
 STAGE1_PATH = $(FLASH_TOOL_PATH)/xburst_stage1
 STAGE2_PATH = $(FLASH_TOOL_PATH)/xburst_stage2
-CROSS_COMPILE ?= mipsel-linux-
+CROSS_COMPILE ?= mipsel-openwrt-linux-
 
 CFLAGS="-O2"
 

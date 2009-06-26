@@ -21,5 +21,7 @@ int init_nand_in();
 int nand_prog(void);
 int nand_query(void);
 int nand_erase(struct nand_in *nand_in);
+int debug_memory(int obj, unsigned int start, unsigned int size);
+int debug_gpio(int obj, unsigned char ops, unsigned char pin);
 
 #endif  /* __CMD_H__ */

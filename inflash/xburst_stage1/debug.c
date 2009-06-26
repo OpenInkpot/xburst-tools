@@ -71,11 +71,9 @@ void gpio_test(unsigned char ops, unsigned char pin)
 
 void do_debug()
 {
-	switch (fw_args->debug_ops)
-	{
+	switch (fw_args->debug_ops) {
 	case 1:      /* sdram check */
-		switch (CPU_ID)
-		{
+		switch (CPU_ID) {
 		case 0x4740:
 			gpio_init_4740();
 			serial_init();
@@ -86,7 +84,8 @@ void do_debug()
 			serial_init();
 			sdram_init_4750();
 			break;
-		default:;
+		default:
+			;
 		}
 		REG8(USB_REG_INDEX) = 1;
 		REG32(USB_FIFO_EP1) = check_sdram(fw_args->start, fw_args->size);

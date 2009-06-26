@@ -749,10 +749,10 @@ int debug_memory(int obj, unsigned int start, unsigned int size)
 	usleep(100);
 	usb_read_data_from_ingenic(&ingenic_dev, buffer, 8);
 	if (buffer[0] != 0)
-		printf("\n Test memory fail! Last error address is %x !",
+		printf("\n Test memory fail! Last error address is %x !\n",
 		       buffer[0]);
 	else
-		printf("\n Test memory pass!");
+		printf("\n Test memory pass!\n");
 
 	return 1;
 }

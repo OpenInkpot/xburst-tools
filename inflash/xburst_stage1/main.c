@@ -36,7 +36,7 @@ volatile u32 CFG_EXTAL;
 volatile u8 PHM_DIV;
 volatile u8 IS_SHARE;
 extern int pllout2;
-#if 1
+#if 0
 void test_load_args(void)
 {
 	CPU_ID = 0x4740 ;
@@ -68,11 +68,12 @@ void load_args(void)
 		CFG_CPU_SPEED = 192000000;
 	}
 	PHM_DIV = fw_args->phm_div;
-	if ( fw_args->use_uart > 3 ) fw_args->use_uart = 0;
+	if (fw_args->use_uart > 3) 
+		fw_args->use_uart = 0;
 	UART_BASE = UART0_BASE + fw_args->use_uart * 0x1000;
 	CONFIG_BAUDRATE = fw_args->boudrate;
-	SDRAM_BW16 = fw_args->bus_width;
-	SDRAM_BANK4 = fw_args->bank_num;
+	SDRAM_BW16 = fw_args->bus_width == 0 ? 32 : 16;
+	SDRAM_BANK4 = fw_args->bank_num * 4;
 	SDRAM_ROW = fw_args->row_addr;
 	SDRAM_COL = fw_args->col_addr;
 	CONFIG_MOBILE_SDRAM = fw_args->is_mobile;
@@ -81,7 +82,7 @@ void load_args(void)
 
 void c_main(void)
 {
-	test_load_args();
+	load_args();
 
 	if (fw_args->debug_ops > 0) {
 		do_debug();
@@ -105,7 +106,7 @@ void c_main(void)
 		return;
 	}
 #if 1
-	serial_puts("Setup fw args as:\n");
+	serial_puts("Setup xburst CPU args as:\n");
 	serial_put_hex(CPU_ID);
 	serial_put_hex(CFG_EXTAL);
 	serial_put_hex(CFG_CPU_SPEED);
@@ -119,5 +120,6 @@ void c_main(void)
 	serial_put_hex(pllout2);
 	serial_put_hex(REG_CPM_CPCCR);
 #endif
-	serial_puts("Fw run finish !\n");
+	serial_puts("xburst stage1 run finish !\n");
+	load_args();
 }
