@@ -19,7 +19,7 @@
 #ifndef __NANDLIB_H__
 #define __NANDLIB_H__
 
-#include "typedef.h"
+#include "typedefs.h"
 
 #ifndef NULL
 #define NULL	0

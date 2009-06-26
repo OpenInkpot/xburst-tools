@@ -22,7 +22,7 @@
 #ifndef __JZ4750_H__
 #define __JZ4750_H__
 
-#include "typedef.h"
+#include "typedefs.h"
 
 #ifndef __ASSEMBLY__
 #define UCOS_CSP 0
