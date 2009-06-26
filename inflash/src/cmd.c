@@ -702,3 +702,97 @@ int nand_read(int mode)
 
 	return 1;
 }
+
+int debug_memory(int obj, unsigned int start, unsigned int size)
+{
+	unsigned int buffer[8],tmp;
+
+	tmp = usb_get_ingenic_cpu(&ingenic_dev);
+	if (tmp  > 2) {
+		printf("\n This command only run under UNBOOT state!");
+		return -1;
+	}
+
+	switch (tmp) {
+	case 1:
+		tmp = 0;
+		hand.fw_args.cpu_id = 0x4740;
+		break;
+	case 2:
+		tmp = 0;
+		hand.fw_args.cpu_id = 0x4750;
+		break;
+	}
+
+	hand.fw_args.debug_ops = 1;/* tell device it's memory debug */
+	hand.fw_args.start = start;
+
+	if (size == 0)
+		hand.fw_args.size = total_size;
+	else
+		hand.fw_args.size = size;
+
+	printf("\n Now test memory from %x to %x: ",
+	       start, start + hand.fw_args.size);
+
+	if (load_file(&ingenic_dev, STAGE1_FILE_PATH) < 1)
+		return -1;
+	if (usb_ingenic_upload(&ingenic_dev, 1) < 1)
+		return -1;
+
+	usleep(100);
+	usb_read_data_from_ingenic(&ingenic_dev, buffer, 8);
+	if (buffer[0] != 0)
+		printf("\n Test memory fail! Last error address is %x !",
+		       buffer[0]);
+	else
+		printf("\n Test memory pass!");
+
+	return 1;
+}
+
+int debug_gpio(int obj, unsigned char ops, unsigned char pin)
+{
+	unsigned int tmp;
+
+	tmp = usb_get_ingenic_cpu(&ingenic_dev);
+	if (tmp  > 2) {
+		printf("\n This command only run under UNBOOT state!");
+		return -1;
+	}
+
+	switch (tmp) {
+	case 1:
+		tmp = 0;
+		hand.fw_args.cpu_id = 0x4740;
+		if (pin > 124) {
+			printf("\n Jz4740 has 124 GPIO pin in all!");
+			return -1;
+		}
+		break;
+	case 2:
+		tmp = 0;
+		hand.fw_args.cpu_id = 0x4750;
+		if (pin > 178) {
+			printf("\n Jz4750 has 178 GPIO pin in all!");
+			return -1;
+		}
+		break;
+	}
+
+	hand.fw_args.debug_ops = ops;/* tell device it's memory debug */
+	hand.fw_args.pin_num = pin;
+
+	if (ops == 2)
+		printf("\n GPIO %d set!",pin);
+	else
+		printf("\n GPIO %d clear!",pin);
+
+	if (load_file(&ingenic_dev, STAGE1_FILE_PATH) < 1)
+		return -1;
+	if (usb_ingenic_upload(&ingenic_dev, 1) < 1)
+		return -1;
+
+	return 0;
+}
+

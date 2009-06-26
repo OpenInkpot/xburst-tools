@@ -18,8 +18,10 @@
 extern struct nand_in nand_in;
 int com_argc;
 char com_argv[MAX_ARGC][MAX_COMMAND_LENGTH];
+const char HEX_NUM[17]={'0','1','2','3','4','5','6','7','8','9',
+			'a','b','c','d','e','f',' '};
 
-static const char COMMAND[][30]=
+static const char COMMAND[][COMMAND_NUM]=
 {
 	"",
 	"query",
@@ -79,6 +81,23 @@ static int handle_help(void)
 	       "\n gpioc         let one GPIO to low level;");
 	/* printf("\n nmake         read all data from nand flash and store to file(experimental);"); */
 	return 1;
+}
+
+unsigned int hex2dec(char *s)
+{
+	int i,L=(int)strlen(s),j;
+	unsigned int temp=0;
+	if (L>8) L=8;
+	for (i = 0; i < L; i++) {
+		for (j = 0; j < 16; j++)
+			if (s[i] == HEX_NUM[j]) 
+				break;
+
+		if (j == 16) 
+			return 0;
+		temp = temp * 16 + j;
+	}
+	return temp;
 }
 
 static int handle_version(void)
@@ -143,6 +162,35 @@ int handle_nmark(void)
 	return 1;
 }
 
+int handle_memtest(void)
+{
+	unsigned int start, size;
+	if (com_argc != 2 && com_argc != 4)
+	{
+		printf("\n Usage:");
+		printf(" memtest (1) [2] [3] ");
+		printf("\n 1:device index number"
+		       "\n 2:SDRAM start address"
+		       "\n 3:test size      ");
+		return -1;
+	}
+
+	if (com_argc == 4) {
+		if (com_argv[2][0]=='0'&&com_argv[2][1]=='x') 
+			start=hex2dec(&com_argv[2][2]);
+		else start=atol(com_argv[2]);
+
+		if (com_argv[3][0]=='0'&&com_argv[3][1]=='x') 
+			size = hex2dec(&com_argv[3][2]);
+		else size = atol(com_argv[3]);
+	} else {
+		start = 0;
+		size = 0;
+	}
+	debug_memory(atoi(com_argv[1]), start, size);
+	return 1;
+}
+
 int command_interpret(char * com_buf)
 {
 	char *buf = com_buf;
@@ -150,6 +198,10 @@ int command_interpret(char * com_buf)
 	
 	L = (int)strlen(buf);
 	buf[L]=' ';
+
+	if (buf[0] == '\n')
+		return 0;
+
 	for (k = 0; k <= L; k++) {
 		if (*buf == ' ' || *buf == '\n') {
 			while ( *(++buf) == ' ' );
@@ -180,10 +232,9 @@ int command_handle(char *buf)
 {
 	int cmd = command_interpret(buf); /* get the command index */
 
-	if (!cmd)
-		return -1;
-
 	switch (cmd) {
+	case 0:
+		break;
 	case 6:
 		nand_query();
 		break;
@@ -217,6 +268,9 @@ int command_handle(char *buf)
 		break;
 	case 26:
 		handle_nmark();
+		break;
+	case 29:
+		handle_memtest();
 		break;
 	default:
 		printf("\n command not support or input error!");
