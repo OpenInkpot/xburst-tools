@@ -21,7 +21,7 @@
 #ifndef __JZ4740_H__
 #define __JZ4740_H__
 
-#include "typedefs.h"
+#include "xburst_types.h"
 
 #ifndef __ASSEMBLY__
 #define UCOS_CSP 0

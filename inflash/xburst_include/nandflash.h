@@ -19,7 +19,7 @@
 #ifndef __NANDLIB_H__
 #define __NANDLIB_H__
 
-#include "typedefs.h"
+#include "xburst_types.h"
 
 #ifndef NULL
 #define NULL	0
