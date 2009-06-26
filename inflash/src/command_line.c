@@ -47,6 +47,7 @@ static const char COMMAND[][30]=
 	"unselect",
 	"chip",
 	"unchip",
+	"nmark",
 	"nmake",
 	"load",
 	"memtest",
@@ -113,6 +114,32 @@ int handle_nerase(void)
 	if (nand_erase(&nand_in) < 1)
 		return -1;
 
+	return 1;
+}
+
+int handle_nmark(void)
+{
+	int i;
+	if (com_argc < 4) {
+		printf("\n Usage:");
+		printf(" nerase (1) (2) (3) ");
+		printf("\n 1:bad block number"
+		       "\n 2:device index number"
+		       "\n 3:flash chip index number ");
+		return -1;
+	}
+	init_nand_in();
+
+	nand_in.start = atoi(com_argv[1]);
+	nand_in.dev = atoi(com_argv[2]);
+
+	if (atoi(com_argv[3])>=MAX_DEV_NUM) {
+		printf("\n Flash index number overflow!");
+		return -1;
+	}
+	(nand_in.cs_map)[atoi(com_argv[3])] = 1;
+
+	nand_markbad(&nand_in);
 	return 1;
 }
 
@@ -187,6 +214,9 @@ int command_handle(char *buf)
 				 * then run usb_ingenic_cleanup*/
 	case 20:
 		boot(STAGE1_FILE_PATH, STAGE2_FILE_PATH);
+		break;
+	case 26:
+		handle_nmark();
 		break;
 	default:
 		printf("\n command not support or input error!");
