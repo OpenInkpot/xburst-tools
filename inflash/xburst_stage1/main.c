@@ -1,7 +1,7 @@
 /*
  * Main routine of the firmware.
  *
- * Copyright (C) 2009 PI
+ * Copyright (C) 2009
  * Author:  Xiangfu Liu <xiangfu.z@gmail.com>
  *
  * This program is free software; you can redistribute it and/or
@@ -121,5 +121,4 @@ void c_main(void)
 	serial_put_hex(REG_CPM_CPCCR);
 #endif
 	serial_puts("xburst stage1 run finish !\n");
-	load_args();
 }
