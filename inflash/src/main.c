@@ -95,7 +95,7 @@ int main(int argc, char **argv)
 	}
 
 	while (1) {
-		printf("inflash :> ");
+		printf("\ninflash :> ");
 		cptr = fgets(com_buf, 256, stdin);
 		if (cptr == NULL)
 			continue;

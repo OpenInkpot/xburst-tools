@@ -141,37 +141,37 @@ int parse_configure(struct hand *hand, char * file_path)
 	hand_init_def(hand);
 
 	cfg_opt_t opts[] = {
-		CFG_INT("EXTCLK", &hand->fw_args.ext_clk, CFGF_NONE),
-		CFG_INT("CPUSPEED", &hand->fw_args.cpu_speed, CFGF_NONE),
-		CFG_INT("PHMDIV", &hand->fw_args.phm_div, CFGF_NONE),
-		CFG_INT("BOUDRATE", &hand->fw_args.boudrate, CFGF_NONE),
-		CFG_INT("USEUART", &hand->fw_args.use_uart, CFGF_NONE),
+		CFG_INT("BOUDRATE", 57600, CFGF_NONE),
+		CFG_SIMPLE_INT("EXTCLK", &hand->fw_args.ext_clk),
+		CFG_SIMPLE_INT("CPUSPEED", &hand->fw_args.cpu_speed),
+		CFG_SIMPLE_INT("PHMDIV", &hand->fw_args.phm_div),
+		CFG_SIMPLE_INT("USEUART", &hand->fw_args.use_uart),
 
-		CFG_INT("BUSWIDTH", &hand->fw_args.bus_width, CFGF_NONE),
-		CFG_INT("BANKS", &hand->fw_args.bank_num, CFGF_NONE),
-		CFG_INT("ROWADDR", &hand->fw_args.row_addr, CFGF_NONE),
-		CFG_INT("COLADDR", &hand->fw_args.col_addr, CFGF_NONE),
+		CFG_SIMPLE_INT("BUSWIDTH", &hand->fw_args.bus_width),
+		CFG_SIMPLE_INT("BANKS", &hand->fw_args.bank_num),
+		CFG_SIMPLE_INT("ROWADDR", &hand->fw_args.row_addr),
+		CFG_SIMPLE_INT("COLADDR", &hand->fw_args.col_addr),
 
-		CFG_INT("ISMOBILE", &hand->fw_args.is_mobile, CFGF_NONE),
-		CFG_INT("ISBUSSHARE", &hand->fw_args.is_busshare, CFGF_NONE),
-		CFG_INT("DEBUGOPS", &hand->fw_args.debug_ops, CFGF_NONE),
-		CFG_INT("PINNUM", &hand->fw_args.pin_num, CFGF_NONE),
-		CFG_INT("START", &hand->fw_args.start, CFGF_NONE),
-		CFG_INT("SIZE", &hand->fw_args.size, CFGF_NONE),
+		CFG_SIMPLE_INT("ISMOBILE", &hand->fw_args.is_mobile),
+		CFG_SIMPLE_INT("ISBUSSHARE", &hand->fw_args.is_busshare),
+		CFG_SIMPLE_INT("DEBUGOPS", &hand->fw_args.debug_ops),
+		CFG_SIMPLE_INT("PINNUM", &hand->fw_args.pin_num),
+		CFG_SIMPLE_INT("START", &hand->fw_args.start),
+		CFG_SIMPLE_INT("SIZE", &hand->fw_args.size),
 
-		CFG_INT("NAND_BUSWIDTH", &hand->nand_bw, CFGF_NONE),
-		CFG_INT("NAND_ROWCYCLES", &hand->nand_rc, CFGF_NONE),
-		CFG_INT("NAND_PAGESIZE", &hand->nand_ps, CFGF_NONE),
-		CFG_INT("NAND_PAGEPERBLOCK", &hand->nand_ppb, CFGF_NONE),
-		CFG_INT("NAND_FORCEERASE", &hand->nand_force_erase, CFGF_NONE),
-		CFG_INT("NAND_OOBSIZE", &hand->nand_os, CFGF_NONE),
-		CFG_INT("NAND_ECCPOS", &hand->nand_eccpos, CFGF_NONE),
-		CFG_INT("NAND_BADBLOCKPOS", &hand->nand_bbpos, CFGF_NONE),
-		CFG_INT("NAND_BADBLOCKPAGE", &hand->nand_bbpage, CFGF_NONE),
-		CFG_INT("NAND_PLANENUM", &hand->nand_plane, CFGF_NONE),
-		CFG_INT("NAND_BCHBIT", &hand->nand_bchbit, CFGF_NONE),
-		CFG_INT("NAND_WPPIN", &hand->nand_wppin, CFGF_NONE),
-		CFG_INT("NAND_BLOCKPERCHIP", &hand->nand_bpc, CFGF_NONE),
+		CFG_SIMPLE_INT("NAND_BUSWIDTH", &hand->nand_bw),
+		CFG_SIMPLE_INT("NAND_ROWCYCLES", &hand->nand_rc),
+		CFG_SIMPLE_INT("NAND_PAGESIZE", &hand->nand_ps),
+		CFG_SIMPLE_INT("NAND_PAGEPERBLOCK", &hand->nand_ppb),
+		CFG_SIMPLE_INT("NAND_FORCEERASE", &hand->nand_force_erase),
+		CFG_SIMPLE_INT("NAND_OOBSIZE", &hand->nand_os),
+		CFG_SIMPLE_INT("NAND_ECCPOS", &hand->nand_eccpos),
+		CFG_SIMPLE_INT("NAND_BADBLOCKPOS", &hand->nand_bbpos),
+		CFG_SIMPLE_INT("NAND_BADBLOCKPAGE", &hand->nand_bbpage),
+		CFG_SIMPLE_INT("NAND_PLANENUM", &hand->nand_plane),
+		CFG_SIMPLE_INT("NAND_BCHBIT", &hand->nand_bchbit),
+		CFG_SIMPLE_INT("NAND_WPPIN", &hand->nand_wppin),
+		CFG_SIMPLE_INT("NAND_BLOCKPERCHIP", &hand->nand_bpc),
 
 		CFG_END()
 	};
@@ -181,6 +181,7 @@ int parse_configure(struct hand *hand, char * file_path)
 	if (cfg_parse(cfg, file_path) == CFG_PARSE_ERROR)
 		return -1;
 
+	hand->fw_args.boudrate = cfg_getint(cfg, "BOUDRATE");
 	cfg_free(cfg);
 
 	hand->fw_args.cpu_id = 0x4740;
@@ -190,7 +191,7 @@ int parse_configure(struct hand *hand, char * file_path)
 		hand->fw_args.bus_width = 1 ; 
 	hand->fw_args.bank_num = hand->fw_args.bank_num / 4; 
 	hand->fw_args.cpu_speed = hand->fw_args.cpu_speed / hand->fw_args.ext_clk;
-
+	
 	total_size = (unsigned int)
 		(2 << (hand->fw_args.row_addr + hand->fw_args.col_addr - 1)) * 2 
 		* (hand->fw_args.bank_num + 1) * 2 

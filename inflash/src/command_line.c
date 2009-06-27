@@ -115,7 +115,7 @@ int handle_nerase(void)
 		printf("\n 1:start block number"
 		       "\n 2:block length"
 		       "\n 3:device index number"
-		       "\n 4:flash chip index number\n");
+		       "\n 4:flash chip index number");
 		return -1;
 	}
 
@@ -144,7 +144,7 @@ int handle_nmark(void)
 		printf(" nerase (1) (2) (3) ");
 		printf("\n 1:bad block number"
 		       "\n 2:device index number"
-		       "\n 3:flash chip index number\n");
+		       "\n 3:flash chip index number");
 		return -1;
 	}
 	init_nand_in();
@@ -171,7 +171,7 @@ int handle_memtest(void)
 		printf(" memtest (1) [2] [3] ");
 		printf("\n 1:device index number"
 		       "\n 2:SDRAM start address"
-		       "\n 3:test size\n");
+		       "\n 3:test size");
 		return -1;
 	}
 
@@ -197,7 +197,7 @@ int handle_gpio(int mode)
 		printf("\n Usage:"
 		       " gpios (1) (2) "
 		       "\n 1:GPIO pin number"
-		       "\n 2:device index number\n");
+		       "\n 2:device index number");
 		return -1;
 	}
 
