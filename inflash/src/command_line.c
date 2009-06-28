@@ -16,10 +16,11 @@
 #include "inflash_version.h"
  
 extern struct nand_in nand_in;
+extern struct sdram_in sdram_in;
+extern unsigned char code_buf[4 * 512 * 1024];
+
 int com_argc;
 char com_argv[MAX_ARGC][MAX_COMMAND_LENGTH];
-const char HEX_NUM[17]={'0','1','2','3','4','5','6','7','8','9',
-			'a','b','c','d','e','f',' '};
 
 static const char COMMAND[][COMMAND_NUM]=
 {
@@ -83,23 +84,6 @@ static int handle_help(void)
 	return 1;
 }
 
-unsigned int hex2dec(char *s)
-{
-	int i,L=(int)strlen(s),j;
-	unsigned int temp=0;
-	if (L>8) L=8;
-	for (i = 0; i < L; i++) {
-		for (j = 0; j < 16; j++)
-			if (s[i] == HEX_NUM[j]) 
-				break;
-
-		if (j == 16) 
-			return 0;
-		temp = temp * 16 + j;
-	}
-	return temp;
-}
-
 static int handle_version(void)
 {
 	printf(" USB Boot Software current version: %s\n", INFLASH_VERSION);
@@ -110,9 +94,8 @@ static int handle_version(void)
 int handle_nerase(void)
 {
 	if (com_argc < 5) {
-		printf(" Usage:\n");
-		printf(" nerase (1) (2) (3) (4) ");
-		printf(" 1:start block number\n"
+		printf(" Usage: nerase (1) (2) (3) (4)\n"
+		       " 1:start block number\n"
 		       " 2:block length\n"
 		       " 3:device index number\n"
 		       " 4:flash chip index number\n");
@@ -138,11 +121,9 @@ int handle_nerase(void)
 
 int handle_nmark(void)
 {
-	int i;
 	if (com_argc < 4) {
-		printf(" Usage:\n");
-		printf(" nerase (1) (2) (3) ");
-		printf(" 1:bad block number\n"
+		printf(" Usage: nerase (1) (2) (3)\n"
+		       " 1:bad block number\n"
 		       " 2:device index number\n"
 		       " 3:flash chip index number\n");
 		return -1;
@@ -167,22 +148,16 @@ int handle_memtest(void)
 	unsigned int start, size;
 	if (com_argc != 2 && com_argc != 4)
 	{
-		printf(" Usage:\n");
-		printf(" memtest (1) [2] [3] ");
-		printf(" 1:device index number\n"
+		printf(" Usage: memtest (1) [2] [3]\n"
+		       " 1:device index number\n"
 		       " 2:SDRAM start address\n"
 		       " 3:test size\n");
 		return -1;
 	}
 
 	if (com_argc == 4) {
-		if (com_argv[2][0]=='0'&&com_argv[2][1]=='x') 
-			start=hex2dec(&com_argv[2][2]);
-		else start=atol(com_argv[2]);
-
-		if (com_argv[3][0]=='0'&&com_argv[3][1]=='x') 
-			size = hex2dec(&com_argv[3][2]);
-		else size = atol(com_argv[3]);
+		start = strtoul(com_argv[2], NULL, 0);
+		size = strtoul(com_argv[3], NULL, 0);
 	} else {
 		start = 0;
 		size = 0;
@@ -194,14 +169,35 @@ int handle_memtest(void)
 int handle_gpio(int mode)
 {
 	if (com_argc < 3) {
-		printf(" Usage:\n"
-		       " gpios (1) (2) "
+		printf(" Usage:"
+		       " gpios (1) (2)\n"
 		       " 1:GPIO pin number\n"
 		       " 2:device index number\n");
 		return -1;
 	}
 
 	debug_gpio(atoi(com_argv[2]), mode, atoi(com_argv[1]));
+	return 1;
+}
+
+int handle_load(void)
+{
+	if (com_argc<4) {
+		printf(" Usage:"
+		       " load (1) (2) (3) \n"
+		       " 1:SDRAM start address\n"
+		       " 2:image file name\n"
+		       " 3:device index number\n");
+
+		return -1;
+	}
+
+	sdram_in.start=strtoul(com_argv[1], NULL, 0);
+	printf(" start:::::: 0x%x\n", sdram_in.start);
+
+	sdram_in.dev = atoi(com_argv[3]);
+	sdram_in.buf = code_buf;
+	sdram_load_file(&sdram_in, com_argv[2]);
 	return 1;
 }
 
@@ -273,10 +269,16 @@ int command_handle(char *buf)
 	case 13:
 		handle_version();
 		break;
+	case 14:
+		debug_go();
+		break;
 	case 16:		/* exit */
 		printf(" exiting inflash software\n");
 		return -1;	/* return -1 to break the main.c while
 				 * then run usb_ingenic_cleanup*/
+		/*case 17:
+		nand_read(NAND_READ_TO_RAM); */
+		break;
 	case 18:
 		handle_gpio(2);
 		break;
@@ -288,6 +290,9 @@ int command_handle(char *buf)
 		break;
 	case 26:
 		handle_nmark();
+		break;
+	case 28:
+		handle_load();
 		break;
 	case 29:
 		handle_memtest();

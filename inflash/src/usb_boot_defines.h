@@ -10,7 +10,6 @@
 #ifndef __USB_BOOT_DEFINES_H__
 #define __USB_BOOT_DEFINES_H__
 
-/* #define dprintf(x...) printf(x) */
 #define SDRAM_SIZE ( 16 * 1024 * 1024 )
 #define CODE_SIZE  ( 4 * 1024 * 1024 )
 /* #define START_ADDR ( 0x80000000 + SDRAM_SIZE - CODE_SIZE ) */
@@ -19,10 +18,8 @@
 #define NAND_MAX_PAGE_NUM	1073740824	/*Hand.nand_pn */
 #define NAND_SECTION_NUM	23
 #define MAX_TRANSFER_SIZE	0x100000
-#define MAX_LOAD_SIZE	0x3000
-#define NAND_MAX_BYTE_NUM	(Hand.nand_pn * Hand.nand_ps)
-#define	IOCTL_INBUF_SIZE	512
-#define	IOCTL_OUTBUF_SIZE	512
+#define MAX_LOAD_SIZE		0x3000
+#define NAND_MAX_BYTE_NUM	(hand.nand_pn * hand.nand_ps)
 #define MAX_DEV_NUM	16
 
 enum CPUTYPE {
@@ -152,3 +149,4 @@ struct sdram_in {
 };
 
 #endif	/* __USB_BOOT_DEFINES_H__ */
+

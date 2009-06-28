@@ -27,9 +27,10 @@ extern char com_argv[MAX_ARGC][MAX_COMMAND_LENGTH];
 
 struct ingenic_dev ingenic_dev;
 struct hand hand;
-
+struct sdram_in sdram_in;
 struct nand_in nand_in;
 static struct nand_out nand_out;
+
 unsigned int total_size;
 unsigned char code_buf[4 * 512 * 1024];
 unsigned char check_buf[4 * 512 * 1024];
@@ -137,7 +138,7 @@ int boot(char *stage1_path, char *stage2_path){
 	}
 
 	if (status) {
-		printf(" Already booted.");
+		printf(" Already booted.\n");
 		return 1;
 	} else {
 		printf(" CPU not yet booted, now booting...\n");
@@ -174,7 +175,7 @@ int error_check(unsigned char *org,unsigned char * obj,unsigned int size)
 	for (i = 0; i < size; i++) {
 		if (org[i] != obj[i]) {
 			unsigned int s = (i < 8) ? i : i - 8; // start_dump
-			printf("FAIL at off %d, wrote %x, read %x\n", i, org[i], obj[i]);
+			printf("FAIL at off %d, wrote 0x%x, read 0x%x\n", i, org[i], obj[i]);
 			printf("  off %d write: %02x %02x %02x %02x %02x %02x %02x %02x %02x %02x %02x %02x %02x %02x %02x %02x\n", s,
 				org[s], org[s+1], org[s+2], org[s+3], org[s+4], org[s+5], org[s+6], org[s+7],
 				org[s+8], org[s+9], org[s+10], org[s+11], org[s+12], org[s+13], org[s+14], org[s+15]);
@@ -586,9 +587,8 @@ int nand_query(void)
 	unsigned char csn;
 
 	if (com_argc < 3) {
-		printf(" Usage:\n");
-		printf(" nquery (1) (2) ");
-		printf(" (1):device index number\n"
+		printf(" Usage: nquery (1) (2)\n"
+		       " (1):device index number\n"
 		       " (2):flash index number\n"); 
 		return -1;
 	}
@@ -633,14 +633,15 @@ int nand_read(int mode)
 	unsigned int start_addr, length, page_num;
 	unsigned char csn;
 	unsigned short temp = 0;
+	unsigned ram_addr = 0;
 
 	if (com_argc < 5) {
-		printf(" Usage:\n");
-		printf(" nread (1) (2) (3) (4) ");
-		printf(" 1:start page number\n"
+		printf(" Usage: nread (1) (2) (3) (4)\n"
+		       " 1:start page number\n"
 		       " 2:length in byte\n"
 		       " 3:device index number\n"
-		       " 4:flash index number \n");
+		       " 4:flash index number\n"
+		       " 5:start SDRAM address\n");
 		return -1;
 	}
 	init_nand_in();
@@ -654,6 +655,10 @@ int nand_read(int mode)
 	nand_in.length= atoi(com_argv[2]);
 	nand_in.dev = atoi(com_argv[3]);
 
+	if (com_argc = 6) {
+		ram_addr = strtoul(com_argv[5], NULL, 0);
+		printf("==%s==", com_argv[5]);
+	}
 	start_addr = nand_in.start;
 	length = nand_in.length;
 
@@ -674,9 +679,6 @@ int nand_read(int mode)
 
 	page_num = length / hand.nand_ps +1;
 
-	usb_send_data_address_to_ingenic(&ingenic_dev, start_addr);
-	usb_send_data_length_to_ingenic(&ingenic_dev, page_num);
-
 	switch(mode) {
 	case NAND_READ:
 		temp = ((NO_OOB<<12) & 0xf000) + ((csn<<4) & 0xff0) + NAND_READ;
@@ -685,22 +687,33 @@ int nand_read(int mode)
 		temp = ((csn<<4) & 0xff0) + NAND_READ_OOB;
 		break;
 	case NAND_READ_RAW:
-		temp = ((NO_OOB<<12) & 0xf000) + ((csn<<4) & 0xff0) + NAND_READ_RAW;
+		temp = ((NO_OOB<<12) & 0xf000) + ((csn<<4) & 0xff0) + 
+			NAND_READ_RAW;
+		break;
+	case NAND_READ_TO_RAM:
+		temp = ((NO_OOB<<12) & 0xf000) + ((csn<<4) & 0xff0) + 
+			NAND_READ_TO_RAM;
+		printf(" Reading nand to RAM: 0x%x\n", ram_addr);
+		usb_ingenic_start(&ingenic_dev, VR_PROGRAM_START1, ram_addr);
 		break;
 	default:
 		printf(" unknow mode!\n");
 		return -1;
 	}
 
+	usb_send_data_address_to_ingenic(&ingenic_dev, start_addr);
+	usb_send_data_length_to_ingenic(&ingenic_dev, page_num);
+
 	usb_ingenic_nand_ops(&ingenic_dev, temp);
 
 	usb_read_data_from_ingenic(&ingenic_dev, nand_in.buf, page_num * hand.nand_ps);
 
-	for (j=0;j<length;j++) 
-	{
-		if (j % 16 == 0) printf(" 0x%08x :\n",j);
+	for (j = 0; j < length; j++) {
+		if (j % 16 == 0)
+		printf("\n 0x%08x : ",j);
 		printf("%02x ",(nand_in.buf)[j]);
 	}
+	printf("\n");
 
 	usb_read_data_from_ingenic(&ingenic_dev, ret, 8);
 	printf(" Operation end position : %d \n",
@@ -738,7 +751,7 @@ int debug_memory(int obj, unsigned int start, unsigned int size)
 	else
 		hand.fw_args.size = size;
 
-	printf(" Now test memory from %x to %x: \n",
+	printf(" Now test memory from 0x%x to 0x%x: \n",
 	       start, start + hand.fw_args.size);
 
 	if (load_file(&ingenic_dev, STAGE1_FILE_PATH) < 1)
@@ -749,7 +762,7 @@ int debug_memory(int obj, unsigned int start, unsigned int size)
 	usleep(100);
 	usb_read_data_from_ingenic(&ingenic_dev, buffer, 8);
 	if (buffer[0] != 0)
-		printf(" Test memory fail! Last error address is %x !\n",
+		printf(" Test memory fail! Last error address is 0x%x !\n",
 		       buffer[0]);
 	else
 		printf(" Test memory pass!\n");
@@ -802,3 +815,117 @@ int debug_gpio(int obj, unsigned char ops, unsigned char pin)
 	return 0;
 }
 
+int debug_go(void)
+{
+	unsigned int addr,obj;
+	if (com_argc<3) {
+		printf(" Usage: go (1) (2) \n"
+		       " 1:start SDRAM address\n"
+		       " 2:device index number\n");
+		return 0;
+	}
+
+	addr = strtoul(com_argv[1], NULL, 0);
+	obj = atoi(com_argv[2]);
+
+	printf(" Executing No.%d device at address 0x%x\n", obj, addr);
+
+	if (usb_ingenic_start(&ingenic_dev, VR_PROGRAM_START2, addr) < 1)
+		return -1;
+
+	return 1;
+}
+
+int sdram_load(struct sdram_in *sdram_in)
+{
+	if (usb_get_ingenic_cpu(&ingenic_dev) < 3) {
+		printf(" Device unboot! Boot it first!\n");
+		return -1;
+	}
+
+	if (sdram_in->length > (unsigned int) MAX_LOAD_SIZE) {
+		printf(" Image length too long!\n");
+		return -1;
+	}
+
+	ingenic_dev.file_buff = sdram_in->buf;
+	ingenic_dev.file_len = sdram_in->length;
+	usb_send_data_to_ingenic(&ingenic_dev);
+	usb_send_data_address_to_ingenic(&ingenic_dev, sdram_in->start);
+	usb_send_data_length_to_ingenic(&ingenic_dev, sdram_in->length);
+	usb_ingenic_sdram_ops(&ingenic_dev, sdram_in);
+
+	usb_read_data_from_ingenic(&ingenic_dev, ret, 8);
+	printf(" Load last address at 0x%x\n",
+	       ((ret[3]<<24)|(ret[2]<<16)|(ret[1]<<8)|(ret[0]<<0)));
+
+	return 1;
+}
+
+int sdram_load_file(struct sdram_in *sdram_in, char *file_path)
+{
+	struct stat fstat;
+	unsigned int flen,m,j,offset,k;
+	int fd, status, res = -1;
+
+	status = stat(file_path, &fstat);
+	if (status < 0) {
+		fprintf(stderr, "Error - can't get file size from '%s': %s\n",
+			file_path, strerror(errno));
+		goto out;
+	}
+	flen = fstat.st_size;
+
+	fd = open(file_path, O_RDONLY);
+	if (fd < 0) {
+		fprintf(stderr, "Error - can't open file '%s': %s\n", 
+			file_path, strerror(errno));
+		goto out;
+	}
+
+	m = flen / MAX_LOAD_SIZE;
+	j = flen % MAX_LOAD_SIZE;
+	offset = 0;
+
+	printf(" Total size to send in byte is :%d\n", flen);
+	printf(" Loading data to SDRAM :\n");
+
+	for (k = 0; k < m; k++) {
+		status = read(fd, sdram_in->buf, MAX_LOAD_SIZE);
+		if (status < MAX_LOAD_SIZE) {
+			fprintf(stderr, "Error - can't read file '%s': %s\n", 
+				file_path, strerror(errno));
+			goto close;
+		}
+
+		sdram_in->length = MAX_LOAD_SIZE;
+		if (sdram_load(sdram_in) < 1)
+			goto close;
+
+		sdram_in->start += MAX_LOAD_SIZE;
+		if ( k % 60 == 0) 
+			printf(" 0x%x \n", sdram_in->start);
+	}
+
+	if (j) {
+		if (j % 4 !=0) 
+			j += 4 - (j % 4);
+		status = read(fd, sdram_in->buf, j);
+		if (status < j) {
+			fprintf(stderr, "Error - can't read file '%s': %s\n", 
+				file_path, strerror(errno));
+			goto close;
+		}
+
+		sdram_in->length = j;
+		if (sdram_load(sdram_in) < 1)
+			goto close;
+	}
+
+	res = 1;
+
+close:
+	close(fd);
+out:
+	return res;
+}
