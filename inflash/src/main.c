@@ -48,6 +48,7 @@ int main(int argc, char **argv)
 	int command = 0;
 	char *cptr;
 	char com_buf[256] = {0};
+	char *cmdpt;
 
 	printf("inflash - Ingenic XBurst USB Boot Utility\n"
 	       "(c) 2009 Ingenic Semiconductor Inc., Qi Hardware Inc., Xiangfu Liu, Marek Lindner\n"
@@ -69,7 +70,7 @@ int main(int argc, char **argv)
 			exit(EXIT_SUCCESS);
 		case 'c':
 			command = 1;
-			strcpy(com_buf, optarg);
+			cmdpt = optarg;
 			break;
 		default:
 			help();
@@ -89,13 +90,23 @@ int main(int argc, char **argv)
 		return EXIT_FAILURE;
 
 	if (command) {		/* direct run command */
+		char *delim=";";
+		char *p;
+		p = strtok(cmdpt, delim);
+		strcpy(com_buf, p);
+		printf(" Execute command: %s \n",com_buf);
 		command_handle(com_buf);
-		printf("\n");
+
+		while((p = strtok(NULL,delim))) {
+			strcpy(com_buf, p);
+			printf(" Execute command: %s \n",com_buf);
+			command_handle(com_buf);
+		}
 		goto out;
 	}
 
 	while (1) {
-		printf("\ninflash :> ");
+		printf("inflash :> ");
 		cptr = fgets(com_buf, 256, stdin);
 		if (cptr == NULL)
 			continue;
