@@ -90,7 +90,7 @@ out:
 void init_cfg()
 {
 	if (usb_get_ingenic_cpu(&ingenic_dev) < 3) {
-		printf("\n XBurst CPU not booted yet, boot it first!\n");
+		printf(" XBurst CPU not booted yet, boot it first!\n");
 		return;
 	}
 
@@ -191,14 +191,14 @@ int error_check(unsigned char *org,unsigned char * obj,unsigned int size)
 int nand_markbad(struct nand_in *nand_in)
 {
 	if (usb_get_ingenic_cpu(&ingenic_dev) < 3) {
-		printf("\n Device unboot! Boot it first!");
+		printf(" Device unboot! Boot it first!\n");
 		return -1;
 	}
-	printf("\n mark bad block : %d ",nand_in->start);
+	printf(" mark bad block : %d\n",nand_in->start);
 	usb_send_data_address_to_ingenic(&ingenic_dev, nand_in->start);
 	usb_ingenic_nand_ops(&ingenic_dev, NAND_MARK_BAD);
 	usb_read_data_from_ingenic(&ingenic_dev, ret, 8);
-	printf("\n Mark bad block at %d ",((ret[3] << 24) | 
+	printf(" Mark bad block at %d\n",((ret[3] << 24) | 
 					   (ret[2] << 16) | 
 					   (ret[1] << 8)  | 
 					   (ret[0] << 0)) / hand.nand_ppb);
@@ -212,9 +212,9 @@ int nand_program_check(struct nand_in *nand_in,
 	unsigned int i, page_num, cur_page = -1;
 	unsigned short temp;
 
-	printf("\n Writing NAND page %d len %d...", nand_in->start, nand_in->length);
+	printf(" Writing NAND page %d len %d...\n", nand_in->start, nand_in->length);
 	if (nand_in->length > (unsigned int)MAX_TRANSFER_SIZE) {
-		printf("\n Buffer size too long!");
+		printf(" Buffer size too long!\n");
 		return -1;
 	}
 
@@ -226,7 +226,7 @@ int nand_program_check(struct nand_in *nand_in,
 #endif
 
 	if (usb_get_ingenic_cpu(&ingenic_dev) < 3) {
-		printf("\n Device unboot! Boot it first!");
+		printf(" Device unboot! Boot it first!\n");
 		return -1;
 	}
 	ingenic_dev.file_buff = nand_in->buf;
@@ -329,23 +329,23 @@ int nand_erase(struct nand_in *nand_in)
 	start_blk = nand_in->start;
 	blk_num = nand_in->length;
 	if (start_blk > (unsigned int)NAND_MAX_BLK_NUM)  {
-		printf("\n Start block number overflow!");
+		printf(" Start block number overflow!\n");
 		return -1;
 	}
 	if (blk_num > (unsigned int)NAND_MAX_BLK_NUM) {
-		printf("\n Length block number overflow!");
+		printf(" Length block number overflow!\n");
 		return -1;
 	}
 
 	if (usb_get_ingenic_cpu(&ingenic_dev) < 3) {
-		printf("\n Device unboot! Boot it first!");
+		printf(" Device unboot! Boot it first!\n");
 		return -1;
 	}
 
 	for (i = 0; i < nand_in->max_chip; i++) {
 		if ((nand_in->cs_map)[i]==0) 
 			continue;
-		printf("\n Erasing No.%d device No.%d flash (start_blk %u blk_num %u)......",
+		printf(" Erasing No.%d device No.%d flash (start_blk %u blk_num %u)......\n",
 		       nand_in->dev, i, start_blk, blk_num);
 
 		usb_send_data_address_to_ingenic(&ingenic_dev, start_blk);
@@ -361,14 +361,14 @@ int nand_erase(struct nand_in *nand_in)
 		     (ret[2] << 16) |
 		     (ret[1] << 8)  | 
 		     (ret[0] << 0)) / hand.nand_ppb;
-	printf("\n Return: %02x %02x %02x %02x %02x %02x %02x %02x (position %d)", ret[0], ret[1], ret[2], ret[3], ret[4], ret[5], ret[6], ret[7], end_block);
+	printf(" Return: %02x %02x %02x %02x %02x %02x %02x %02x (position %d)\n", ret[0], ret[1], ret[2], ret[3], ret[4], ret[5], ret[6], ret[7], end_block);
 	if (!hand.nand_force_erase) {	
 	/* not force erase, show bad block infomation */
-		printf("\n There are marked bad blocks: %d ", 
+		printf(" There are marked bad blocks: %d\n", 
 		       end_block - start_blk - blk_num );
 	} else {
 	/* force erase, no bad block infomation can show */
-		printf("\n Force erase, no bad block infomation!" );
+		printf(" Force erase, no bad block infomation!\n" );
 	}
 	return 1;
 }
@@ -407,7 +407,7 @@ int nand_program_file(struct nand_in *nand_in,
 		return -1;
 	}
 
-	printf("\n Programing No.%d device, flen %d, start page %d...",nand_in->dev, flen, nand_in->start);
+	printf(" Programing No.%d device, flen %d, start page %d...\n",nand_in->dev, flen, nand_in->start);
 	n_in.start = nand_in->start / hand.nand_ppb; 
 	if (nand_in->option == NO_OOB) {
 		if (flen % (hand.nand_ppb * hand.nand_ps) == 0) 
@@ -423,7 +423,7 @@ int nand_program_file(struct nand_in *nand_in,
 				((hand.nand_ps + hand.nand_os) * hand.nand_ppb)
 				+ 1;
 	}
-	/* printf("\n length %d flen %d ", n_in.length, flen); */
+	/* printf(" length %d flen %d\n", n_in.length, flen); */
 	n_in.cs_map = nand_in->cs_map;
 	n_in.dev = nand_in->dev;
 	n_in.max_chip = nand_in->max_chip;
@@ -435,9 +435,9 @@ int nand_program_file(struct nand_in *nand_in,
 		transfer_size = (hand.nand_ppb * (hand.nand_ps + hand.nand_os));
 	m = flen / transfer_size;
 	j = flen % transfer_size;
-	printf("\n Size to send %d, transfer_size %d", flen, transfer_size);
-	printf("\n Image type : %s", IMAGE_TYPE[nand_in->option]);
-	printf("\n It will cause %d times buffer transfer.", j == 0 ? m : m + 1);
+	printf(" Size to send %d, transfer_size %d\n", flen, transfer_size);
+	printf(" Image type : %s\n", IMAGE_TYPE[nand_in->option]);
+	printf(" It will cause %d times buffer transfer.\n", j == 0 ? m : m + 1);
 
 #ifdef CONFIG_NAND_OUT
 	for (i = 0; i < nand_in->max_chip; i++)
@@ -465,7 +465,7 @@ int nand_program_file(struct nand_in *nand_in,
 			return -1;
 
 		if (start_page - nand_in->start > hand.nand_ppb)
-			printf("\n Skip a old bad block !");
+			printf(" Skip a old bad block !\n");
 		nand_in->start = start_page;
 
 #ifdef CONFIG_NAND_OUT
@@ -515,7 +515,7 @@ int nand_program_file_planes(struct nand_in *nand_in,
 		      struct nand_out *nand_out,
 		      char *fname)
 {
-	printf(" \n not implement yet !");
+	printf("  not implement yet !\n");
 	return -1;
 }
 
@@ -534,18 +534,18 @@ int init_nand_in(void)
 int nand_prog(void)
 {
 	char *image_file;
-	char *help = "\n Usage: nprog (1) (2) (3) (4) (5)"
-		"\n (1)\tstart page number"
-		"\n (2)\timage file name"
-		"\n (3)\tdevice index number"
-		"\n (4)\tflash index number"
-		"\n (5) image type must be:"
-		"\n \t-n:\tno oob"
-		"\n \t-o:\twith oob no ecc"
-		"\n \t-e:\twith oob and ecc";
+	char *help = " Usage: nprog (1) (2) (3) (4) (5)\n"
+		" (1)\tstart page number\n"
+		" (2)\timage file name\n"
+		" (3)\tdevice index number\n"
+		" (4)\tflash index number\n"
+		" (5) image type must be:\n"
+		" \t-n:\tno oob\n"
+		" \t-o:\twith oob no ecc\n"
+		" \t-e:\twith oob and ecc\n";
 
 	if (com_argc != 6) {
-		printf("\n not enough argument.");
+		printf(" not enough argument.\n");
 		printf("%s", help);
 		return 0;
 	}
@@ -571,7 +571,7 @@ int nand_prog(void)
 		nand_program_file(&nand_in, &nand_out, image_file);
 
 #ifdef CONFIG_NAND_OUT
-	printf("\n Flash check result:");
+	printf(" Flash check result:\n");
 	int i;
 	for (i = 0; i < 16; i++)
 		printf(" %d", (nand_out.status)[i]);
@@ -586,10 +586,10 @@ int nand_query(void)
 	unsigned char csn;
 
 	if (com_argc < 3) {
-		printf("\n Usage:");
+		printf(" Usage:\n");
 		printf(" nquery (1) (2) ");
-		printf("\n (1):device index number"
-		       "\n (2):flash index number"); 
+		printf(" (1):device index number\n"
+		       " (2):flash index number\n"); 
 		return -1;
 	}
 	init_nand_in();
@@ -605,24 +605,24 @@ int nand_query(void)
 		return -1;
 
 	if (usb_get_ingenic_cpu(&ingenic_dev) < 3) {
-		printf("\n Device unboot! Boot it first!");
+		printf(" Device unboot! Boot it first!\n");
 		return -1;
 	}
 
 	csn = i;
-	printf("\n ID of No.%d device No.%d flash: ", nand_in.dev, csn);
+	printf(" ID of No.%d device No.%d flash: \n", nand_in.dev, csn);
 
 	unsigned short ops = ((csn << 4) & 0xff0) + NAND_QUERY;
 	usb_ingenic_nand_ops(&ingenic_dev, ops);
 	usb_read_data_from_ingenic(&ingenic_dev, ret, 8);
-	printf("\n Vendor ID    :0x%x ",(unsigned char)ret[0]);
-	printf("\n Product ID   :0x%x ",(unsigned char)ret[1]);
-	printf("\n Chip ID      :0x%x ",(unsigned char)ret[2]);
-	printf("\n Page ID      :0x%x ",(unsigned char)ret[3]);
-	printf("\n Plane ID     :0x%x ",(unsigned char)ret[4]);
+	printf(" Vendor ID    :0x%x \n",(unsigned char)ret[0]);
+	printf(" Product ID   :0x%x \n",(unsigned char)ret[1]);
+	printf(" Chip ID      :0x%x \n",(unsigned char)ret[2]);
+	printf(" Page ID      :0x%x \n",(unsigned char)ret[3]);
+	printf(" Plane ID     :0x%x \n",(unsigned char)ret[4]);
 
 	usb_read_data_from_ingenic(&ingenic_dev, ret, 8);
-	printf("\n Operation status: Success!");
+	printf(" Operation status: Success!\n");
 
 	return 1;
 }
@@ -635,18 +635,18 @@ int nand_read(int mode)
 	unsigned short temp = 0;
 
 	if (com_argc < 5) {
-		printf("\n Usage:");
+		printf(" Usage:\n");
 		printf(" nread (1) (2) (3) (4) ");
-		printf("\n 1:start page number"
-		       "\n 2:length in byte"
-		       "\n 3:device index number"
-		       "\n 4:flash index number ");
+		printf(" 1:start page number\n"
+		       " 2:length in byte\n"
+		       " 3:device index number\n"
+		       " 4:flash index number \n");
 		return -1;
 	}
 	init_nand_in();
 
 	if (atoi(com_argv[4]) >= MAX_DEV_NUM) {
-		printf("\n Flash index number overflow!");
+		printf(" Flash index number overflow!\n");
 		return -1;
 	}
 	(nand_in.cs_map)[atoi(com_argv[4])] = 1;
@@ -658,11 +658,11 @@ int nand_read(int mode)
 	length = nand_in.length;
 
 	if (start_addr > NAND_MAX_PAGE_NUM || length > NAND_MAX_PAGE_NUM ) {
-		printf("\n Page number overflow!");
+		printf(" Page number overflow!\n");
 		return -1;
 	}
 	if (usb_get_ingenic_cpu(&ingenic_dev) < 3) {
-		printf("\n Device unboot! Boot it first!");
+		printf(" Device unboot! Boot it first!\n");
 		return -1;
 	}
 	for (i = 0; i < nand_in.max_chip; i++) 
@@ -670,7 +670,7 @@ int nand_read(int mode)
 			break;
 	if (i >= nand_in.max_chip) return 1;
 	csn = i;
-	printf("\n Reading from No.%d device No.%d flash....",nand_in.dev,csn);
+	printf(" Reading from No.%d device No.%d flash....\n",nand_in.dev,csn);
 
 	page_num = length / hand.nand_ps +1;
 
@@ -688,7 +688,7 @@ int nand_read(int mode)
 		temp = ((NO_OOB<<12) & 0xf000) + ((csn<<4) & 0xff0) + NAND_READ_RAW;
 		break;
 	default:
-		printf("\n unknow mode!");
+		printf(" unknow mode!\n");
 		return -1;
 	}
 
@@ -698,12 +698,12 @@ int nand_read(int mode)
 
 	for (j=0;j<length;j++) 
 	{
-		if (j % 16 == 0) printf("\n 0x%08x :",j);
+		if (j % 16 == 0) printf(" 0x%08x :\n",j);
 		printf("%02x ",(nand_in.buf)[j]);
 	}
 
 	usb_read_data_from_ingenic(&ingenic_dev, ret, 8);
-	printf("\n Operation end position : %d ",
+	printf(" Operation end position : %d \n",
 	       (ret[3]<<24)|(ret[2]<<16)|(ret[1]<<8)|(ret[0]<<0));
 
 	return 1;
@@ -715,7 +715,7 @@ int debug_memory(int obj, unsigned int start, unsigned int size)
 
 	tmp = usb_get_ingenic_cpu(&ingenic_dev);
 	if (tmp  > 2) {
-		printf("\n This command only run under UNBOOT state!");
+		printf(" This command only run under UNBOOT state!\n");
 		return -1;
 	}
 
@@ -738,7 +738,7 @@ int debug_memory(int obj, unsigned int start, unsigned int size)
 	else
 		hand.fw_args.size = size;
 
-	printf("\n Now test memory from %x to %x: ",
+	printf(" Now test memory from %x to %x: \n",
 	       start, start + hand.fw_args.size);
 
 	if (load_file(&ingenic_dev, STAGE1_FILE_PATH) < 1)
@@ -749,10 +749,10 @@ int debug_memory(int obj, unsigned int start, unsigned int size)
 	usleep(100);
 	usb_read_data_from_ingenic(&ingenic_dev, buffer, 8);
 	if (buffer[0] != 0)
-		printf("\n Test memory fail! Last error address is %x !",
+		printf(" Test memory fail! Last error address is %x !\n",
 		       buffer[0]);
 	else
-		printf("\n Test memory pass!");
+		printf(" Test memory pass!\n");
 
 	return 1;
 }
@@ -763,7 +763,7 @@ int debug_gpio(int obj, unsigned char ops, unsigned char pin)
 
 	tmp = usb_get_ingenic_cpu(&ingenic_dev);
 	if (tmp  > 2) {
-		printf("\n This command only run under UNBOOT state!");
+		printf(" This command only run under UNBOOT state!\n");
 		return -1;
 	}
 
@@ -772,7 +772,7 @@ int debug_gpio(int obj, unsigned char ops, unsigned char pin)
 		tmp = 0;
 		hand.fw_args.cpu_id = 0x4740;
 		if (pin > 124) {
-			printf("\n Jz4740 has 124 GPIO pin in all!");
+			printf(" Jz4740 has 124 GPIO pin in all!\n");
 			return -1;
 		}
 		break;
@@ -780,7 +780,7 @@ int debug_gpio(int obj, unsigned char ops, unsigned char pin)
 		tmp = 0;
 		hand.fw_args.cpu_id = 0x4750;
 		if (pin > 178) {
-			printf("\n Jz4750 has 178 GPIO pin in all!");
+			printf(" Jz4750 has 178 GPIO pin in all!\n");
 			return -1;
 		}
 		break;
@@ -790,9 +790,9 @@ int debug_gpio(int obj, unsigned char ops, unsigned char pin)
 	hand.fw_args.pin_num = pin;
 
 	if (ops == 2)
-		printf("\n GPIO %d set!",pin);
+		printf(" GPIO %d set!\n",pin);
 	else
-		printf("\n GPIO %d clear!",pin);
+		printf(" GPIO %d clear!\n",pin);
 
 	if (load_file(&ingenic_dev, STAGE1_FILE_PATH) < 1)
 		return -1;

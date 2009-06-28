@@ -58,28 +58,28 @@ static const char COMMAND[][COMMAND_NUM]=
 
 static int handle_help(void)
 {
-	printf("\n command support in current version:"
-	       "\n help          print this help;"
-	       "\n boot          boot device and make it in stage2;"
-	       "\n list          show current device number can connect;"
-	       "\n fconfig       set USB Boot config file;"
-	       "\n nquery        query NAND flash info;"
-	       "\n nread         read NAND flash data with checking bad block and ECC;"
-	       "\n nreadraw      read NAND flash data without checking bad block and ECC;"
-	       "\n nreadoob      read NAND flash oob without checking bad block and ECC;"
-	       "\n nerase        erase NAND flash;"
-	       "\n nprog         program NAND flash with data and ECC;"
-	       "\n nmark         mark a bad block in NAND flash;"
-	       "\n go            execute program in SDRAM;"
-	       "\n version       show current USB Boot software version;"
-	       "\n exit          quit from telnet session;"
-	       "\n readnand      read data from nand flash and store to SDRAM;"
-	       "\n load          load file data to SDRAM;"
-	       "\n run           run command script in file;"
-	       "\n memtest       do SDRAM test;"
-	       "\n gpios         let one GPIO to high level;"
-	       "\n gpioc         let one GPIO to low level;");
-	/* printf("\n nmake         read all data from nand flash and store to file(experimental);"); */
+	printf(" command support in current version:\n"
+	       " help          print this help;\n"
+	       " boot          boot device and make it in stage2;\n"
+	       " list          show current device number can connect;\n"
+	       " fconfig       set USB Boot config file;\n"
+	       " nquery        query NAND flash info;\n"
+	       " nread         read NAND flash data with checking bad block and ECC;\n"
+	       " nreadraw      read NAND flash data without checking bad block and ECC;\n"
+	       " nreadoob      read NAND flash oob without checking bad block and ECC;\n"
+	       " nerase        erase NAND flash;\n"
+	       " nprog         program NAND flash with data and ECC;\n"
+	       " nmark         mark a bad block in NAND flash;\n"
+	       " go            execute program in SDRAM;\n"
+	       " version       show current USB Boot software version;\n"
+	       " exit          quit from telnet session;\n"
+	       " readnand      read data from nand flash and store to SDRAM;\n"
+	       " load          load file data to SDRAM;\n"
+	       " run           run command script in file;\n"
+	       " memtest       do SDRAM test;\n"
+	       " gpios         let one GPIO to high level;\n"
+	       " gpioc         let one GPIO to low level;\n");
+	/* printf(" nmake         read all data from nand flash and store to file(experimental);\n"); */
 	return 1;
 }
 
@@ -102,7 +102,7 @@ unsigned int hex2dec(char *s)
 
 static int handle_version(void)
 {
-	printf("\n USB Boot Software current version: %s", INFLASH_VERSION);
+	printf(" USB Boot Software current version: %s\n", INFLASH_VERSION);
 	return 1;
 }
 
@@ -110,12 +110,12 @@ static int handle_version(void)
 int handle_nerase(void)
 {
 	if (com_argc < 5) {
-		printf("\n Usage:");
+		printf(" Usage:\n");
 		printf(" nerase (1) (2) (3) (4) ");
-		printf("\n 1:start block number"
-		       "\n 2:block length"
-		       "\n 3:device index number"
-		       "\n 4:flash chip index number");
+		printf(" 1:start block number\n"
+		       " 2:block length\n"
+		       " 3:device index number\n"
+		       " 4:flash chip index number\n");
 		return -1;
 	}
 
@@ -125,7 +125,7 @@ int handle_nerase(void)
 	nand_in.length = atoi(com_argv[2]);
 	nand_in.dev = atoi(com_argv[3]);
 	if (atoi(com_argv[4]) >= MAX_DEV_NUM) {
-		printf("\n Flash index number overflow!");
+		printf(" Flash index number overflow!\n");
 		return -1;
 	}
 	(nand_in.cs_map)[atoi(com_argv[4])] = 1;
@@ -140,11 +140,11 @@ int handle_nmark(void)
 {
 	int i;
 	if (com_argc < 4) {
-		printf("\n Usage:");
+		printf(" Usage:\n");
 		printf(" nerase (1) (2) (3) ");
-		printf("\n 1:bad block number"
-		       "\n 2:device index number"
-		       "\n 3:flash chip index number");
+		printf(" 1:bad block number\n"
+		       " 2:device index number\n"
+		       " 3:flash chip index number\n");
 		return -1;
 	}
 	init_nand_in();
@@ -153,7 +153,7 @@ int handle_nmark(void)
 	nand_in.dev = atoi(com_argv[2]);
 
 	if (atoi(com_argv[3])>=MAX_DEV_NUM) {
-		printf("\n Flash index number overflow!");
+		printf(" Flash index number overflow!\n");
 		return -1;
 	}
 	(nand_in.cs_map)[atoi(com_argv[3])] = 1;
@@ -167,11 +167,11 @@ int handle_memtest(void)
 	unsigned int start, size;
 	if (com_argc != 2 && com_argc != 4)
 	{
-		printf("\n Usage:");
+		printf(" Usage:\n");
 		printf(" memtest (1) [2] [3] ");
-		printf("\n 1:device index number"
-		       "\n 2:SDRAM start address"
-		       "\n 3:test size");
+		printf(" 1:device index number\n"
+		       " 2:SDRAM start address\n"
+		       " 3:test size\n");
 		return -1;
 	}
 
@@ -194,10 +194,10 @@ int handle_memtest(void)
 int handle_gpio(int mode)
 {
 	if (com_argc < 3) {
-		printf("\n Usage:"
+		printf(" Usage:\n"
 		       " gpios (1) (2) "
-		       "\n 1:GPIO pin number"
-		       "\n 2:device index number");
+		       " 1:GPIO pin number\n"
+		       " 2:device index number\n");
 		return -1;
 	}
 
@@ -274,7 +274,7 @@ int command_handle(char *buf)
 		handle_version();
 		break;
 	case 16:		/* exit */
-		printf("\n exiting inflash software\n");
+		printf(" exiting inflash software\n");
 		return -1;	/* return -1 to break the main.c while
 				 * then run usb_ingenic_cleanup*/
 	case 18:
@@ -293,7 +293,7 @@ int command_handle(char *buf)
 		handle_memtest();
 		break;
 	default:
-		printf("\n command not support or input error!\n");
+		printf(" command not support or input error!\n");
 		break;
 	}
 

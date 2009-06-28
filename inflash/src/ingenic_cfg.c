@@ -52,56 +52,56 @@ int check_dump_cfg(struct hand *hand)
 	printf("Now checking whether all configure args valid:");
 	/* check PLL */
 	if (hand->fw_args.ext_clk > 27 || hand->fw_args.ext_clk < 12) {
-		printf("\n EXTCLK setting invalid!");
+		printf(" EXTCLK setting invalid!\n");
 		return 0;
 	}
 	if (hand->fw_args.phm_div > 32 || hand->fw_args.ext_clk < 2) {
-		printf("\n PHMDIV setting invalid!");
+		printf(" PHMDIV setting invalid!\n");
 		return 0;
 	}
 	if ((hand->fw_args.cpu_speed * hand->fw_args.ext_clk ) % 12 != 0) {
-		printf("\n CPUSPEED setting invalid!");
+		printf(" CPUSPEED setting invalid!\n");
 		return 0;
 	}
 
 	/* check SDRAM */
 	if (hand->fw_args.bus_width > 1 ) {
-		printf("\n SDRAMWIDTH setting invalid!");
+		printf(" SDRAMWIDTH setting invalid!\n");
 		return 0;
 	}
 	if (hand->fw_args.bank_num > 1 ) {
-		printf("\n BANKNUM setting invalid!");
+		printf(" BANKNUM setting invalid!\n");
 		return 0;
 	}
 	if (hand->fw_args.row_addr > 13 && hand->fw_args.row_addr < 11 ) {
-		printf("\n ROWADDR setting invalid!");
+		printf(" ROWADDR setting invalid!\n");
 		return 0;
 	}
 	if (hand->fw_args.col_addr > 13 && hand->fw_args.col_addr < 11 ) {
-		printf("\n COLADDR setting invalid!");
+		printf(" COLADDR setting invalid!\n");
 		return 0;
 	}
 
 	/* check NAND */
 	if ( hand->nand_ps < 2048 && hand->nand_os > 16 ) {
-		printf("\n PAGESIZE or OOBSIZE setting invalid!");
-		printf("\n PAGESIZE is %d,\t OOBSIZE is %d", 
+		printf(" PAGESIZE or OOBSIZE setting invalid!\n");
+		printf(" PAGESIZE is %d,\t OOBSIZE is %d\n", 
 		       hand->nand_ps, hand->nand_os);
 		return 0;
 	}
 	if ( hand->nand_ps < 2048 && hand->nand_ppb > 32 ) {
-		printf("\n PAGESIZE or PAGEPERBLOCK setting invalid!");
+		printf(" PAGESIZE or PAGEPERBLOCK setting invalid!\n");
 		return 0;
 	}
 
 	if ( hand->nand_ps > 512 && hand->nand_os <= 16 ) {
-		printf("\n PAGESIZE or OOBSIZE setting invalid!");
-		printf("\n PAGESIZE is %d,\t OOBSIZE is %d", 
+		printf(" PAGESIZE or OOBSIZE setting invalid!\n");
+		printf(" PAGESIZE is %d,\t OOBSIZE is %d\n", 
 		       hand->nand_ps, hand->nand_os);
 		return 0;
 	}
 	if ( hand->nand_ps > 512 && hand->nand_ppb < 64 ) {
-		printf("\n PAGESIZE or PAGEPERBLOCK setting invalid!");
+		printf(" PAGESIZE or PAGEPERBLOCK setting invalid!\n");
 		return 0;
 	}
 	printf(" YES\n");
