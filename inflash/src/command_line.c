@@ -60,27 +60,38 @@ static const char COMMAND[][COMMAND_NUM]=
 static int handle_help(void)
 {
 	printf(" command support in current version:\n"
-	       " help          print this help;\n"
-	       " boot          boot device and make it in stage2;\n"
-	       " list          show current device number can connect;\n"
-	       " fconfig       set USB Boot config file;\n"
-	       " nquery        query NAND flash info;\n"
-	       " nread         read NAND flash data with checking bad block and ECC;\n"
-	       " nreadraw      read NAND flash data without checking bad block and ECC;\n"
-	       " nreadoob      read NAND flash oob without checking bad block and ECC;\n"
-	       " nerase        erase NAND flash;\n"
-	       " nprog         program NAND flash with data and ECC;\n"
-	       " nmark         mark a bad block in NAND flash;\n"
-	       " go            execute program in SDRAM;\n"
-	       " version       show current USB Boot software version;\n"
-	       " exit          quit from telnet session;\n"
-	       " readnand      read data from nand flash and store to SDRAM;\n"
-	       " load          load file data to SDRAM;\n"
-	       " run           run command script in file;\n"
-	       " memtest       do SDRAM test;\n"
-	       " gpios         let one GPIO to high level;\n"
-	       " gpioc         let one GPIO to low level;\n");
-	/* printf(" nmake         read all data from nand flash and store to file(experimental);\n"); */
+	/* " query" */
+	/* " querya" */
+	/* " erase" */
+	/* " read" */
+	/* " prog" */
+	" nquery \tquery NAND flash info;\n"
+	" nerase \terase NAND flash;\n"
+	" nread \tread NAND flash data with checking bad block and ECC;\n"
+	" nreadraw \tread NAND flash data without checking bad block and ECC;\n"
+	" nreadoob \tread NAND flash oob without checking bad block and ECC;\n" /* index 10 */
+	" nprog \tprogram NAND flash with data and ECC;\n"
+	" help \tprint this help;\n"
+	" version \tshow current USB Boot software version;\n"
+	" go \texecute program in SDRAM;\n"
+	" fconfig \tset USB Boot config file;(not implement)\n"
+	" exit \tquit from telnet session;\n"
+	" readnand \tread data from nand flash and store to SDRAM;\n"
+	" gpios \tset one GPIO to high level;\n"
+	" gpioc \tlet one GPIO to low level;\n");
+	" boot \tboot device and make it in stage2;\n" /* index 20 */
+	" list \tshow current device number can connect;(not implement)\n"
+	/* " select" */
+	/* " unselect" */
+	/* " chip" */
+	/* " unchip" */
+	" nmark \tmark a bad block in NAND flash;\n"
+	" nmake \tread all data from nand flash and store to file(experimental);(not implement)\n"
+	" load \tload file data to SDRAM;\n"
+	" memtest \tdo SDRAM test;\n"
+	" run\tun command script in file;\n"
+	" sdprog \tprogram SD card;(not implement)"
+	" sdread \tread data from SD card;(not implement)");
 	return 1;
 }
 
