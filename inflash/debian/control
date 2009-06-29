@@ -9,7 +9,7 @@ Homepage: http://code.google.com/p/pi-project
 Package: inflash
 Architecture: any
 Depends: ${shlibs:Depends}, libusb, libconfuse
-Description:  inflash - host tool for Ingenic XBurst CPU USB boot and NAND flash access. 
+Description: host tool for Ingenic XBurst CPU USB boot and NAND flash access. 
  inflash is a host tool for Ingenic XBurst CPU device usb boot.
  it's can flash bootloader, kernel, rootfs to Ingenic XBurst CPU
  device nand. also have some test function for Ingenic XBurst CPU 
