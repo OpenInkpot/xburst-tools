@@ -65,33 +65,33 @@ static int handle_help(void)
 	/* " erase" */
 	/* " read" */
 	/* " prog" */
-	" nquery \tquery NAND flash info;\n"
-	" nerase \terase NAND flash;\n"
-	" nread \tread NAND flash data with checking bad block and ECC;\n"
-	" nreadraw \tread NAND flash data without checking bad block and ECC;\n"
-	" nreadoob \tread NAND flash oob without checking bad block and ECC;\n" /* index 10 */
-	" nprog \tprogram NAND flash with data and ECC;\n"
-	" help \tprint this help;\n"
-	" version \tshow current USB Boot software version;\n"
-	" go \texecute program in SDRAM;\n"
-	" fconfig \tset USB Boot config file;(not implement)\n"
-	" exit \tquit from telnet session;\n"
-	" readnand \tread data from nand flash and store to SDRAM;\n"
-	" gpios \tset one GPIO to high level;\n"
-	" gpioc \tlet one GPIO to low level;\n");
-	" boot \tboot device and make it in stage2;\n" /* index 20 */
-	" list \tshow current device number can connect;(not implement)\n"
+	" nquery     query NAND flash info\n"
+	" nerase     erase NAND flash\n"
+	" nread      read NAND flash data with checking bad block and ECC\n"
+	" nreadraw   read NAND flash data without checking bad block and ECC\n"
+	" nreadoo    read NAND flash oob without checking bad block and ECC\n" /* index 10 */
+	" nprog      program NAND flash with data and ECC\n"
+	" help       print this help\n"
+	" version    show current USB Boot software version\n"
+	" go         execute program in SDRAM\n"
+	" fconfig    set USB Boot config file(not implement)\n"
+	" exit       quit from telnet session\n"
+	" readnand   read data from nand flash and store to SDRAM\n"
+	" gpios      set one GPIO to high level\n"
+	" gpioc      set one GPIO to low level\n"
+	" boot       boot device and make it in stage2\n" /* index 20 */
+	" list       show current device number can connect(not implement)\n"
 	/* " select" */
 	/* " unselect" */
 	/* " chip" */
 	/* " unchip" */
-	" nmark \tmark a bad block in NAND flash;\n"
-	" nmake \tread all data from nand flash and store to file(experimental);(not implement)\n"
-	" load \tload file data to SDRAM;\n"
-	" memtest \tdo SDRAM test;\n"
-	" run\tun command script in file;\n"
-	" sdprog \tprogram SD card;(not implement)"
-	" sdread \tread data from SD card;(not implement)");
+	" nmark      mark a bad block in NAND flash\n"
+	" nmake      read all data from nand flash and store to file(not implement)\n"
+	" load       load file data to SDRAM\n"
+	" memtest    do SDRAM test\n"
+	" run        run command script in file(implement by -c args)\n"
+	" sdprog     program SD card(not implement)\n"
+	" sdread     read data from SD card(not implement)\n");
 	return 1;
 }
 

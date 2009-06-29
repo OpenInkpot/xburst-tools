@@ -25,7 +25,7 @@ static void help(void)
 	printf("Usage: inflash [options] ...(must run as root)\n"
 	       "  -h --help\t\t\tPrint this help message\n"
 	       "  -v --version\t\t\tPrint the version number\n"
-	       "  -c --command\t\t\tDirect run the command\n\n"
+	       "  -c --command\t\t\tDirect run the commands, split by ';'\n"
 	       "  <run without options to enter commands via inflash prompt>\n\n"
 	       "Report bugs to <xiangfu.z@gmail.com>.\n"
 		);
