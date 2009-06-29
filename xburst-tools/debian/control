@@ -1,4 +1,4 @@
-Source: inflash
+Source: xburst-tools
 Section: misc
 Priority: extra
 Maintainer: xiangfu liu <xiangfu.z@gmail.com>
@@ -6,11 +6,11 @@ Build-Depends: debhelper (>= 7), libusb-dev, libconfuse-dev
 Standards-Version: 3.8.0
 Homepage: http://code.google.com/p/pi-project
 
-Package: inflash
+Package: xburst-tools
 Architecture: any
 Depends: ${shlibs:Depends}, libusb, libconfuse
 Description: host tool for Ingenic XBurst CPU USB boot and NAND flash access. 
- inflash is a host tool for Ingenic XBurst CPU device usb boot.
+ xburst-tools is a host tool for Ingenic XBurst CPU device usb boot.
  it's can flash bootloader, kernel, rootfs to Ingenic XBurst CPU
  device nand. also have some test function for Ingenic XBurst CPU 
  device.

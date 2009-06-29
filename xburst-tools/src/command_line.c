@@ -13,7 +13,7 @@
 #include "usb_boot_defines.h"
 #include "ingenic_usb.h"
 #include "cmd.h"
-#include "inflash_version.h"
+#include "xburst_tools_version.h"
  
 extern struct nand_in nand_in;
 extern struct sdram_in sdram_in;
@@ -97,7 +97,7 @@ static int handle_help(void)
 
 static int handle_version(void)
 {
-	printf(" USB Boot Software current version: %s\n", INFLASH_VERSION);
+	printf(" USB Boot Software current version: %s\n", XBURST_TOOLS_VERSION);
 	return 1;
 }
 
@@ -284,7 +284,7 @@ int command_handle(char *buf)
 		debug_go();
 		break;
 	case 16:		/* exit */
-		printf(" exiting inflash software\n");
+		printf(" exiting xburst-tools software\n");
 		return -1;	/* return -1 to break the main.c while
 				 * then run usb_ingenic_cleanup*/
 		/*case 17:

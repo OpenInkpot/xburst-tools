@@ -37,8 +37,8 @@
 #define VENDOR_ID	0x601a
 #define PRODUCT_ID	0x4740
 
-#define STAGE1_FILE_PATH "/usr/share/inflash/xburst_stage1.bin"
-#define STAGE2_FILE_PATH "/usr/share/inflash/xburst_stage2.bin"
+#define STAGE1_FILE_PATH "/usr/share/xburst_tools/xburst_stage1.bin"
+#define STAGE2_FILE_PATH "/usr/share/xburst_tools/xburst_stage2.bin"
 
 #define ARRAY_SIZE(a) (sizeof(a) / sizeof(a[0]))
 

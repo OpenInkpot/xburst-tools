@@ -41,7 +41,7 @@ build-stamp:  config.status
 
 	# Add here commands to compile the package.
 	$(MAKE)
-	#docbook-to-man debian/inflash.sgml > inflash.1
+	#docbook-to-man debian/xburst-tools.sgml > xburst-tools.1
 
 	touch $@
 
@@ -62,8 +62,8 @@ install: build
 	dh_prep  
 	dh_installdirs
 
-	# Add here commands to install the package into debian/inflash.
-	$(MAKE) DESTDIR=$(CURDIR)/debian/inflash install
+	# Add here commands to install the package into debian/xburst-tools.
+	$(MAKE) DESTDIR=$(CURDIR)/debian/xburst-tools install
 
 
 # Build architecture-independent files here.

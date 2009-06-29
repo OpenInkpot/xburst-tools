@@ -1,5 +1,5 @@
 *
-* inflash
+* xburst-tools
 *
 * Utility to respond to Ingenic XBurst USB boot protocol, provide
 * initial boot stages and ability to access NAND on device.
@@ -14,7 +14,7 @@ modify it under the terms of the GNU General Public License
 as published by the Free Software Foundation; either version
 3 of the License, or (at your option) any later version.
 
-inflash is the Linux version of a Windows utility from Ingenic called 'usbboot'.
+xburst-tools is the Linux version of a Windows utility from Ingenic called 'usbboot'.
 Homepage: http://www.ingenic.cn/eng/productServ/kfyd/compiler/pffaqContents.aspx#questionAnchor8
 Manual: ftp://ftp.ingenic.cn/3sw/00tools/usb_boot/manual/USB_Boot_Tool_Manual_1.4_EN.pdf
 
@@ -25,14 +25,14 @@ Build and Installation:
   ./configure
   make
   make install
-    *) make install will install the 'inflash' binary to /usr/bin/inflash
-       and the stage 1 and 2 bootloaders as well as inflash.cfg configuration
-       file into /usr/share/inflash
+    *) make install will install the 'xburst-tools' binary to /usr/bin/xburst-tools
+       and the stage 1 and 2 bootloaders as well as xburst-tools.cfg configuration
+       file into /usr/share/xburst-tools
 
-Configuration file: /usr/share/inflash/inflash.cfg
+Configuration file: /usr/share/xburst-tools/xburst-tools.cfg
 
 Examples:
-  sudo inflash     (invoking inflash without options will let you enter commands at the inflash prompt)
-  sudo inflash -c "boot"
-  sudo inflash -c "nprog 0 u-boot-nand.bin 0 0 -n"
-  sudo inflash -c "nprog 2048 uImage 0 0 -n"
+  sudo xburst-tools (invoking xburst-tools without options will let you enter commands at the xburst-tools prompt)
+  sudo xburst-tools  -c "boot"
+  sudo xburst-tools  -c "nprog 0 u-boot-nand.bin 0 0 -n"
+  sudo xburst-tools  -c "nprog 2048 uImage 0 0 -n"
