@@ -8,11 +8,11 @@
  * 3 of the License, or (at your option) any later version.
  */
 
-#include "ingenic_usb.h"
-#include "usb_boot_defines.h"
 #include <usb.h>
 #include <stdio.h>
 #include <string.h>
+#include "usb_boot_defines.h"
+#include "ingenic_usb.h"
 
 extern unsigned int total_size;
 
@@ -155,8 +155,7 @@ int usb_get_ingenic_cpu(struct ingenic_dev *ingenic_dev)
 	}
 
 	ingenic_dev->cpu_info_buff[8] = '\0';
-	printf(" CPU data: %s\n",
-		ingenic_dev->cpu_info_buff);
+	/* printf(" CPU data: %s\n", ingenic_dev->cpu_info_buff); */
 
 	if (!strcmp(ingenic_dev->cpu_info_buff,"JZ4740V1")) return 1;
 	if (!strcmp(ingenic_dev->cpu_info_buff,"JZ4750V1")) return 2;
@@ -267,31 +266,14 @@ int usb_read_data_from_ingenic(struct ingenic_dev *ingenic_dev,
 	return 1;
 }
 
-int usb_ingenic_upload(struct ingenic_dev *ingenic_dev, int stage)
+int usb_ingenic_start(struct ingenic_dev *ingenic_dev, int rqst, int stage_addr)
 {
 	int status;
-
-	unsigned int stage2_addr;
-	stage2_addr = total_size + 0x80000000;
-	stage2_addr -= CODE_SIZE;
-
-	int stage_addr = (stage == 1 ? 0x80002000 : stage2_addr);
-
-	usb_send_data_address_to_ingenic(ingenic_dev, stage_addr);
-	printf(" Download stage %d program and execute at 0x%08x\n", 
-	       stage, (stage_addr));
-	usb_send_data_to_ingenic(ingenic_dev);
-
-	if (stage == 2) {
-		if (usb_get_ingenic_cpu(ingenic_dev) < 1) 
-			return -1;
-		usb_ingenic_flush_cache(ingenic_dev);
-	}
 
 	/* tell the device to start the uploaded device */
 	status = usb_control_msg(ingenic_dev->usb_handle,
           /* bmRequestType */ USB_ENDPOINT_OUT | USB_TYPE_VENDOR | USB_RECIP_DEVICE,
-          /* bRequest      */ (stage == 1 ? VR_PROGRAM_START1 : VR_PROGRAM_START2),
+	  /* bRequest      */ rqst,
           /* wValue        */ STAGE_ADDR_MSB(stage_addr),
           /* wIndex        */ STAGE_ADDR_LSB(stage_addr),
           /* Data          */ 0,
@@ -303,7 +285,34 @@ int usb_ingenic_upload(struct ingenic_dev *ingenic_dev, int stage)
 			"on the Ingenic device: %i\n", status);
 		return status;
 	}
+	return 1;
+}
 
+int usb_ingenic_upload(struct ingenic_dev *ingenic_dev, int stage)
+{
+	int status;
+
+	unsigned int stage2_addr;
+	stage2_addr = total_size + 0x80000000;
+	stage2_addr -= CODE_SIZE;
+
+	int stage_addr = (stage == 1 ? 0x80002000 : stage2_addr);
+	int rqst = VR_PROGRAM_START1;
+
+	usb_send_data_address_to_ingenic(ingenic_dev, stage_addr);
+	printf(" Download stage %d program and execute at 0x%08x\n", 
+	       stage, (stage_addr));
+	usb_send_data_to_ingenic(ingenic_dev);
+
+	if (stage == 2) {
+		if (usb_get_ingenic_cpu(ingenic_dev) < 1) 
+			return -1;
+		usb_ingenic_flush_cache(ingenic_dev);
+		rqst = VR_PROGRAM_START2;
+	}
+
+	if (usb_ingenic_start(ingenic_dev, rqst, stage_addr) < 1)
+		return -1;
 	if (usb_get_ingenic_cpu(ingenic_dev) < 1)
 		return -1;
 
@@ -356,6 +365,27 @@ int usb_ingenic_configration(struct ingenic_dev *ingenic_dev, int ops)
 	if (status != 0) {
 		fprintf(stderr, "Error - "
 			"can't init Ingenic configration: %i\n", status);
+		return -1;
+	}
+
+	return 1;
+}
+
+int usb_ingenic_sdram_ops(struct ingenic_dev *ingenic_dev, int ops)
+{
+	int status;
+	status = usb_control_msg(ingenic_dev->usb_handle,
+          /* bmRequestType */ USB_ENDPOINT_OUT | USB_TYPE_VENDOR | USB_RECIP_DEVICE,
+          /* bRequest      */ VR_SDRAM_OPS,
+          /* wValue        */ ops,
+          /* wIndex        */ 0,
+          /* Data          */ 0,
+          /* wLength       */ 0,
+                              USB_TIMEOUT);
+
+	if (status != 0) {
+		fprintf(stderr, "Error - "
+			"Device can't load file to sdram: %i\n", status);
 		return -1;
 	}
 
