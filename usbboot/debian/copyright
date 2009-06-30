@@ -1,7 +1,7 @@
 This package was debianized by Xiangfu Liu<xiangfu.z@gmail.com> on
 Mon, 22 Jun 2009 22:48:14 +0800.
 
-It was downloaded from <http://code.google.com/p/pi-project/>
+It was downloaded from <http://github.com/xiangfu/xburst-tools>
 
 Upstream Author(s): Xiangfu Liu <xiangfu.z@gmail.com>
 
@@ -15,5 +15,3 @@ or (at your option) any later version.
 On Debian systems, the complete text of the GNU General Public
 License can be found in the file `/usr/share/common-licenses/GPL-3'.
 
-# Please also look if there are files or directories which have a
-# different copyright/license attached and list them here.

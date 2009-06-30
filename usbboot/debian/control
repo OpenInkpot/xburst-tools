@@ -4,7 +4,7 @@ Priority: extra
 Maintainer: xiangfu liu <xiangfu.z@gmail.com>
 Build-Depends: debhelper (>= 7), libusb-dev, libconfuse-dev
 Standards-Version: 3.8.0
-Homepage: http://code.google.com/p/pi-project
+Homepage: http://github.com/xiangfu/xburst-tools
 
 Package: xburst-tools
 Architecture: any

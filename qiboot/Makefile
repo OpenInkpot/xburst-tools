@@ -90,4 +90,3 @@ clean:
 	@rm -f src/fs/*.o src/fs/*~
 	@rm -f include/*~ ${IMAGE_DIR}/*
 	@make clean -C $(TOOLS)
-
