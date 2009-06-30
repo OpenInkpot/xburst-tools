@@ -1,16 +1,16 @@
 Source: xburst-tools
 Section: misc
 Priority: extra
-Maintainer: xiangfu liu <xiangfu.z@gmail.com>
+Maintainer: Xiangfu Liu <xiangfu.z@gmail.com>
 Build-Depends: debhelper (>= 7), libusb-dev, libconfuse-dev
 Standards-Version: 3.8.0
-Homepage: http://code.google.com/p/pi-project
+Homepage: http://github.com/xiangfu/xburst-tools
 
 Package: xburst-tools
 Architecture: any
 Depends: ${shlibs:Depends}, libusb, libconfuse
-Description: host tool for Ingenic XBurst CPU USB boot and NAND flash access. 
- xburst-tools is a host tool for Ingenic XBurst CPU device usb boot.
- it's can flash bootloader, kernel, rootfs to Ingenic XBurst CPU
- device nand. also have some test function for Ingenic XBurst CPU 
- device.
+Description: tools for Ingenic XBurst CPU USB boot and NAND flash access.
+ xburst-tools contains tools for Ingenic XBurst CPU device booting.
+ It can flash bootloader, kernel, rootfs to Ingenic XBurst CPU
+ device NAND, and also has test functions for Ingenic XBurst CPU 
+ devices.
