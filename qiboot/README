@@ -1,0 +1,149 @@
+Qi
+==
+
+Qi (named by Alan Cox on Openmoko kernel list) is a minimal bootloader that
+"breathes life" into Linux.  Its goal is to stay close to the minimum needed
+to "load" and then "boot" Linux -- no boot menus, additional peripheral init
+or private states.
+
+
+What's wrong with U-Boot, they keep telling people to not reinvent the wheel?
+=============================================================================
+
+U-Boot is gradually becoming a simplified knockoff of Linux.  After using it a
+while, it became clear we were cutting and pasting drivers into U-Boot from
+Linux, cutting them down and not having a plan to maintain the U-Boot versions
+as the Linux ones were changed.
+
+We decided that we would use full Linux for things that Linux is good at and
+only have the bootloader do the device init that is absolutely required before
+Linux can be pulled into memory and started.  In practice since we had a working
+U-Boot implementation it meant cutting that right down to the bone (start.S
+mainly for s3c2442) and then building it up from scratch optimized to just do
+load and boot.
+
+
+Samsung - specific boot sequence
+================================
+
+Right now Qi supports Samsung "steppingstone" scheme devices, but in fact it's
+the same in processors like iMX31 that there is a small area of SRAM that is
+prepped with NAND content via ROM on the device.  There's nothing that stops Qi
+use on processors without steppingstone, although the ATAG stuff assumes we deal
+with ARM based processor.
+
+
+Per-CPU Qi
+==========
+
+Qi has a concept of a single bootloader binary created per CPU type.  The
+different devices that use that CPU are all supported in the same binary.  At
+runtime after the common init is done, Qi asks each supported device code in
+turn if it recognizes the device as being handled by it, the first one to reply
+that it knows the device gets to control the rest of the process.
+
+Consequently, there is NO build-time configuration file as found on U-Boot
+except a make env var that sets the CPU type being built, eg:
+
+  make CPU=s3c6410
+
+
+Booting Heuristics
+==================
+
+Qi has one or more ways to fetch a kernel depending on the device it finds it is
+running on, for example on GTA02 it can use NAND and SD card devices.  It goes
+through these device-specific storage devices in order and tries to boot the
+first viable kernel it finds, usually /boot/<uImage-device>.bin for example
+/boot/uImage-GTA02.bin.
+
+The default order for GTA02 is: 1st SD primary partition, 2nd primary
+partition, 3rd primary partition, NAND kernel partition.
+
+You can disable a rootfs for consideration for boot if you add a file
+/boot/noboot-<device>, eg, /boot/noboot-GTA02.  This differs from renaming or
+deleting the kernel image because updating the kernel package would give you a
+working kernel again and allow boot, whereas the noboot indication will remain
+until you remove it.
+
+The kernel commandline used is associated with the storage device and partition,
+this allows the correct root= line to be arrived at without any work.
+
+If no kernel image can be found, Qi falls back to doing a memory test.
+
+
+Appending to commandline
+========================
+
+You can append to the Qi commandline by creating a file /boot/append-<device>,
+eg, /boot/append-GTA02 containing the additional kernel commandline you want.
+
+This means you can affect the boot per-rootfs, but that if you reimage the
+rootfs you at the same time define what is appeneded.  Because these files are
+looked for with the <device> name in them, options can be selected depending on
+the device the rootfs is run on.
+
+
+Initrd support
+==============
+
+Initrd or initramfs in separate file is supported to be loaded at given
+memory address in addition to kernel image.  The ATAGs are issued accordingly.
+
+
+Interactive UI
+==============
+
+Being minimalistic by its nature, Qi has very limited abilities to
+interact with a user. On GTA02 the red LED and the vibrator are used
+(if the battery is in good condition) to notify user of the following
+actions:
+
+The LED is turned on either on:
+ - Successful partition mount
+ - Successful kernel pull
+ - Successful initramfs pull
+
+The LED is turned off and vibrator runs briefly either on:
+ - Fail of kernel pull
+ - Fail of initramfs pull
+ - Fail of mount partition
+ - Skipping of current boot possibility
+
+The LED is turned off either on:
+ - Start of the kernel
+ - Start of the mem test
+ - Start of the kernel pull
+ - Start of the initramfs pull
+
+If a user presses the AUX button after successful partition mount and
+before start of the kernel pull (that is, while the red LED is on),
+this boot possibility is skipped (and GTA02 owners can feel
+vibration). If a user holds the POWER button just before start of the
+kernel, debugging parameters are added to the kernel command line
+and a lot of information is output to the screen.
+
+Functional Differences from U-Boot on GTA02
+===========================================
+
+ - Backlight and USB is not enabled until Linux starts after a few seconds
+
+ - No startup splash screen
+
+ - by default there is no boot spew on the LCM
+
+ - On GTAxx boots from first uSD ext2 / 3 partition containing
+    /boot/uImage-<devicename>.bin present, eg, /boot/uImage-GTA02.bin, it checks
+    first three partitions in turn
+
+ - On GTA01 and 02 if nothing is workable on the SD Card, or it is not present,
+    Qi will try to boot from NAND
+
+ - You can disable a partition for boot by creating /boot/noboot-<devicename>,
+    eg, /boot/noboot-GTA02, it will skip it and check the next partition
+
+ - Way faster
+
+ - There is no concept of "staying in the bootloader".  The bootloader exits to
+    Linux as fast as possible, that's all it does.
+
