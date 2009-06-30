@@ -284,7 +284,7 @@ int command_handle(char *buf)
 		debug_go();
 		break;
 	case 16:		/* exit */
-		printf(" exiting xburst-tools software\n");
+		printf(" exiting usbboot software\n");
 		return -1;	/* return -1 to break the main.c while
 				 * then run usb_ingenic_cleanup*/
 		/*case 17:

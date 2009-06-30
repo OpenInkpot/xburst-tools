@@ -10,15 +10,15 @@ xburst_tools_version.h:
 	'\n#endif' > xburst_tools_version.h
 BUILT_SOURCES = xburst_tools_version.h
 
-bin_PROGRAMS = xburst_tools
-xburst_tools_SOURCES = cmd.c  command_line.c  ingenic_cfg.c  \
+bin_PROGRAMS = usbboot
+usbboot_SOURCES = cmd.c  command_line.c  ingenic_cfg.c  \
 	ingenic_usb.c  main.c
 
 prefix = /usr
 datadir = /usr/share/xburst_tools
 data_DATA = ../xburst_stage1/xburst_stage1.bin \
 	../xburst_stage2/xburst_stage2.bin \
-	xburst_tools.cfg
+	usbboot.cfg
 EXTRA_DIST = $(datadir)
 
 ../xburst_stage1/xburst_stage1.bin:

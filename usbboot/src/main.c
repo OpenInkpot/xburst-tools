@@ -22,18 +22,18 @@ extern struct hand hand;
 
 static void help(void)
 {
-	printf("Usage: xburst-tools [options] ...(must run as root)\n"
+	printf("Usage: usbboot [options] ...(must run as root)\n"
 	       "  -h --help\t\t\tPrint this help message\n"
 	       "  -v --version\t\t\tPrint the version number\n"
 	       "  -c --command\t\t\tDirect run the commands, split by ';'\n"
-	       "  <run without options to enter commands via xburst-tools prompt>\n\n"
+	       "  <run without options to enter commands via usbboot prompt>\n\n"
 	       "Report bugs to <xiangfu.z@gmail.com>.\n"
 		);
 }
 
 static void print_version(void)
 {
-	printf("xburst-tools version: %s\n", XBURST_TOOLS_VERSION);
+	printf("usbboot version: %s\n", XBURST_TOOLS_VERSION);
 }
 
 static struct option opts[] = {
@@ -50,7 +50,7 @@ int main(int argc, char **argv)
 	char com_buf[256] = {0};
 	char *cmdpt;
 
-	printf("xburst-tools - Ingenic XBurst USB Boot Utility\n"
+	printf("usbboot - Ingenic XBurst USB Boot Utility\n"
 	       "(c) 2009 Ingenic Semiconductor Inc., Qi Hardware Inc., Xiangfu Liu, Marek Lindner\n"
 	       "This program is Free Software and comes with ABSOLUTELY NO WARRANTY.\n\n");
 
@@ -106,7 +106,7 @@ int main(int argc, char **argv)
 	}
 
 	while (1) {
-		printf("xburst-tools :> ");
+		printf("usbboot :> ");
 		cptr = fgets(com_buf, 256, stdin);
 		if (cptr == NULL)
 			continue;
