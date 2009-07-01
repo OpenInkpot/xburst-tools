@@ -1,0 +1,22 @@
+
+This is the source code of the NAND Secondary Program Loader (SPL).
+The NAND SPL itself will be first loaded by the IPL (Initial Program Loader)
+inside the CPU, then it loads the kernel image from NAND into RAM and 
+starts the kernel from RAM.
+
+To build the NAND SPL, follow next steps:
+
+  $ cd src/
+  $ make
+
+And you will get a binary file called n-boot.bin.
+
+Before building the SPL, you should open config.h and check the 
+configuration is correct for your system.
+
+For JZ4730, the n-boot.bin must be less than 4KB.
+
+For JZ4740, the n-boot.bin must be less than 8KB.
+
+The platform definitions were declared in include/jz47xx_board.h.
+Please check and modify it according to your system.
