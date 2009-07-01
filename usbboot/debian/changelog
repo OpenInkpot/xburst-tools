@@ -1,7 +1,5 @@
-xburst-tools (20090630-1) unstable; urgency=low
+xburst-tools (2009.06) unstable; urgency=low
 
-  [ xiangfu liu ]
-  * Initial release
-
+  * Non-maintainer upload
 
  -- xiangfu liu <xiangfu.z@gmail.com>  Tue, 30 Jun 2009 14:28:36 +0800
