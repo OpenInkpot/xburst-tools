@@ -3,7 +3,7 @@ Section: misc
 Priority: extra
 Maintainer: Xiangfu Liu <xiangfu.z@gmail.com>
 Build-Depends: debhelper (>= 7), libusb-dev, libconfuse-dev
-Standards-Version: 3.8.0
+Standards-Version: 3.8.2
 Homepage: http://github.com/xiangfu/xburst-tools
 
 Package: xburst-tools
