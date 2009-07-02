@@ -12,7 +12,7 @@
 #include <getopt.h>
 #include <unistd.h>
 #include <string.h>
-#include "xburst_tools_version.h"
+#include "xburst-tools_version.h"
 #include "command_line.h"
 #include "ingenic_usb.h"
 #include "ingenic_cfg.h"

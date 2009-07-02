@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2009 PI
+ * Copyright (C) 2009 QI
  * Author:  Xiangfu Liu <xiangfu.z@gmail.com>
  *
  * This program is free software; you can redistribute it and/or
@@ -223,43 +223,36 @@ static int nand_check_block(u32 block)
 	{
 		pg = block * ppb + 0;
 		read_oob(oob_buf, oobsize, pg);
-		if ( oob_buf[0] != 0xff || oob_buf[1] != 0xff )
-		{
+		if ( oob_buf[0] != 0xff || oob_buf[1] != 0xff ) {
 			serial_puts("Absolute skip a bad block\n");
 			return 1;
 		}
 
 		pg = block * ppb + 1;
 		read_oob(oob_buf, oobsize, pg);
-		if ( oob_buf[0] != 0xff || oob_buf[1] != 0xff )
-		{
+		if ( oob_buf[0] != 0xff || oob_buf[1] != 0xff ) {
 			serial_puts("Absolute skip a bad block\n");
 			return 1;
 		}
 
 		pg = block * ppb + ppb - 2 ;
 		read_oob(oob_buf, oobsize, pg);
-		if ( oob_buf[0] != 0xff || oob_buf[1] != 0xff )
-		{
+		if ( oob_buf[0] != 0xff || oob_buf[1] != 0xff ) {
 			serial_puts("Absolute skip a bad block\n");
 			return 1;
 		}
 
 		pg = block * ppb + ppb - 1 ;
 		read_oob(oob_buf, oobsize, pg);
-		if ( oob_buf[0] != 0xff || oob_buf[1] != 0xff )
-		{
+		if ( oob_buf[0] != 0xff || oob_buf[1] != 0xff ) {
 			serial_puts("Absolute skip a bad block\n");
 			return 1;
 		}
 
-	}
-	else
-	{
+	} else {
 		pg = block * ppb + bad_block_page;
 		read_oob(oob_buf, oobsize, pg);
-		if (oob_buf[bad_block_pos] != 0xff)
-		{
+		if (oob_buf[bad_block_pos] != 0xff) {
 			serial_puts("Skip a bad block\n");
 			return 1;
 		}
@@ -383,14 +376,12 @@ static int read_oob(void *buf, u32 size, u32 pg)
 		coladdr = pagesize;
 
 	if (pagesize == 512)
-		/* Send READOOB command */
-		__nand_cmd(CMD_READC);
+		__nand_cmd(CMD_READC); /* Send READOOB command */
 	else
-		/* Send READ0 command */
-		__nand_cmd(CMD_READA);
+		__nand_cmd(CMD_READA); /* Send READ0 command */
 
-	/* Send column address */
-	__nand_addr(coladdr & 0xff);
+	__nand_addr(coladdr & 0xff); /* Send column address */
+
 	if (pagesize != 512)
 		__nand_addr(coladdr >> 8);
 
@@ -600,15 +591,14 @@ restart:
 			}
 		}
 
-		if ( option != NO_OOB )      //if NO_OOB do not perform vaild check!
-		{
-			for ( j = 0 ; j < pagesize + oobsize; j ++)
-			{
+		//if NO_OOB do not perform vaild check!
+		if ( option != NO_OOB ) {
+			for ( j = 0 ; j < pagesize + oobsize; j ++) {
 				if (tmpbuf[j] != 0xff)
 					break;
 			}
-			if ( j == oobsize + pagesize ) 
-			{
+
+			if ( j == oobsize + pagesize ) {
 				tmpbuf += ( pagesize + oobsize ) ;
 				i ++;
 				cur ++;
@@ -631,8 +621,7 @@ restart:
 			rowaddr >>= 8;
 		}
 
-		switch (option)
-		{
+		switch (option) {
 		case OOB_ECC:
 			write_proc(tmpbuf, pagesize);  //write data
 			tmpbuf += pagesize;
@@ -668,7 +657,7 @@ restart:
 			tmpbuf += oobsize;
 
 			break;
-		case NO_OOB:              //bin image
+		case NO_OOB: /* bin image */
 			/* write out data */
 			for (j = 0; j < ecccnt; j++) {
 				volatile u8 *paraddr = (volatile u8 *)EMC_NFPAR0;
@@ -691,6 +680,7 @@ restart:
 			for (j = 0; j < oobsize; j++) {
 				oob_buf[j] = 0xff;
 			}
+
 			oob_buf[2] = 0;
 			oob_buf[3] = 0;
 			oob_buf[4] = 0;
@@ -698,6 +688,7 @@ restart:
 			for (j = 0; j < ecccnt*PAR_SIZE; j++) {
 				oob_buf[ecc_pos + j] = ecc_buf[j];
 			}
+
 			write_proc((u8 *)oob_buf, oobsize);
 			break;
 		}
@@ -708,8 +699,8 @@ restart:
 
 		__nand_cmd(CMD_READ_STATUS);
 
-		if (__nand_data8() & 0x01)  /* page program error */
-		{
+		/* page program error */
+		if (__nand_data8() & 0x01) {
 			serial_puts("Skip a write fail block\n");
 			nand_erase_4740( 1, cur/ppb, 1);  //force erase before
 			nand_mark_bad_4740(cur/ppb);
@@ -767,9 +758,8 @@ u32 nand_mark_bad_4740(int block)
 {
 	u32 rowaddr;
 
-//	nand_erase_4740( 1, block, 1);  //force erase before
-	if ( bad_block_page >= ppb )    //absolute bad block mark!
-	{                               //mark four page!
+	//nand_erase_4740( 1, block, 1);  //force erase before
+	if ( bad_block_page >= ppb ) {  //mark four page!
 		rowaddr = block * ppb + 0;
 		nand_mark_bad_page(rowaddr);
 
@@ -781,9 +771,7 @@ u32 nand_mark_bad_4740(int block)
 
 		rowaddr = block * ppb + ppb - 1;
 		nand_mark_bad_page(rowaddr);
-	}
-	else                            //mark one page only
-	{
+	} else {                        //mark one page only
 		rowaddr = block * ppb + bad_block_page;
 		nand_mark_bad_page(rowaddr);
 	}
@@ -822,7 +810,7 @@ static int nand_data_read16(char *buf, int count)
 {
 	int i;
 	u16 *p = (u16 *)buf;
-	for (i=0;i<count/2;i++)
+	for (i=0; i < count / 2; i++)
 		*p++ = __nand_data16();
 	return 0;
 }
