@@ -1,4 +1,4 @@
-#
+
 # "PI Makefile" - for setting up the PI development environment
 #
 # (C) Copyright 2009 PI.
@@ -43,7 +43,7 @@ KERNEL_HEADERS_PACKAGE=$(KERNEL_HEADERS_VER).tar.bz2
 KERNEL_HEADERS_URL=
 
 # for the device stage
-FLASH_TOOL_PATH = ./inflash
+FLASH_TOOL_PATH = ./usbboot
 FLASH_TOOL_BIN_PATH = $(FLASH_TOOL_PATH)/bin
 STAGE1_PATH = $(FLASH_TOOL_PATH)/xburst_stage1
 STAGE2_PATH = $(FLASH_TOOL_PATH)/xburst_stage2
@@ -155,15 +155,15 @@ kernel:
 	make uImage
 
 ### flash-boot
-.PHONY: inflash
-inflash: stage1 stage2
+.PHONY: usbboot
+usbboot: stage1 stage2
 	mkdir -p $(FLASH_TOOL_BIN_PATH)
-	cp $(FLASH_TOOL_PATH)/src/inflash.cfg $(FLASH_TOOL_BIN_PATH)
+	cp $(FLASH_TOOL_PATH)/src/usbboot.cfg $(FLASH_TOOL_BIN_PATH)
 	cd $(FLASH_TOOL_PATH) && \
 	./autogen.sh && \
 	./configure && \
 	make
-	cp $(FLASH_TOOL_PATH)/src/inflash $(FLASH_TOOL_BIN_PATH)
+	cp $(FLASH_TOOL_PATH)/src/usbboot $(FLASH_TOOL_BIN_PATH)
 
 stage1:
 	make CROSS_COMPILE=$(CROSS_COMPILE) -C $(STAGE1_PATH)
@@ -172,11 +172,11 @@ stage2:
 	make CROSS_COMPILE=$(CROSS_COMPILE) -C $(STAGE2_PATH)
 
 ### clean up
-distclean: clean clean-inflash clean-toolchain
+distclean: clean clean-usbboot clean-toolchain
 
 clean:
 
-clean-inflash:
+clean-usbboot:
 	make clean CROSS_COMPILE=$(CROSS_COMPILE) -C $(STAGE1_PATH)
 	make clean CROSS_COMPILE=$(CROSS_COMPILE) -C $(STAGE2_PATH)
 	make clean -C $(FLASH_TOOL_PATH)

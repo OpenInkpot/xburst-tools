@@ -2,7 +2,7 @@
  * Include file for Ingenic Semiconductor's JZ4740 CPU.
  *
  * (C) Copyright 2009
- * Author: Xiangfu Liu <xiangfu.z@gmail.com>
+ * Author: Xiangfu Liu <xiangfu@qi-hardware.com>
  *
  * This program is free software; you can redistribute it and/or
  * modify it under the terms of the GNU General Public License

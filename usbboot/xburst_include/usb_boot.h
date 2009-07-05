@@ -2,7 +2,7 @@
  * "Ingenic flash tool" - flash the Ingenic CPU via USB
  *
  *  Copyright (C) 2009
- * Author: Xiangfu Liu <xiangfu.z@gmail.com>
+ * Author: Xiangfu Liu <xiangfu@qi-hardware.com>
  *
  * This program is free software; you can redistribute it and/or
  * modify it under the terms of the GNU General Public License

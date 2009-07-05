@@ -1,12 +1,12 @@
-This package was debianized by Xiangfu Liu<xiangfu.z@gmail.com> on
+This package was debianized by Xiangfu Liu<xiangfu@qi-hardware.com> on
 Mon, 22 Jun 2009 22:48:14 +0800.
 
 It was downloaded from <http://github.com/xiangfu/xburst-tools>
 
-Upstream Author: Xiangfu Liu <xiangfu.z@gmail.com>
+Upstream Author: Xiangfu Liu <xiangfu@qi-hardware.com>
 
 
-The Debian packaging is copyright 2009, xiangfu <xiangfu.z@gmail.com> and
+The Debian packaging is copyright 2009, xiangfu <xiangfu@qi-hardware.com> and
 is licensed under the GPL, see `/usr/share/common-licenses/GPL-3'.
 
 You are free to distribute this software under the terms of

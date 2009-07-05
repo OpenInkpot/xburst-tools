@@ -52,6 +52,11 @@ clean:
 	dh_testroot
 	rm -f build-stamp 
 
+	rm -f debian/stamp-autothings-update
+	@# Delete generated files, we don't want them in the diff.
+	rm -f aclocal.m4 config.h.in configure Makefile.in m4/install-sh
+	rm -f m4/missing m4/depcomp src/Makefile.in src/xburst-tools_version.h
+
 	# Add here commands to clean up after the build process.
 	[ ! -f Makefile ] || $(MAKE) distclean
 	rm -f config.sub config.guess

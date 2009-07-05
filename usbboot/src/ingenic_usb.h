@@ -1,5 +1,5 @@
 /*
- * Authors: Xiangfu Liu <xiangfu.z@gmail.com>
+ * Authors: Xiangfu Liu <xiangfu@qi-hardware.com>
  *          Marek Lindner <lindner_marek@yahoo.de>
  *
  * This program is free software; you can redistribute it and/or

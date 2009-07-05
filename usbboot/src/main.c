@@ -1,5 +1,5 @@
 /*
- * Authors: Xiangfu Liu <xiangfu.z@gmail.com>
+ * Authors: Xiangfu Liu <xiangfu@qi-hardware.com>
  *
  * This program is free software; you can redistribute it and/or
  * modify it under the terms of the GNU General Public License
@@ -27,7 +27,7 @@ static void help(void)
 	       "  -v --version\t\t\tPrint the version number\n"
 	       "  -c --command\t\t\tDirect run the commands, split by ';'\n"
 	       "  <run without options to enter commands via usbboot prompt>\n\n"
-	       "Report bugs to <xiangfu.z@gmail.com>.\n"
+	       "Report bugs to <xiangfu@qi-hardware.com>.\n"
 		);
 }
 

@@ -1,6 +1,6 @@
 /*
  * Copyright (C) 2009 QI
- * Author:  Xiangfu Liu <xiangfu.z@gmail.com>
+ * Author:  Xiangfu Liu <xiangfu@qi-hardware.com>
  *
  * This program is free software; you can redistribute it and/or
  * modify it under the terms of the GNU General Public License
@@ -495,8 +495,7 @@ u32 nand_read_4740(void *buf, u32 startpage, u32 pagenum, int option)
 			stat = REG_EMC_NFINTS;
 			if (stat & EMC_NFINTS_ERR) {
 				if (stat & EMC_NFINTS_UNCOR) {
-					if (flag)
-					{
+					if (flag) {
 						serial_puts("\nUncorrectable error occurred\n");
 						serial_put_hex(cur_page);
 						handshake_PKT[3] = 1;
