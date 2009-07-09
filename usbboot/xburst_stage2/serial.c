@@ -102,5 +102,4 @@ void serial_put_hex(unsigned int  d)
 	c[8] = '\n';
 	c[9] = 0;
 	serial_puts(c);
-
 }

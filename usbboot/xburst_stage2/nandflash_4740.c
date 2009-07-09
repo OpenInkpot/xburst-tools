@@ -262,11 +262,11 @@ static int nand_check_block(u32 block)
 }
 
 /*
- * Read data <pagenum> pages from <startpage> page.
+ * Read data <pagecount> pages from <startpage> page.
  * Don't skip bad block.
  * Don't use HW ECC.
  */
-u32 nand_read_raw_4740(void *buf, u32 startpage, u32 pagenum, int option)
+u32 nand_read_raw_4740(void *buf, u32 startpage, u32 pagecount, int option)
 {
 	u32 cnt, j;
 	u32 cur_page, rowaddr;
@@ -276,7 +276,7 @@ u32 nand_read_raw_4740(void *buf, u32 startpage, u32 pagenum, int option)
 
 	cur_page = startpage;
 	cnt = 0;
-	while (cnt < pagenum) {
+	while (cnt < pagecount) {
 		select_chip(cnt / ppb);
 		if ((cur_page % ppb) == 0) {
 			if (nand_check_block(cur_page / ppb)) {
@@ -431,11 +431,11 @@ void rs_correct(unsigned char *buf, int idx, int mask)
 }
 
  /*
- * Read data <pagenum> pages from <startpage> page.
+ * Read data <pagecount> pages from <startpage> page.
  * Skip bad block if detected.
  * HW ECC is used.
  */
-u32 nand_read_4740(void *buf, u32 startpage, u32 pagenum, int option)
+u32 nand_read_4740(void *buf, u32 startpage, u32 pagecount, int option)
 {
 	u32 j, k;
 	u32 cur_page, cur_blk, cnt, rowaddr, ecccnt;
@@ -446,7 +446,7 @@ u32 nand_read_4740(void *buf, u32 startpage, u32 pagenum, int option)
 	tmpbuf = buf;
 	handshake_PKT[3] = 0;
 
-	while (cnt < pagenum) {
+	while (cnt < pagecount) {
 		select_chip(cnt / ppb);
 		/* If this is the first page of the block, check for bad. */
 		if ((cur_page % ppb) == 0) {
@@ -496,12 +496,11 @@ u32 nand_read_4740(void *buf, u32 startpage, u32 pagenum, int option)
 			if (stat & EMC_NFINTS_ERR) {
 				if (stat & EMC_NFINTS_UNCOR) {
 					if (flag) {
-						serial_puts("\nUncorrectable error occurred\n");
+						serial_puts("\nUncorrectable error occurred, Page:");
 						serial_put_hex(cur_page);
 						handshake_PKT[3] = 1;
 					}
-				}
-				else {
+				} else {
 					handshake_PKT[3] = 0;
 					u32 errcnt = (stat & EMC_NFINTS_ERRCNT_MASK) >> EMC_NFINTS_ERRCNT_BIT;
 					switch (errcnt) {
@@ -524,8 +523,7 @@ u32 nand_read_4740(void *buf, u32 startpage, u32 pagenum, int option)
 			tmpbuf += ECC_BLOCK;
 		}
 
-		switch (option)
-		{
+		switch (option) {
 		case	OOB_ECC:
 			for (j = 0; j < oobsize; j++)
 				tmpbuf[j] = oob_buf[j];
@@ -701,8 +699,8 @@ restart:
 		/* page program error */
 		if (__nand_data8() & 0x01) {
 			serial_puts("Skip a write fail block\n");
-			nand_erase_4740( 1, cur/ppb, 1);  //force erase before
-			nand_mark_bad_4740(cur/ppb);
+			nand_erase_4740(1, cur/ppb, 1);  //force erase before
+			nand_mark_bad_4740(cur / ppb);
 			spage += ppb;
 			goto restart;
 		}
