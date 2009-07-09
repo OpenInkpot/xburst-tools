@@ -1,7 +1,7 @@
 /*
  * Include file for Ingenic Semiconductor's JZ4750 CPU.
  *
- * (C) Copyright 2009
+ * Copyright 2009 (C) Qi Hardware Inc.,
  * Author: Xiangfu Liu <xiangfu@qi-hardware.com>
  *
  * This program is free software; you can redistribute it and/or

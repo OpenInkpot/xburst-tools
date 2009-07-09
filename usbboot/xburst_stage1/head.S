@@ -4,7 +4,7 @@
  * Entry point of the firmware.
  * The firmware code are executed in the ICache.
  *
- * (C) Copyright 2009
+ * Copyright 2009 (C) Qi Hardware Inc.,
  * Author: Xiangfu Liu <xiangfu@qi-hardware.com>
  *
  * This program is free software; you can redistribute it and/or

@@ -6,12 +6,26 @@ It was downloaded from <http://github.com/xiangfu/xburst-tools>
 Upstream Author: Xiangfu Liu <xiangfu@qi-hardware.com>
 
 
-The Debian packaging is copyright 2009, xiangfu <xiangfu@qi-hardware.com> and
-is licensed under the GPL, see `/usr/share/common-licenses/GPL-3'.
+The Debian packaging is copyright 2009, 
+	Xiangfu Liu<xiangfu@qi-hardware.com> and
+	Marek Lindner <lindner_marek@yahoo.de>
+	Wolfgang Spraul <wolfgang@qi-hardware.com>
+	Ingenic Semiconductor Inc.
+	Seeger Chin <seeger.chin@gmail.com>
+	Michael Anburaj <michaelanburaj@hotmail.com>
+	Ralf Baechle
+	Silicon Graphics, Inc.
+	Paul M. Antoine
+	Kevin D. Kissell <kevink@mips.com>
+	Carsten Langgaard <carstenl@mips.com>
+	MIPS Technologies, Inc.
+	Maciej W. Rozycki
+	Lucifer at Ingenic Semiconductor Inc.
+is licensed under the GPL, see `/usr/share/common-licenses/GPL'.
 
 You are free to distribute this software under the terms of
 the GNU General Public License  either version 3 of the License,
 or (at your option) any later version.
 On Debian systems, the complete text of the GNU General Public
-License can be found in the file `/usr/share/common-licenses/GPL-3'.
+License can be found in the file `/usr/share/common-licenses/GPL'.
 

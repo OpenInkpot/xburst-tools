@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2009 PI
+ * Copyright (C) 2009 Qi Hardware Inc.,
  * Author:  Xiangfu Liu <xiangfu@qi-hardware.com>
  *
  * This program is free software; you can redistribute it and/or

@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2009 QI
+ * Copyright (C) 2009 Qi Hardware Inc.,
  * Author:  Xiangfu Liu <xiangfu@qi-hardware.com>
  *
  * This program is free software; you can redistribute it and/or
@@ -16,6 +16,7 @@
  * Foundation, Inc., 51 Franklin Street, Fifth Floor,
  * Boston, MA  02110-1301, USA
  */
+
 #include "nandflash.h"
 #include "jz4740.h"
 #include "usb_boot.h"
@@ -68,7 +69,6 @@ static volatile unsigned char *cmdport = (volatile unsigned char *)0xb8008000;
 static int bus = 8, row = 2, pagesize = 2048, oobsize = 64, ppb = 128;
 static int bad_block_pos,bad_block_page,force_erase,ecc_pos,wp_pin;
 extern struct hand Hand;
-//static u8 data_buf[2048] = {0};
 static u8 oob_buf[256] = {0};
 extern u16 handshake_PKT[4];
 
@@ -92,7 +92,8 @@ static inline void __nand_sync(void)
 static void select_chip(int block)
 {
 	int t;
-	if (!Hand.nand_bpc) return;
+	if (!Hand.nand_bpc) 
+		return;
 	t = (block / Hand.nand_bpc) % 4;
 	addrport = (volatile unsigned char *)(EMC_CSN[t] + 0x10000);
 	dataport = (volatile unsigned char *)EMC_CSN[t];
@@ -109,27 +110,28 @@ static int (*read_proc)(char *, int) = NULL;
 
 static nand_init_gpio(void)
 {
-	//modify this fun to a specifical borad
-	//this fun init those gpio use by all flash chip
-	//select the gpio function related to flash chip
+	/* modify this fun to a specifical borad
+	 * this fun init those gpio use by all flash chip
+	 * select the gpio function related to flash chip
+	 */
 	__gpio_as_nand();
 }
 
 inline void nand_enable_4740(unsigned int csn)
 {
-	//modify this fun to a specifical borad
-	//this fun to enable the chip select pin csn
-	//the choosn chip can work after this fun
-	//dprintf("\n Enable chip select :%d",csn);
+	/* modify this fun to a specifical borad
+	 * this fun to enable the chip select pin csn
+	 * the choosn chip can work after this fun
+	 */
 	__nand_enable();
 }
 
 inline void nand_disable_4740(unsigned int csn)
 {
-	//modify this fun to a specifical borad
-	//this fun to enable the chip select pin csn
-	//the choosn chip can not work after this fun
-	//dprintf("\n Disable chip select :%d",csn);
+	/* modify this fun to a specifical borad
+	 * this fun to enable the chip select pin csn
+	 * the choosn chip can not work after this fun
+	 */
 	__nand_disable();
 }
 
@@ -162,7 +164,6 @@ int nand_init_4740(int bus_width, int row_cycle, int page_size, int page_per_blo
 	ecc_pos = ep;
 	wp_pin = Hand.nand_wppin;
 
-//	nand_enable(0);
 	/* Initialize NAND Flash Pins */
 	if (wp_pin)
 	{
@@ -218,47 +219,42 @@ u32 nand_read_oob_4740(void *buf, u32 startpage, u32 pagenum)
 static int nand_check_block(u32 block)
 {
 	u32 pg,i;
-
-	if ( bad_block_page >= ppb )    //do absolute bad block detect!
-	{
+	if ( bad_block_page >= ppb ) {
+		/* do absolute bad block detect! */
 		pg = block * ppb + 0;
 		read_oob(oob_buf, oobsize, pg);
-		if ( oob_buf[0] != 0xff || oob_buf[1] != 0xff ) {
-			serial_puts("Absolute skip a bad block\n");
-			return 1;
-		}
+		if ( oob_buf[0] != 0xff || oob_buf[1] != 0xff )
+			goto bad;
 
 		pg = block * ppb + 1;
 		read_oob(oob_buf, oobsize, pg);
-		if ( oob_buf[0] != 0xff || oob_buf[1] != 0xff ) {
-			serial_puts("Absolute skip a bad block\n");
-			return 1;
-		}
+		if ( oob_buf[0] != 0xff || oob_buf[1] != 0xff )
+			goto bad;
 
 		pg = block * ppb + ppb - 2 ;
 		read_oob(oob_buf, oobsize, pg);
-		if ( oob_buf[0] != 0xff || oob_buf[1] != 0xff ) {
-			serial_puts("Absolute skip a bad block\n");
-			return 1;
-		}
+		if ( oob_buf[0] != 0xff || oob_buf[1] != 0xff )
+			goto bad;
 
 		pg = block * ppb + ppb - 1 ;
 		read_oob(oob_buf, oobsize, pg);
-		if ( oob_buf[0] != 0xff || oob_buf[1] != 0xff ) {
-			serial_puts("Absolute skip a bad block\n");
-			return 1;
-		}
+		if ( oob_buf[0] != 0xff || oob_buf[1] != 0xff )
+			goto bad;
 
 	} else {
 		pg = block * ppb + bad_block_page;
 		read_oob(oob_buf, oobsize, pg);
-		if (oob_buf[bad_block_pos] != 0xff) {
-			serial_puts("Skip a bad block\n");
-			return 1;
-		}
+		if (oob_buf[bad_block_pos] != 0xff)
+			goto bad;
 
 	}
+
 	return 0;
+
+bad:
+	serial_puts("Absolute skip a bad block\n");
+	return 1;
+	
 }
 
 /*
@@ -280,7 +276,7 @@ u32 nand_read_raw_4740(void *buf, u32 startpage, u32 pagecount, int option)
 		select_chip(cnt / ppb);
 		if ((cur_page % ppb) == 0) {
 			if (nand_check_block(cur_page / ppb)) {
-				cur_page += ppb;   // Bad block, set to next block 
+				cur_page += ppb; //Bad block, set to next block 
 				continue;
 			}
 		}
@@ -327,10 +323,8 @@ u32 nand_erase_4740(int blk_num, int sblk, int force)
 	for (i = 0; i < blk_num; ) {
 		rowaddr = cur;
 		select_chip(cur / ppb);
-		if ( !force )
-		{
-			if (nand_check_block(cur/ppb))
-			{
+		if ( !force ) {
+			if (nand_check_block(cur/ppb)) {
 				cur += ppb;
 				blk_num += Hand.nand_plane;
 				continue;
@@ -347,8 +341,7 @@ u32 nand_erase_4740(int blk_num, int sblk, int force)
 		__nand_sync();
 		__nand_cmd(CMD_READ_STATUS);
 
-		if (__nand_data8() & 0x01) 
-		{
+		if (__nand_data8() & 0x01) {
 			serial_puts("Erase fail at ");
 			serial_put_hex(cur / ppb);
 			nand_mark_bad_4740(cur/ppb);
@@ -452,7 +445,7 @@ u32 nand_read_4740(void *buf, u32 startpage, u32 pagecount, int option)
 		if ((cur_page % ppb) == 0) {
 			cur_blk = cur_page / ppb;
 			if (nand_check_block(cur_blk)) {
-				cur_page += ppb;   // Bad block, set to next block 
+				cur_page += ppb; //Bad block, set to next block 
 				continue;
 			}
 		}
@@ -524,19 +517,19 @@ u32 nand_read_4740(void *buf, u32 startpage, u32 pagecount, int option)
 		}
 
 		switch (option) {
-		case	OOB_ECC:
+		case OOB_ECC:
 			for (j = 0; j < oobsize; j++)
 				tmpbuf[j] = oob_buf[j];
 			tmpbuf += oobsize;
 			break;
-		case	OOB_NO_ECC:
+		case OOB_NO_ECC:
 			for (j = 0; j < ecccnt * PAR_SIZE; j++)
 				oob_buf[ecc_pos + j] = 0xff;
 			for (j = 0; j < oobsize; j++)
 				tmpbuf[j] = oob_buf[j];
 			tmpbuf += oobsize;
 			break;
-		case	NO_OOB:
+		case NO_OOB:
 			break;
 		}
 
@@ -811,4 +804,3 @@ static int nand_data_read16(char *buf, int count)
 		*p++ = __nand_data16();
 	return 0;
 }
-
