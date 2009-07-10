@@ -185,10 +185,12 @@ int error_check(unsigned char *org,unsigned char * obj,unsigned int size)
 		if (org[i] != obj[i]) {
 			unsigned int s = (i < 8) ? i : i - 8; // start_dump
 			printf("FAIL at off %d, wrote 0x%x, read 0x%x\n", i, org[i], obj[i]);
-			printf("  off %d write: %02x %02x %02x %02x %02x %02x %02x %02x %02x %02x %02x %02x %02x %02x %02x %02x\n", s,
+			printf("  off %d write: %02x %02x %02x %02x %02x %02x %02x %02x"
+			       " %02x %02x %02x %02x %02x %02x %02x %02x\n", s,
 				org[s], org[s+1], org[s+2], org[s+3], org[s+4], org[s+5], org[s+6], org[s+7],
 				org[s+8], org[s+9], org[s+10], org[s+11], org[s+12], org[s+13], org[s+14], org[s+15]);
-			printf("  off %d read:  %02x %02x %02x %02x %02x %02x %02x %02x %02x %02x %02x %02x %02x %02x %02x %02x\n", s,
+			printf("  off %d read:  %02x %02x %02x %02x %02x %02x %02x %02x"
+			       " %02x %02x %02x %02x %02x %02x %02x %02x\n", s,
 				obj[s], obj[s+1], obj[s+2], obj[s+3], obj[s+4], obj[s+5], obj[s+6], obj[s+7],
 				obj[s+8], obj[s+9], obj[s+10], obj[s+11], obj[s+12], obj[s+13], obj[s+14], obj[s+15]);
 			return 0;
@@ -262,7 +264,8 @@ int nand_program_check(struct nand_in *nand_in,
 		usb_ingenic_nand_ops(&ingenic_dev, temp);
 
 		usb_read_data_from_ingenic(&ingenic_dev, ret, 8);
-		printf(" Finish! (len %d start_page %d page_num %d)", nand_in->length, nand_in->start, page_num);
+		printf(" Finish! (len %d start_page %d page_num %d)\n", 
+		       nand_in->length, nand_in->start, page_num);
 
 		usb_send_data_address_to_ingenic(&ingenic_dev, nand_in->start);
 		/* Read back to check! */
@@ -273,7 +276,7 @@ int nand_program_check(struct nand_in *nand_in,
 			temp = ((OOB_ECC << 12) & 0xf000) +
 				((i << 4) & 0xff0) + NAND_READ;
 			usb_ingenic_nand_ops(&ingenic_dev, temp);
-			printf("Checking %d bytes...", nand_in->length);
+			printf(" Checking %d bytes...", nand_in->length);
 			usb_read_data_from_ingenic(&ingenic_dev, check_buf, 
 						   page_num * (hand.nand_ps + hand.nand_os));
 			usb_read_data_from_ingenic(&ingenic_dev, ret, 8);
@@ -282,7 +285,7 @@ int nand_program_check(struct nand_in *nand_in,
 			temp = ((OOB_NO_ECC << 12) & 0xf000) + 
 				((i << 4) & 0xff0) + NAND_READ;
 			usb_ingenic_nand_ops(&ingenic_dev, temp);
-			printf("Checking %d bytes...", nand_in->length);
+			printf(" Checking %d bytes...", nand_in->length);
 			usb_read_data_from_ingenic(&ingenic_dev, check_buf, 
 						   page_num * (hand.nand_ps + hand.nand_os));
 			usb_read_data_from_ingenic(&ingenic_dev, ret, 8);
@@ -291,7 +294,7 @@ int nand_program_check(struct nand_in *nand_in,
 			temp = ((NO_OOB << 12) & 0xf000) + 
 				((i << 4) & 0xff0) + NAND_READ;
 			usb_ingenic_nand_ops(&ingenic_dev, temp);
-			printf("Checking %d bytes...", nand_in->length);
+			printf(" Checking %d bytes...", nand_in->length);
 			usb_read_data_from_ingenic(&ingenic_dev, check_buf, 
 						   page_num * hand.nand_ps);
 			usb_read_data_from_ingenic(&ingenic_dev, ret, 8);
@@ -303,21 +306,21 @@ int nand_program_check(struct nand_in *nand_in,
 		cur_page = (ret[3] << 24) | (ret[2] << 16) |  (ret[1] << 8) | 
 			(ret[0] << 0);
 
+#ifdef CONFIG_NAND_OUT
+		(nand_out->status)[i] = 1;
+#endif
+
 		if (nand_in->start < 1 && 
 		    hand.nand_ps == 4096 && 
 		    hand.fw_args.cpu_id == 0x4740) {
-			/* (nand_out->status)[i] = 1; */
-			printf(" no check! End at %d ",cur_page);
+			printf(" no check! End at Page: %d\n", cur_page);
 			continue;
 		}
 
-		if (nand_in->check(nand_in->buf, check_buf, nand_in->length)) {
-			/* (nand_out->status)[i] = 1; */
-			printf(" pass! End at %d ",cur_page);
-		} else {
-			/* (nand_out->status)[i] = 0; */
-			printf(" fail! End at %d ",cur_page);
-
+		if (!nand_in->check(nand_in->buf, check_buf, nand_in->length)) {
+#ifdef CONFIG_NAND_OUT
+			(nand_out->status)[i] = 0;
+#endif
 			struct nand_in bad;
 			// tbd: doesn't the other side skip bad blocks too? Can we just deduct 1 from cur_page?
 			// tbd: why do we only mark a block as bad if the last page in the block was written?
@@ -325,6 +328,8 @@ int nand_program_check(struct nand_in *nand_in,
 			if (cur_page % hand.nand_ppb == 0)
 				nand_markbad(&bad);
 		}
+
+		printf(" End at Page: %d\n",cur_page);
 	}
 
 	*start_page = cur_page;
@@ -371,7 +376,8 @@ int nand_erase(struct nand_in *nand_in)
 		     (ret[2] << 16) |
 		     (ret[1] << 8)  | 
 		     (ret[0] << 0)) / hand.nand_ppb;
-	printf(" Return: %02x %02x %02x %02x %02x %02x %02x %02x (position %d)\n", ret[0], ret[1], ret[2], ret[3], ret[4], ret[5], ret[6], ret[7], end_block);
+	printf(" Return: %02x %02x %02x %02x %02x %02x %02x %02x (position %d)\n", 
+	       ret[0], ret[1], ret[2], ret[3], ret[4], ret[5], ret[6], ret[7], end_block);
 	if (!hand.nand_force_erase) {	
 	/* not force erase, show bad block infomation */
 		printf(" There are marked bad blocks: %d\n", 
@@ -380,6 +386,7 @@ int nand_erase(struct nand_in *nand_in)
 	/* force erase, no bad block infomation can show */
 		printf(" Force erase, no bad block infomation!\n" );
 	}
+
 	return 1;
 }
 
