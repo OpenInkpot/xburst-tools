@@ -1,22 +1,28 @@
-=Cross toolchain=
-you can get the cross toolchain at:
-  http://www.openmobilefree.net/other/file/mipseltools-gcc412-glibc261.tar.bz2
-  ftp://ftp.ingenic.cn/3sw/01linux/00toolchain/mipseltools-gcc412-glibc261.tar.bz2
-  ftp://ftp.ingenic.cn/3sw/01linux/00toolchain/jz-crosstools-src.tar.bz2
+=serial console=
+  take off the cover of PCB, then you will send the "GND" and "TXD"
+  and th TP74 is the "RXD", you can get serial output from those pins 
+  you need a TTL <-> RS232 converter. here[1] is the serial PIN in the board.
 
-or you can build is from source:
-  make toolchain
+=toolchain=
+    $ git clone git://github.com/lindnermarek/openwrt-x-burst.git[2]
+    $ git checkout --track -b x-burst origin/x-burst
+    $ make menuconfig
+         (select 'XBurst JZ47x0 [2.6]' in Target System
+          for configure the u-boot in setp: 4)
+    $ make
+  we will get toolchain under /PATH/TO/openwrt-x-burst/staging_dir/
+  toolchain-mipsel_gcc-4.1.2_uClibc-0.9.30.1/usr/bin
 
-=Serial Console=
-1. open the case
+=xburst-tools (reflash tools)=
+     you can get source in git://github.com/xiangfu/xburst-tools.git[3]
 
-2. take off the cover of PCB
-   then you will send the "GND" and "TXD"
-   and th TP74 is the "RXD"
-   you can get serial output from those pins 
+=u-boot=
+    in openWRT menuconfig-->Target Images-->Build U-Boot bootloader -->
+    U-Boot target board (NEW) --> input 'qi_lb60'
+    here[4] is the u-boot github URL
 
-3. you need a "RS-232 <--> TTL" converter to 
-   get the correct output date
+=kernel(2.6.24)=
+    here[5] is the kernel GIT URL.
 
 =CPU Jz4740=
 Jz4740 is a multimedia application processor targeted at mobile devices 
@@ -26,18 +32,23 @@ high performance and a low power consumption solution for embedded devices.
 
 Boot up
 The Jz4740 can be set to boot from NOR or NAND.
-If booted from NAND, the CPU fetches the first page from NAND and uses the first 4 bytes on it to know how the NAND chip should be treated (16/8-bit bus, 2/3 row cycles).
-After that it copies the first 8kB from NAND and copies it to the I-Cache for execution.
+If booted from NAND, the CPU fetches the first page from NAND and uses the 
+first 4 bytes on it to know how the NAND chip should be treated (16/8-bit 
+bus, 2/3 row cycles). After that it copies the first 8kB from NAND and 
+copies it to the I-Cache for execution.
 
 Ingenic Media Extension Instruction Set
-According to the MXU User Guide, the XBurst processor supports additional instructions called the Ingenic Media Extension Instruction Set (they call it an SIMD instruction set).
+According to the MXU User Guide, the XBurst processor supports additional 
+instructions called the Ingenic Media Extension Instruction Set (they 
+call it an SIMD instruction set).
 
 Excerpt from the PDF:
-Processors (such as the Jz4740) have 60 extra SIMD commands used for the optimization of multimedia codecs such as MPEG4, H264, VC-1, RMVB, ... and other multimedia decoder algorithms that can be optimized using the MXU.
+Processors (such as the Jz4740) have 60 extra SIMD commands used for the 
+optimization of multimedia codecs such as MPEG4, H264, VC-1, RMVB, ... 
+and other multimedia decoder algorithms that can be optimized using the MXU.
 
 Image Processing Unit
 The Jz4740 also has an IPU which has the following features:
-
     * Video frame resize
     * Color space conversion: 420/444/422 YUV to RGB convert 
 
@@ -46,3 +57,19 @@ The Jz4740 also has an IPU which has the following features:
 2. edit the file under 'debian' folder (create by 'dh_make')
 3. run 'dpkg-buildpackage -rfakeroot' to create the deb package and source 
    package
+
+----
+[1] http://www.openmobilefree.net/?p=61
+[2] here is the web site
+http://github.com/lindnermarek/openwrt-x-burst/commits/x-burst
+     now we put the code in github.com
+[3] in folder 'usbboot', here is the tar package and Debian package.
+     http://cloud.github.com/downloads/xiangfu/xburst-tools/xburst-tools_0.0_200906.tar.gz
+     http://cloud.github.com/downloads/xiangfu/xburst-tools/xburst-tools_0.0_200906-1_i386.deb
+[4] http://github.com/xiangfu/qi-u-boot/tree
+     this git repos have two branch [master] [pi]
+     [master] is the v2009.06
+     [pi] is 1.1.6 old version.(will detele laster)
+[5] git://github.com/xiangfu/qi-kernel.git
+    only one master branch in kernel git. so you can just
+    'git clone' and 'make uImage' to get the kernel image
