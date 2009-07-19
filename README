@@ -1,62 +1,55 @@
+Prepare for Reflash Device 
+--------------------
 =serial console=
-  take off the cover of PCB, then you will send the "GND" and "TXD"
-  and th TP74 is the "RXD", you can get serial output from those pins 
-  you need a TTL <-> RS232 converter. here[1] is the serial PIN in the board.
+  at the back of Ben Nanonote, there is "GND", "TXD" and "RXD", 
+  you can get serial output from those pins 
+  you need a TTL <-> RS232 converter. because the Ben Nanonote serial 
+  console is TTL. here[1] is the serial PIN in the board.
 
 =toolchain=
     $ git clone git://github.com/lindnermarek/openwrt-x-burst.git[2]
     $ git checkout --track -b x-burst origin/x-burst
     $ make menuconfig
-         (select 'XBurst JZ47x0 [2.6]' in Target System
-          for configure the u-boot in setp: 4)
+         (select 'XBurst JZ47x0 [2.6]' in 'Target System')
     $ make
-  we will get toolchain under /PATH/TO/openwrt-x-burst/staging_dir/
+  then you will get toolchain under /PATH/TO/openwrt-x-burst/staging_dir/
   toolchain-mipsel_gcc-4.1.2_uClibc-0.9.30.1/usr/bin
 
-=xburst-tools (reflash tools)=
-     you can get source in git://github.com/xiangfu/xburst-tools.git[3]
+=xburst-tools (usbboot tools)=
+  you can get source code at git://github.com/xiangfu/xburst-tools.git[3]
+    $ cd /PATH/TO/xburst-tools/usbboot
+    $ ./autogen.sh && ./configure && make && sudo make install
+  then you got the 'usbboot' command. that is for the reflash.
 
 =u-boot=
-    in openWRT menuconfig-->Target Images-->Build U-Boot bootloader -->
-    U-Boot target board (NEW) --> input 'qi_lb60'
-    here[4] is the u-boot github URL
+  in openWRT menuconfig-->Target Images-->Build U-Boot bootloader -->
+  U-Boot target board (NEW) --> input 'qi_lb60
+  
+  here[4] is the u-boot github URL
+    $ make qi_lb60_config
+    $ make 
+  there is 'u-boot-nand.bin' is for Ben
 
 =kernel(2.6.24)=
-    here[5] is the kernel GIT URL.
+  here[5] is the kernel GIT URL. this kernel is work in Ben Nanonote.
+  yes. there is another kernel in openWRT(2.6.28), it's will work later :-)
+    $ make qi_lb60_defconfig
+    $ make uImage
+  there is 'arch/mips/boot/uImage' for Ben.
 
-=CPU Jz4740=
-Jz4740 is a multimedia application processor targeted at mobile devices 
-PMP. Incorporates the XBurst CPU core based on leading 
-micro-architecture technology, this processor provides high integration, 
-high performance and a low power consumption solution for embedded devices.
 
-Boot up
-The Jz4740 can be set to boot from NOR or NAND.
-If booted from NAND, the CPU fetches the first page from NAND and uses the 
-first 4 bytes on it to know how the NAND chip should be treated (16/8-bit 
-bus, 2/3 row cycles). After that it copies the first 8kB from NAND and 
-copies it to the I-Cache for execution.
-
-Ingenic Media Extension Instruction Set
-According to the MXU User Guide, the XBurst processor supports additional 
-instructions called the Ingenic Media Extension Instruction Set (they 
-call it an SIMD instruction set).
-
-Excerpt from the PDF:
-Processors (such as the Jz4740) have 60 extra SIMD commands used for the 
-optimization of multimedia codecs such as MPEG4, H264, VC-1, RMVB, ... 
-and other multimedia decoder algorithms that can be optimized using the MXU.
-
-Image Processing Unit
-The Jz4740 also has an IPU which has the following features:
-    * Video frame resize
-    * Color space conversion: 420/444/422 YUV to RGB convert 
-
-=debian package=
-1. run 'dh_make'
-2. edit the file under 'debian' folder (create by 'dh_make')
-3. run 'dpkg-buildpackage -rfakeroot' to create the deb package and source 
-   package
+How To Reflash
+--------------------
+1. plug the Ben to your computer. direct connect. no usb hub.
+2. short the two pin ('boot from usb' show in [1])
+3. press 'RESET' at the back of Ben
+4. in you computer run [6] and [7]. then you flashed the bootloader and kernel
+   to nand flash. 
+5. rootfs: format your SD card. 
+   the first partition must VFAT and others is EXT2.
+   we can put the kernel(uImage) in the first partition. put the rootfs in second partition.
+   download the rootfs [8], uncompress it to second partition of SD card
+6. now you can boot your Ben.
 
 ----
 [1] http://www.openmobilefree.net/?p=61
@@ -67,9 +60,26 @@ http://github.com/lindnermarek/openwrt-x-burst/commits/x-burst
      http://cloud.github.com/downloads/xiangfu/xburst-tools/xburst-tools_0.0_200906.tar.gz
      http://cloud.github.com/downloads/xiangfu/xburst-tools/xburst-tools_0.0_200906-1_i386.deb
 [4] http://github.com/xiangfu/qi-u-boot/tree
-     this git repos have two branch [master] [pi]
-     [master] is the v2009.06
-     [pi] is 1.1.6 old version.(will detele laster)
+     [master] is the last u-boot.
+     command: "mmc init;fatload mmc 0 0x80600000 uImage;bootm" is for boot the kernel in sd card.
 [5] git://github.com/xiangfu/qi-kernel.git
     only one master branch in kernel git. so you can just
-    'git clone' and 'make uImage' to get the kernel image
+[6] flash.u-boot.sh
+--------
+#!/bin/bash
+U_BOOT=/PATH/TO/u-boot-nand.bin
+sudo ../usbboot/src/usbboot -c "\
+boot;\
+nprog 0 $U_BOOT 0 0 -n"
+
+[7] flash.kernel.sh
+----------
+#!/bin/bash
+START_PAGE=2048
+KERNEL=/PATH/TO/KERNEL_FOLDER/arch/mips/boot/uImage
+sudo usbboot -c "boot"
+sudo usbboot -c "nprog $START_PAGE $KERNEL  0 0 -n"
+
+[8] http://www.openmobilefree.net/other/file/root26.tar.bz2
+
+
