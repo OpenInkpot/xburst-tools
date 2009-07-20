@@ -72,6 +72,8 @@ install: build
 	# Add here commands to install the package into debian/xburst-tools.
 	$(MAKE) DESTDIR=$(CURDIR)/debian/xburst-tools install
 
+	install -o root -g root -m 0644 doc/usbboot.cfg $(BUILDDIR)/etc/xburst-tools
+
 
 # Build architecture-independent files here.
 binary-indep: install
