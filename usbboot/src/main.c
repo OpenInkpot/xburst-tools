@@ -26,7 +26,7 @@
 #include "ingenic_usb.h"
 #include "ingenic_cfg.h"
 
-#define CONFIG_FILE_PATH "/usr/share/xburst-tools/usbboot.cfg"
+#define CONFIG_FILE_PATH "/etc/xburst-tools/usbboot.cfg"
 
 extern struct ingenic_dev ingenic_dev;
 extern struct hand hand;
