@@ -15,10 +15,16 @@ AC_PROG_CXX
 
 # Checks for libraries.
 AC_CHECK_LIB([c], [main])
-AC_CHECK_LIB([confuse], [main])
+AC_CHECK_LIB([confuse], [main], [], [
+echo "Error! You need to have libconfuse."
+echo "Maybe run 'sudo apt-get install libconfuse-dev' under debian"
+exit -1 ])
 AC_CHECK_LIB([gcc], [main])
 AC_CHECK_LIB([m], [main])
-AC_CHECK_LIB([usb], [main])
+AC_CHECK_LIB([usb], [main], [], [
+echo "Error! You need to have libconfuse. \n"
+echo "Maybe run 'sudo apt-get install libusb-dev' under debian"
+exit -1 ])
 
 LIBS="$LIBS $USB_LIBS"
 CFLAGS="$CFLAGS $USB_CFLAGS"
