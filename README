@@ -30,25 +30,18 @@ Prepare for Reflash Device
     $ make 
   there is 'u-boot-nand.bin' is for Ben
 
-=kernel(2.6.24)=
-  here[5] is the kernel GIT URL. this kernel is work in Ben Nanonote.
-  yes. there is another kernel in openWRT(2.6.28), it's will work later :-)
-    $ make qi_lb60_defconfig
-    $ make uImage
-  there is 'arch/mips/boot/uImage' for Ben.
-
 
 How To Reflash
 --------------------
 1. plug the Ben to your computer. direct connect. no usb hub.
 2. short the two pin ('boot from usb' show in [1])
 3. press 'RESET' at the back of Ben
-4. in you computer run [6] and [7]. then you flashed the bootloader and kernel
+4. in you computer run [5] and [6]. then you flashed the bootloader and kernel
    to nand flash. 
 5. rootfs: format your SD card. 
    the first partition must VFAT and others is EXT2.
    we can put the kernel(uImage) in the first partition. put the rootfs in second partition.
-   download the rootfs [8], uncompress it to second partition of SD card
+   uncompress openwrt rootfs to second partition of SD card
 6. now you can boot your Ben.
 
 ----
@@ -62,9 +55,7 @@ http://github.com/lindnermarek/openwrt-x-burst/commits/x-burst
 [4] http://github.com/xiangfu/qi-u-boot/tree
      [master] is the last u-boot.
      command: "mmc init;fatload mmc 0 0x80600000 uImage;bootm" is for boot the kernel in sd card.
-[5] git://github.com/xiangfu/qi-kernel.git
-    only one master branch in kernel git. so you can just
-[6] flash.u-boot.sh
+[5] flash.u-boot.sh
 --------
 #!/bin/bash
 U_BOOT=/PATH/TO/u-boot-nand.bin
@@ -72,14 +63,11 @@ sudo ../usbboot/src/usbboot -c "\
 boot;\
 nprog 0 $U_BOOT 0 0 -n"
 
-[7] flash.kernel.sh
+[6] flash.kernel.sh
 ----------
 #!/bin/bash
 START_PAGE=2048
-KERNEL=/PATH/TO/KERNEL_FOLDER/arch/mips/boot/uImage
+KERNEL=/PATH/TO/KERNEL_UIMAGE
 sudo usbboot -c "boot"
 sudo usbboot -c "nprog $START_PAGE $KERNEL  0 0 -n"
-
-[8] http://www.openmobilefree.net/other/file/root26.tar.bz2
-
 
