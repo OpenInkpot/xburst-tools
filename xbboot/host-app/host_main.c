@@ -203,13 +203,10 @@ int main(int argc, char** argv)
 				fprintf(stderr, "Error - number of %s parameters %i\n", argv[1], argc);
 				goto xout_xburst_interface;
 			}
-			if (argv[2][0] == '0' && argv[2][1] == 'x')
-				u32_param = strtoul(&argv[2][2], 0 /* endptr */, 16 /* base */);
-			else
-				u32_param = strtoul(argv[2], 0 /* endptr */, 10 /* base */);
+			u32_param = strtoul(argv[2], 0 /* endptr */, 0 /* base */);
 
 			usb_status = usb_control_msg(xburst_h,
-				/* requesttype */ USB_ENDPOINT_IN | USB_TYPE_VENDOR | USB_RECIP_DEVICE,
+				/* requesttype */ USB_ENDPOINT_OUT | USB_TYPE_VENDOR | USB_RECIP_DEVICE,
 				/* request     */ request_type,
 				/* value       */ HIWORD(u32_param),
 				/* index       */ LOWORD(u32_param),
@@ -225,7 +222,7 @@ int main(int argc, char** argv)
 		}
 		case VR_FLUSH_CACHES: {
 			usb_status = usb_control_msg(xburst_h,
-				/* requesttype */ USB_ENDPOINT_IN | USB_TYPE_VENDOR | USB_RECIP_DEVICE,
+				/* requesttype */ USB_ENDPOINT_OUT | USB_TYPE_VENDOR | USB_RECIP_DEVICE,
 				/* request     */ VR_FLUSH_CACHES,
 				/* value       */ 0,
 				/* index       */ 0,
