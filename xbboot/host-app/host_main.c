@@ -203,7 +203,10 @@ int main(int argc, char** argv)
 				fprintf(stderr, "Error - number of %s parameters %i\n", argv[1], argc);
 				goto xout_xburst_interface;
 			}
-			u32_param = strtoul(argv[2], 0 /* endptr */, 16 /* base */);
+			if (argv[2][0] == '0' && argv[2][1] == 'x')
+				u32_param = strtoul(&argv[2][2], 0 /* endptr */, 16 /* base */);
+			else
+				u32_param = strtoul(argv[2], 0 /* endptr */, 10 /* base */);
 
 			usb_status = usb_control_msg(xburst_h,
 				/* requesttype */ USB_ENDPOINT_IN | USB_TYPE_VENDOR | USB_RECIP_DEVICE,
@@ -244,7 +247,10 @@ int main(int argc, char** argv)
 				fprintf(stderr, "Error - number of %s parameters %i\n", argv[1], argc);
 				goto xout_xburst_interface;
 			}
-			read_len = strtol(argv[2], 0 /* endptr */, 16 /* base */);
+			if (argv[2][0] == '0' && argv[2][1] == 'x')
+				read_len = strtol(&argv[2][2], 0 /* endptr */, 16 /* base */);
+			else
+				read_len = strtol(argv[2], 0 /* endptr */, 10 /* base */);
 			read_buf = (char*) malloc(read_len);
 			if (!read_buf) {
 				fprintf(stderr, "Error - cannot allocate %i bytes read buffer.\n", read_len);
