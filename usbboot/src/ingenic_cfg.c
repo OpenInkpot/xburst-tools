@@ -126,11 +126,13 @@ int check_dump_cfg(struct hand *hand)
 		total_size / 0x100000, 2 * (hand->fw_args.bank_num + 1), 
 	       16 * (2 - hand->fw_args.bus_width));
 
-	printf("Nand page size %d, "
+	printf("Nand page per block %d, "
+	       "Nand page size %d, "
 	       "ECC offset in OOB %d, "
 	       "bad block offset in OOB %d, "
 	       "bad block page %d, "
 	       "use %d plane mode\n",
+	       hand->nand_ppb,
 	       hand->nand_ps,
 	       hand->nand_eccpos,
 	       hand->nand_bbpos,

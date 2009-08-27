@@ -450,6 +450,9 @@ int nand_program_file(struct nand_in *nand_in,
 		transfer_size = (hand.nand_ppb * hand.nand_ps);
 	else
 		transfer_size = (hand.nand_ppb * (hand.nand_ps + hand.nand_os));
+	printf("nand_ppb: %d, nand_ps: %d, nand_os: %d\n", hand.nand_ppb, 
+		hand.nand_ps, hand.nand_os);
+
 	m = flen / transfer_size;
 	j = flen % transfer_size;
 	printf(" Size to send %d, transfer_size %d\n", flen, transfer_size);

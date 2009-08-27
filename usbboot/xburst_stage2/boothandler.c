@@ -315,14 +315,21 @@ void Borad_Init()
 		nand_init_4740(Hand.nand_bw,Hand.nand_rc,Hand.nand_ps,Hand.nand_ppb,
 		       Hand.nand_bbpage,Hand.nand_bbpos,Hand.nand_force_erase,Hand.nand_eccpos);
 	
-		nand_program=nand_program_4740;
-		nand_erase  =nand_erase_4740;
-		nand_read   =nand_read_4740;
-		nand_read_oob=nand_read_oob_4740;
-		nand_read_raw=nand_read_raw_4740;
-		nand_query  = nand_query_4740;
+		dprintf("\nnand_ps, nand_ppb, nand_bbpage, nand_bbpos, nand_eccpos\n");
+		serial_put_hex(Hand.nand_ps);
+		serial_put_hex(Hand.nand_ppb);
+		serial_put_hex(Hand.nand_bbpage);
+		serial_put_hex(Hand.nand_bbpos);
+		serial_put_hex(Hand.nand_eccpos);
+
+		nand_program = nand_program_4740;
+		nand_erase = nand_erase_4740;
+		nand_read = nand_read_4740;
+		nand_read_oob = nand_read_oob_4740;
+		nand_read_raw = nand_read_raw_4740;
+		nand_query = nand_query_4740;
 		nand_enable = nand_enable_4740;
-		nand_disable= nand_disable_4740;
+		nand_disable = nand_disable_4740;
 		nand_mark_bad = nand_mark_bad_4740;
 	break;
 	case 0x4750:
@@ -331,14 +338,14 @@ void Borad_Init()
 			       Hand.nand_ppb, Hand.nand_bchbit, Hand.nand_eccpos,
 			       Hand.nand_bbpos, Hand.nand_bbpage, Hand.nand_force_erase);
 
-		nand_program=nand_program_4750;
-		nand_erase  =nand_erase_4750;
-		nand_read   =nand_read_4750;
-		nand_read_oob=nand_read_oob_4750;
-		nand_read_raw=nand_read_raw_4750;
-		nand_query  = nand_query_4750;
+		nand_program = nand_program_4750;
+		nand_erase = nand_erase_4750;
+		nand_read = nand_read_4750;
+		nand_read_oob = nand_read_oob_4750;
+		nand_read_raw = nand_read_raw_4750;
+		nand_query = nand_query_4750;
 		nand_enable = nand_enable_4750;
-		nand_disable= nand_disable_4750;
+		nand_disable = nand_disable_4750;
 		nand_mark_bad = nand_mark_bad_4750;
 	break;
 	default:

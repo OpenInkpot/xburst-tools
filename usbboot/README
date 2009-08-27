@@ -30,7 +30,7 @@ Build and Installation:
   make install
     *) make install will install the 'usbboot' binary to /usr/bin/usbboot
        and the stage 1 and 2 bootloaders as well as usbboot.cfg configuration
-       file into /usr/share/xburst-tools
+       file into /etc/xburst-tools
 
 Configuration file: /usr/share/xburst-tools/usbboot.cfg
 
