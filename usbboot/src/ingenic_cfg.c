@@ -197,9 +197,9 @@ int parse_configure(struct hand *hand, char * file_path)
 
 	hand->fw_args.cpu_id = 0x4740;
 	if (hand->fw_args.bus_width == 32)
-		hand->fw_args.bus_width = 0 ;
+		hand->fw_args.bus_width = 0;
 	else
-		hand->fw_args.bus_width = 1 ; 
+		hand->fw_args.bus_width = 1;
 	hand->fw_args.bank_num = hand->fw_args.bank_num / 4; 
 	hand->fw_args.cpu_speed = hand->fw_args.cpu_speed / hand->fw_args.ext_clk;
 	

@@ -46,7 +46,7 @@ void test_load_args(void)
 	fw_args->use_uart = 0;
 	UART_BASE = UART0_BASE + fw_args->use_uart * 0x1000;
 	CONFIG_BAUDRATE = 57600;
-	SDRAM_BW16 = 16;
+	SDRAM_BW16 = 1;
 	SDRAM_BANK4 = 4;
 	SDRAM_ROW = 13;
 	SDRAM_COL = 9;
@@ -72,7 +72,7 @@ void load_args(void)
 		fw_args->use_uart = 0;
 	UART_BASE = UART0_BASE + fw_args->use_uart * 0x1000;
 	CONFIG_BAUDRATE = fw_args->boudrate;
-	SDRAM_BW16 = fw_args->bus_width == 0 ? 32 : 16;
+	SDRAM_BW16 = fw_args->bus_width;
 	SDRAM_BANK4 = fw_args->bank_num * 4;
 	SDRAM_ROW = fw_args->row_addr;
 	SDRAM_COL = fw_args->col_addr;
