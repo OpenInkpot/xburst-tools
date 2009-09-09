@@ -32,7 +32,7 @@ Build and Installation:
        and the stage 1 and 2 bootloaders as well as usbboot.cfg configuration
        file into /etc/xburst-tools
 
-Configuration file: /usr/share/xburst-tools/usbboot.cfg
+Configuration file: /etc/xburst-tools/usbboot.cfg
 
 Examples:
   sudo usbboot (invoking usbboot without options will let you enter commands at the usbboot prompt)
