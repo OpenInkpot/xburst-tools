@@ -4,7 +4,7 @@ Priority: extra
 Maintainer: Xiangfu Liu <xiangfu@qi-hardware.com>
 Build-Depends: debhelper (>= 7), pkg-config, autoconf, automake, libusb-dev
 Standards-Version: 3.8.2
-Homepage: http://github.com/xiangfu/xburst-tools
+Homepage: http://projects.qi-hardware.com/index.php/p/xburst-tools/
 
 Package: xburst-tools
 Architecture: any
