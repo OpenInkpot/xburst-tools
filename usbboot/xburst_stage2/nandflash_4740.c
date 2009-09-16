@@ -541,10 +541,16 @@ u32 nand_read_4740(void *buf, u32 startpage, u32 pagecount, int option)
 
 u32 nand_program_4740(void *context, int spage, int pages, int option)
 {
+	size_t datasize;
 	u32 i, j, cur, rowaddr;
 	u8 *tmpbuf;
 	u32 ecccnt,oobsize_sav,ecccnt_sav,eccpos_sav;
 	u8 ecc_buf[256];
+
+	datasize = pagesize;
+	if (option != NO_OOB)
+		datasize += oobsize;
+
 
 	if (wp_pin)
 		__gpio_set_pin(wp_pin);
@@ -581,19 +587,16 @@ restart:
 			}
 		}
 
-		//if NO_OOB do not perform vaild check!
-		if ( option != NO_OOB ) {
-			for ( j = 0 ; j < pagesize + oobsize; j ++) {
-				if (tmpbuf[j] != 0xff)
-					break;
-			}
+		for (j = 0; j < datasize; ++j) {
+			if (tmpbuf[j] != 0xff)
+				break;
+		}
 
-			if ( j == oobsize + pagesize ) {
-				tmpbuf += ( pagesize + oobsize ) ;
-				i ++;
-				cur ++;
-				continue;
-			}
+		if (j == datasize) {
+			tmpbuf += datasize;
+			++i;
+			++cur;
+			continue;
 		}
 
 		if (pagesize == 512)
