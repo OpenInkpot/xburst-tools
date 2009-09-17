@@ -21,11 +21,11 @@ The Debian packaging is copyright 2009,
 	MIPS Technologies, Inc.
 	Maciej W. Rozycki
 	Lucifer at Ingenic Semiconductor Inc.
-is licensed under the GPL, see `/usr/share/common-licenses/GPL'.
+is licensed under the GPL, see `/usr/share/common-licenses/GPL-3'.
 
 You are free to distribute this software under the terms of
 the GNU General Public License  either version 3 of the License,
 or (at your option) any later version.
 On Debian systems, the complete text of the GNU General Public
-License can be found in the file `/usr/share/common-licenses/GPL'.
+License can be found in the file `/usr/share/common-licenses/GPL-3'.
 
