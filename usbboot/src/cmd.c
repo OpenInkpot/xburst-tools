@@ -222,12 +222,14 @@ int nand_program_check(struct nand_in *nand_in,
 		       unsigned int *start_page)
 {
 	unsigned int i, page_num, cur_page = -1;
+	unsigned int start_addr;
 	unsigned short temp;
+	int status = -1;
 
 	printf(" Writing NAND page %d len %d...\n", nand_in->start, nand_in->length);
 	if (nand_in->length > (unsigned int)MAX_TRANSFER_SIZE) {
 		printf(" Buffer size too long!\n");
-		return -1;
+		goto err;
 	}
 
 #ifdef CONFIG_NAND_OUT
@@ -237,15 +239,17 @@ int nand_program_check(struct nand_in *nand_in,
 		(nand_out->status)[i] = 0; /* set all status to fail */
 #endif
 
-	if (usb_get_ingenic_cpu(&ingenic_dev) < 3) {
+	int cpu = usb_get_ingenic_cpu(&ingenic_dev);
+	if (cpu != BOOT4740 && cpu != BOOT4750) {
 		printf(" Device unboot! Boot it first!\n");
-		return -1;
+		goto err;
 	}
+
 	ingenic_dev.file_buff = nand_in->buf;
 	ingenic_dev.file_len = nand_in->length;
 	usb_send_data_to_ingenic(&ingenic_dev);
 	for (i = 0; i < nand_in->max_chip; i++) {
-		if ((nand_in->cs_map)[i]==0) 
+		if ((nand_in->cs_map)[i] == 0) 
 			continue;
 		if (nand_in->option == NO_OOB) {
 			page_num = nand_in->length / hand.nand_ps;
@@ -259,49 +263,46 @@ int nand_program_check(struct nand_in *nand_in,
 		}
 		temp = ((nand_in->option << 12) & 0xf000)  + 
 			((i<<4) & 0xff0) + NAND_PROGRAM;	
-		usb_send_data_address_to_ingenic(&ingenic_dev, nand_in->start);
-		usb_send_data_length_to_ingenic(&ingenic_dev, page_num);
-		usb_ingenic_nand_ops(&ingenic_dev, temp);
+		if (usb_send_data_address_to_ingenic(&ingenic_dev, nand_in->start) != 1)
+			goto err;
+		if (usb_send_data_length_to_ingenic(&ingenic_dev, page_num) != 1)
+			goto err;
+		if (usb_ingenic_nand_ops(&ingenic_dev, temp) != 1)
+			goto err;
+		if (usb_read_data_from_ingenic(&ingenic_dev, ret, 8) != 1)
+			goto err;
 
-		usb_read_data_from_ingenic(&ingenic_dev, ret, 8);
 		printf(" Finish! (len %d start_page %d page_num %d)\n", 
 		       nand_in->length, nand_in->start, page_num);
 
-		usb_send_data_address_to_ingenic(&ingenic_dev, nand_in->start);
 		/* Read back to check! */
+		usb_send_data_address_to_ingenic(&ingenic_dev, nand_in->start);
 		usb_send_data_length_to_ingenic(&ingenic_dev, page_num);
 
 		switch (nand_in->option) {
 		case OOB_ECC:
 			temp = ((OOB_ECC << 12) & 0xf000) +
 				((i << 4) & 0xff0) + NAND_READ;
-			usb_ingenic_nand_ops(&ingenic_dev, temp);
-			printf(" Checking %d bytes...", nand_in->length);
-			usb_read_data_from_ingenic(&ingenic_dev, check_buf, 
-						   page_num * (hand.nand_ps + hand.nand_os));
-			usb_read_data_from_ingenic(&ingenic_dev, ret, 8);
+			start_addr = page_num * (hand.nand_ps + hand.nand_os);
 			break;
 		case OOB_NO_ECC:	/* do not support data verify */
 			temp = ((OOB_NO_ECC << 12) & 0xf000) + 
 				((i << 4) & 0xff0) + NAND_READ;
-			usb_ingenic_nand_ops(&ingenic_dev, temp);
-			printf(" Checking %d bytes...", nand_in->length);
-			usb_read_data_from_ingenic(&ingenic_dev, check_buf, 
-						   page_num * (hand.nand_ps + hand.nand_os));
-			usb_read_data_from_ingenic(&ingenic_dev, ret, 8);
+			start_addr = page_num * (hand.nand_ps + hand.nand_os);
 			break;
 		case NO_OOB:
 			temp = ((NO_OOB << 12) & 0xf000) + 
 				((i << 4) & 0xff0) + NAND_READ;
-			usb_ingenic_nand_ops(&ingenic_dev, temp);
-			printf(" Checking %d bytes...", nand_in->length);
-			usb_read_data_from_ingenic(&ingenic_dev, check_buf, 
-						   page_num * hand.nand_ps);
-			usb_read_data_from_ingenic(&ingenic_dev, ret, 8);
+			start_addr = page_num * hand.nand_ps;
 			break;
 		default:
 			;
 		}
+
+		printf(" Checking %d bytes...", nand_in->length);
+		usb_ingenic_nand_ops(&ingenic_dev, temp);
+		usb_read_data_from_ingenic(&ingenic_dev, check_buf, start_addr);
+		usb_read_data_from_ingenic(&ingenic_dev, ret, 8);
 
 		cur_page = (ret[3] << 24) | (ret[2] << 16) |  (ret[1] << 8) | 
 			(ret[0] << 0);
@@ -329,11 +330,14 @@ int nand_program_check(struct nand_in *nand_in,
 				nand_markbad(&bad);
 		}
 
-		printf(" End at Page: %d\n",cur_page);
+		printf(" End at Page: %d\n", cur_page);
 	}
 
 	*start_page = cur_page;
-	return 0;
+
+	status = 1;
+err:
+	return status;
 }
 
 int nand_erase(struct nand_in *nand_in)
@@ -551,6 +555,7 @@ int init_nand_in(void)
 
 int nand_prog(void)
 {
+	int status = -1;
 	char *image_file;
 	char *help = " Usage: nprog (1) (2) (3) (4) (5)\n"
 		" (1)\tstart page number\n"
@@ -595,7 +600,9 @@ int nand_prog(void)
 		printf(" %d", (nand_out.status)[i]);
 #endif
 
-	return 1;
+	status = 1;
+err:
+	return status;
 }
 
 int nand_query(void)

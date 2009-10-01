@@ -37,11 +37,16 @@
 #define VR_CONFIGRATION		0x09
 #define VR_GET_NUM		0x0a
 
+#define JZ4740V1	1
+#define JZ4750V1	2
+#define BOOT4740	3
+#define BOOT4750	4
+
 #define STAGE_ADDR_MSB(addr) ((addr) >> 16)
 #define STAGE_ADDR_LSB(addr) ((addr) & 0xffff)
 
-#define USB_PACKET_SIZE 512
-#define USB_TIMEOUT 5000
+#define USB_PACKET_SIZE	512
+#define USB_TIMEOUT	5000
 
 #define VENDOR_ID	0x601a
 #define PRODUCT_ID	0x4740
@@ -73,4 +78,3 @@ int usb_ingenic_nand_ops(struct ingenic_dev *ingenic_dev, int ops);
 int usb_read_data_from_ingenic(struct ingenic_dev *ingenic_dev,unsigned char *buff, unsigned int len);
 
 #endif	/* __INGENIC_USB_H__ */
-

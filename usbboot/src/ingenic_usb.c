@@ -166,12 +166,12 @@ int usb_get_ingenic_cpu(struct ingenic_dev *ingenic_dev)
 	ingenic_dev->cpu_info_buff[8] = '\0';
 	printf(" CPU data: %s\n", ingenic_dev->cpu_info_buff);
 
-	if (!strcmp(ingenic_dev->cpu_info_buff,"JZ4740V1")) return 1;
-	if (!strcmp(ingenic_dev->cpu_info_buff,"JZ4750V1")) return 2;
-	if (!strcmp(ingenic_dev->cpu_info_buff,"Boot4740")) return 3;
-	if (!strcmp(ingenic_dev->cpu_info_buff,"Boot4750")) return 4;
+	if (!strcmp(ingenic_dev->cpu_info_buff,"JZ4740V1")) return JZ4740V1;
+	if (!strcmp(ingenic_dev->cpu_info_buff,"JZ4750V1")) return JZ4750V1;
+	if (!strcmp(ingenic_dev->cpu_info_buff,"Boot4740")) return BOOT4740;
+	if (!strcmp(ingenic_dev->cpu_info_buff,"Boot4750")) return BOOT4750;
 
-	return 0;
+	return -1;
 }
 
 int usb_ingenic_flush_cache(struct ingenic_dev *ingenic_dev)
