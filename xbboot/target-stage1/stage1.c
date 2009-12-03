@@ -89,7 +89,6 @@ void gpio_init()
 	__gpio_as_nand();
 	__gpio_as_sdram_32bit();
 	__gpio_as_uart0();
-	__gpio_as_uart1();
 }
 
 void pll_init()
