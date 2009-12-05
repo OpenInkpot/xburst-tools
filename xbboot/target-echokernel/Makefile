@@ -25,7 +25,7 @@ DEBUG_CFLAGS = -g -Wa,-a=$(basename $@).lst
 # registers work. Since other register accesses might be affected too it seems the best
 # is to disable this optimization right now.
 CFLAGS	= -mips32 -O2 -fno-exceptions -fno-unit-at-a-time -fno-zero-initialized-in-bss \
-	-ffunction-sections -fomit-frame-pointer -msoft-float -G 0 $(DEBUG_CFLAGS)
+	-ffunction-sections -fomit-frame-pointer -msoft-float -G 0 $(DEBUG_CFLAGS) -fPIC
 LDFLAGS	= -nostdlib -T target.ld $(CFLAGS)
 LIBS	= -lstdc++ -lc -lm -lgcc
 VPATH   = ../target-common
