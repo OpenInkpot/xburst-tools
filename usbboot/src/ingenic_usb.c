@@ -320,8 +320,10 @@ int usb_ingenic_upload(struct ingenic_dev *ingenic_dev, int stage)
 		rqst = VR_PROGRAM_START2;
 	}
 
+	usleep(100);
 	if (usb_ingenic_start(ingenic_dev, rqst, stage_addr) < 1)
 		return -1;
+	usleep(100);
 	if (usb_get_ingenic_cpu(ingenic_dev) < 1)
 		return -1;
 
