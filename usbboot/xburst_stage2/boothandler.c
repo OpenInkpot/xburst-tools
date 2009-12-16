@@ -42,8 +42,7 @@ void (*nand_enable) (unsigned int csn);
 void (*nand_disable) (unsigned int csn);
 
 struct hand Hand,*Hand_p;
-extern u32 Bulk_out_buf[BULK_OUT_BUF_SIZE];
-extern u32 Bulk_in_buf[BULK_IN_BUF_SIZE];
+extern u32 Bulk_buf[BULK_BUF_SIZE];
 extern u16 handshake_PKT[4];
 extern udc_state;
 extern void *memset(void *s, int c, size_t count);
@@ -68,8 +67,8 @@ void dump_data(unsigned int *p, int size)
 void config_hand()
 {
 	struct hand *hand_p;
-	hand_p=(struct hand *)Bulk_out_buf;
-	memcpy(&Hand, (unsigned char *)Bulk_out_buf, sizeof(struct hand));
+	hand_p=(struct hand *)Bulk_buf;
+	memcpy(&Hand, (unsigned char *)Bulk_buf, sizeof(struct hand));
 
 #if 0
 	Hand.nand_bw=hand_p->nand_bw;
@@ -165,8 +164,8 @@ int NAND_OPS_Handle(u8 *buf)
 	{
 	case NAND_QUERY:
 		dprintf("\n Request : NAND_QUERY!");
-		nand_query((u8 *)Bulk_in_buf);
-		HW_SendPKT(1, Bulk_in_buf, 8);
+		nand_query((u8 *)Bulk_buf);
+		HW_SendPKT(1, Bulk_buf, 8);
 		handshake_PKT[3]=(u16)ERR_OK;
 		udc_state = BULK_IN;
 		break;
@@ -185,11 +184,11 @@ int NAND_OPS_Handle(u8 *buf)
 		break;
 	case NAND_READ_OOB:
 		dprintf("\n Request : NAND_READ_OOB!");
-		memset(Bulk_in_buf,0,ops_length*Hand.nand_ps);
-		ret_dat = nand_read_oob(Bulk_in_buf,start_addr,ops_length);
+		memset(Bulk_buf,0,ops_length*Hand.nand_ps);
+		ret_dat = nand_read_oob(Bulk_buf,start_addr,ops_length);
 		handshake_PKT[0] = (u16) ret_dat;
 		handshake_PKT[1] = (u16) (ret_dat>>16);
-		HW_SendPKT(1,(u8 *)Bulk_in_buf,ops_length*Hand.nand_ps);
+		HW_SendPKT(1,(u8 *)Bulk_buf,ops_length*Hand.nand_ps);
 		udc_state = BULK_IN;		
 		break;
 	case NAND_READ_RAW:
@@ -197,15 +196,15 @@ int NAND_OPS_Handle(u8 *buf)
 		switch (option)
 		{
 		case OOB_ECC:
-			nand_read_raw(Bulk_in_buf,start_addr,ops_length,option);
-			HW_SendPKT(1,(u8 *)Bulk_in_buf,ops_length*(Hand.nand_ps + Hand.nand_os));
+			nand_read_raw(Bulk_buf,start_addr,ops_length,option);
+			HW_SendPKT(1,(u8 *)Bulk_buf,ops_length*(Hand.nand_ps + Hand.nand_os));
 			handshake_PKT[0] = (u16) ret_dat;
 			handshake_PKT[1] = (u16) (ret_dat>>16);
 			udc_state = BULK_IN;
 			break;
 		default:
-			nand_read_raw(Bulk_in_buf,start_addr,ops_length,option);
-			HW_SendPKT(1,(u8 *)Bulk_in_buf,ops_length*Hand.nand_ps);
+			nand_read_raw(Bulk_buf,start_addr,ops_length,option);
+			HW_SendPKT(1,(u8 *)Bulk_buf,ops_length*Hand.nand_ps);
 			handshake_PKT[0] = (u16) ret_dat;
 			handshake_PKT[1] = (u16) (ret_dat>>16);
 			udc_state = BULK_IN;
@@ -226,24 +225,24 @@ int NAND_OPS_Handle(u8 *buf)
 		dprintf("\n Request : NAND_READ!");
 		switch (option) {
 		case 	OOB_ECC:
-			ret_dat = nand_read(Bulk_in_buf,start_addr,ops_length,OOB_ECC);
+			ret_dat = nand_read(Bulk_buf,start_addr,ops_length,OOB_ECC);
 			handshake_PKT[0] = (u16) ret_dat;
 			handshake_PKT[1] = (u16) (ret_dat>>16);
-			HW_SendPKT(1,(u8 *)Bulk_in_buf,ops_length*(Hand.nand_ps + Hand.nand_os ));
+			HW_SendPKT(1,(u8 *)Bulk_buf,ops_length*(Hand.nand_ps + Hand.nand_os ));
 			udc_state = BULK_IN;
 			break;
 		case 	OOB_NO_ECC:
-			ret_dat = nand_read(Bulk_in_buf,start_addr,ops_length,OOB_NO_ECC);
+			ret_dat = nand_read(Bulk_buf,start_addr,ops_length,OOB_NO_ECC);
 			handshake_PKT[0] = (u16) ret_dat;
 			handshake_PKT[1] = (u16) (ret_dat>>16);
-			HW_SendPKT(1,(u8 *)Bulk_in_buf,ops_length*(Hand.nand_ps + Hand.nand_os));
+			HW_SendPKT(1,(u8 *)Bulk_buf,ops_length*(Hand.nand_ps + Hand.nand_os));
 			udc_state = BULK_IN;
 			break;
 		case 	NO_OOB:
-			ret_dat = nand_read(Bulk_in_buf,start_addr,ops_length,NO_OOB);
+			ret_dat = nand_read(Bulk_buf,start_addr,ops_length,NO_OOB);
 			handshake_PKT[0] = (u16) ret_dat;
 			handshake_PKT[1] = (u16) (ret_dat>>16);
-			HW_SendPKT(1,(u8 *)Bulk_in_buf,ops_length*Hand.nand_ps);
+			HW_SendPKT(1,(u8 *)Bulk_buf,ops_length*Hand.nand_ps);
 			udc_state = BULK_IN;
 			break;
 		}
@@ -251,7 +250,7 @@ int NAND_OPS_Handle(u8 *buf)
 		break;
 	case NAND_PROGRAM:
 		dprintf("\n Request : NAND_PROGRAM!");
-		ret_dat = nand_program((void *)Bulk_out_buf,
+		ret_dat = nand_program((void *)Bulk_buf,
 			     start_addr,ops_length,option);
 		handshake_PKT[0] = (u16) ret_dat;
 		handshake_PKT[1] = (u16) (ret_dat>>16);
@@ -285,7 +284,7 @@ int SDRAM_OPS_Handle(u8 *buf)
 	{
 	case 	SDRAM_LOAD:
 		//dprintf("\n Request : SDRAM_LOAD!");
-		ret_dat = (u32)memcpy((u8 *)start_addr,Bulk_out_buf,ops_length);
+		ret_dat = (u32)memcpy((u8 *)start_addr,Bulk_buf,ops_length);
 		handshake_PKT[0] = (u16) ret_dat;
 		handshake_PKT[1] = (u16) (ret_dat>>16);
 		HW_SendPKT(1,handshake_PKT,sizeof(handshake_PKT));

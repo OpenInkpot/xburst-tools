@@ -24,8 +24,7 @@
 #define dprintf(x...)  
 #define TXFIFOEP0 USB_FIFO_EP0
 
-u32 Bulk_in_buf[BULK_IN_BUF_SIZE];
-u32 Bulk_out_buf[BULK_OUT_BUF_SIZE];
+u32 Bulk_buf[BULK_BUF_SIZE];
 u32 Bulk_in_size, Bulk_in_finish, Bulk_out_size;
 u16 handshake_PKT[4] = {0, 0, 0, 0};
 u8 udc_state;
@@ -513,12 +512,12 @@ void EPIN_Handler(u8 EP)
 	}
 
 	if (Bulk_in_size - Bulk_in_finish <= fifosize[EP]) {
-		udcWriteFifo((u8 *)((u32)Bulk_in_buf+Bulk_in_finish),
+		udcWriteFifo((u8 *)((u32)Bulk_buf+Bulk_in_finish),
 			     Bulk_in_size - Bulk_in_finish);
 		usb_setw(USB_REG_INCSR, USB_INCSR_INPKTRDY);
 		Bulk_in_finish = Bulk_in_size;
 	} else {
-		udcWriteFifo((u8 *)((u32)Bulk_in_buf+Bulk_in_finish),
+		udcWriteFifo((u8 *)((u32)Bulk_buf+Bulk_in_finish),
 			    fifosize[EP]);
 		usb_setw(USB_REG_INCSR, USB_INCSR_INPKTRDY);
 		Bulk_in_finish += fifosize[EP];
@@ -531,7 +530,7 @@ void EPOUT_Handler(u8 EP)
 	jz_writeb(USB_REG_INDEX, EP);
 	size = jz_readw(USB_REG_OUTCOUNT);
 	fifo = fifoaddr[EP];
-	udcReadFifo((u8 *)((u32)Bulk_out_buf+Bulk_out_size), size);
+	udcReadFifo((u8 *)((u32)Bulk_buf+Bulk_out_size), size);
 	usb_clearb(USB_REG_OUTCSR,USB_OUTCSR_OUTPKTRDY);
 	Bulk_out_size += size;
 	dprintf("\nEPOUT_handle return!");
