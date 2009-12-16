@@ -35,15 +35,17 @@ void gpio_init();
 void pll_init();
 void serial_init();
 void sdram_init();
+void nand_init();
 
 void c_main(void)
 {
 	load_args();
 	gpio_init();
-	pll_init();
 	serial_init();
+	pll_init();
 	serial_puts("XBurst boot stage1...\n");
 	sdram_init();
+	nand_init();
 	serial_puts("stage 1 finished: GPIO, clocks, SDRAM, UART setup - now jump back to BOOT ROM...\n");
 }
 
@@ -89,7 +91,8 @@ void gpio_init()
 	__gpio_as_nand();
 	__gpio_as_sdram_32bit();
 	__gpio_as_uart0();
-	__gpio_as_uart1();
+	__gpio_as_lcd_18bit();
+	__gpio_as_msc();
 }
 
 void pll_init()
@@ -202,7 +205,14 @@ void sdram_init()
 	REG_EMC_RTCSR = 0;	/* Disable clock for counting */
 
 	/* Fault DMCR value for mode register setting*/
-	dmcr0 = (ARG_BUS_WIDTH_16<<EMC_DMCR_BW_BIT) |
+#define SDRAM_ROW0    11
+#define SDRAM_COL0     8
+#define SDRAM_BANK40   0
+#define SDRAM_BW16     1
+	dmcr0 = ((SDRAM_ROW0-11)<<EMC_DMCR_RA_BIT) |
+		((SDRAM_COL0-8)<<EMC_DMCR_CA_BIT) |
+		(SDRAM_BANK40<<EMC_DMCR_BA_BIT) |
+		(SDRAM_BW16<<EMC_DMCR_BW_BIT) |
 		EMC_DMCR_EPIN |
 		cas_latency_dmcr[((SDRAM_CASL == 3) ? 1 : 0)];
 
@@ -269,4 +279,10 @@ void sdram_init()
 	REG_EMC_DMCR = dmcr | EMC_DMCR_RFSH | EMC_DMCR_MRSET;
 
 	/* everything is ok now */
+}
+
+void nand_init()
+{
+	REG_EMC_SMCR1 = 0x094c4400;
+	REG_EMC_NFCSR |= EMC_NFCSR_NFE1 | EMC_NFCSR_NFCE1; //__nand_enable()
 }

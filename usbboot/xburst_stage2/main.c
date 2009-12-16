@@ -57,11 +57,11 @@ void c_main(void)
 	if ( fw_args->use_uart > 3 ) fw_args->use_uart = 0;
 	UART_BASE = 0xB0030000 + fw_args->use_uart * 0x1000;
 
-	serial_puts("Start address is :");
+	serial_puts("\n Stage2 start address is :\t");
 	serial_put_hex(start_addr);
-	serial_puts("Address offset is:");
+	serial_puts("\n Address offset is:\t");
 	serial_put_hex(offset);
-	serial_puts("GOT correct to   :");
+	serial_puts("\n GOT correct to :\t");
 	serial_put_hex(got_start);
 
 	usb_main();

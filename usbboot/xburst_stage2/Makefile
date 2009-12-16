@@ -29,10 +29,9 @@ DEBUG_CFLAGS = -g -Wa,-a=$(basename $@).lst
 # registers work. Since other register accesses might be affected too it seems the best
 # is to disable this optimization right now.
 CFLAGS	= -mips32 -O2 -fno-exceptions -fno-zero-initialized-in-bss \
-	-ffunction-sections -fomit-frame-pointer -msoft-float -G 0 $(DEBUG_CFLAGS) \
+	-ffunction-sections -fomit-frame-pointer -msoft-float -G 0 -fpie \
 	-I$(XBURST_INCLUDE_PATH) -I$(INFLASH_SRC_PATH)
 LDFLAGS	= -nostdlib -T target.ld $(CFLAGS)
-LIBS	= -lstdc++ -lc -lm -lgcc
 
 OBJS	= main.o udc.o cache.o serial.o boothandler.o nandflash_4740.o nandflash_4750.o
 
@@ -47,8 +46,6 @@ xburst_stage2.elf: head.o $(OBJS)
 
 .c.o:
 	$(CC) $(CFLAGS) -o $@ -c $<
-.cpp.o:
-	$(CC) $(CFLAGS) -fno-rtti -fvtable-gc -o $@ -c $<
 .S.o:
 	$(CC) $(CFLAGS) -o $@ -c $<
 

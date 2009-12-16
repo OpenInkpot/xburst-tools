@@ -89,9 +89,9 @@ void serial_init(void)
 
 void serial_put_hex(unsigned int  d)
 {
-	unsigned char c[12];
+	unsigned char c[9];
 	char i;
-	for(i = 0; i < 8;i++)
+	for(i = 0; i < 8; i++)
 	{
 		c[i] = (d >> ((7 - i) * 4)) & 0xf;
 		if(c[i] < 10)
@@ -99,7 +99,9 @@ void serial_put_hex(unsigned int  d)
 		else
 			c[i] += (0x41 - 10);
 	}
-	c[8] = '\n';
-	c[9] = 0;
+
+	c[8] = 0;
+
+	serial_puts("0x");
 	serial_puts(c);
 }

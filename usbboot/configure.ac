@@ -22,7 +22,7 @@ exit -1 ])
 AC_CHECK_LIB([gcc], [main])
 AC_CHECK_LIB([m], [main])
 AC_CHECK_LIB([usb], [main], [], [
-echo "Error! You need to have libconfuse. \n"
+echo "Error! You need to have libusb. \n"
 echo "Maybe run 'sudo apt-get install libusb-dev' under debian"
 exit -1 ])
 

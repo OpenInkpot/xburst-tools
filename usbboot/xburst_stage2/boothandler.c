@@ -83,13 +83,6 @@ void config_hand()
 	Hand.nand_eccpos=hand_p->nand_eccpos;
 	Hand.nand_bbpos=hand_p->nand_bbpos;
 	Hand.nand_bbpage=hand_p->nand_bbpage;
-//	memcpy( &Hand.fw_args, (unsigned char *)(start_addr + 0x8), 32 );
-
-//	serial_putc(Hand.nand_eccpos + 48);
-//	serial_putc(Hand.nand_bbpos + 48);
-//	serial_putc(Hand.nand_bbpage + 48);
-	/* dprintf("\n Hand : bw %d rc %d ps %d ppb %d erase %d pn %d os %d", */
-	/* 	Hand.nand_bw,Hand.nand_rc,Hand.nand_ps,Hand.nand_ppb,Hand.nand_force_erase,Hand.nand_pn,Hand.nand_os); */
 	serial_put_hex(Hand.fw_args.cpu_id);
 	serial_put_hex(Hand.fw_args.ext_clk);
 #endif
@@ -98,11 +91,12 @@ void config_hand()
 int GET_CUP_INFO_Handle()
 {
 	char temp1[8]="Boot4740",temp2[8]="Boot4750";
-	dprintf("\n GET_CPU_INFO!");
-	if ( Hand.fw_args.cpu_id == 0x4740 )
-		HW_SendPKT(0,temp1,8);
+	dprintf("\n GET_CPU_INFO:\t");
+	serial_put_hex(Hand.fw_args.cpu_id);
+	if (Hand.fw_args.cpu_id == 0x4740)
+		HW_SendPKT(0, temp1, 8);
 	else
-		HW_SendPKT(0,temp2,8);
+		HW_SendPKT(0, temp2, 8);
 	udc_state = IDLE;
 	return ERR_OK; 
 }
@@ -111,7 +105,7 @@ int SET_DATA_ADDERSS_Handle(u8 *buf)
 {
 	USB_DeviceRequest *dreq = (USB_DeviceRequest *)buf;
 	start_addr=(((u32)dreq->wValue)<<16)+(u32)dreq->wIndex;
-	dprintf("\n SET ADDRESS:");
+	dprintf("\n SET ADDRESS:\t");
 	serial_put_hex(start_addr);
 	return ERR_OK;
 }
@@ -120,7 +114,7 @@ int SET_DATA_LENGTH_Handle(u8 *buf)
 {
 	USB_DeviceRequest *dreq = (USB_DeviceRequest *)buf;
 	ops_length=(((u32)dreq->wValue)<<16)+(u32)dreq->wIndex;
-	dprintf("\n DATA_LENGTH :");
+	dprintf("\n DATA_LENGTH:\t");
 	serial_put_hex(ops_length);
 	return ERR_OK;
 }
@@ -219,20 +213,18 @@ int NAND_OPS_Handle(u8 *buf)
 		}
 		break;
 	case NAND_ERASE:
-		dprintf("\n Request : NAND_ERASE!");
+		dprintf("\n Request : NAND_ERASE");
 		ret_dat = nand_erase(ops_length,start_addr,
 			   Hand.nand_force_erase);
 		handshake_PKT[0] = (u16) ret_dat;
 		handshake_PKT[1] = (u16) (ret_dat>>16);
 		HW_SendPKT(1,handshake_PKT,sizeof(handshake_PKT));
 		udc_state = IDLE;
-		dprintf("\n Request : NAND_ERASE_FINISH!");
+		dprintf(" ... finished.");
 		break;
 	case NAND_READ:
 		dprintf("\n Request : NAND_READ!");
-//		dprintf("\n Option : %x",option);
-		switch (option)
-		{
+		switch (option) {
 		case 	OOB_ECC:
 			ret_dat = nand_read(Bulk_in_buf,start_addr,ops_length,OOB_ECC);
 			handshake_PKT[0] = (u16) ret_dat;
@@ -255,21 +247,20 @@ int NAND_OPS_Handle(u8 *buf)
 			udc_state = BULK_IN;
 			break;
 		}
-		dprintf("\n Request : NAND_READ_FUNISH!");
+		dprintf(" ... finished.");
 		break;
 	case NAND_PROGRAM:
 		dprintf("\n Request : NAND_PROGRAM!");
-//		dprintf("\n Option : %x",option);
 		ret_dat = nand_program((void *)Bulk_out_buf,
 			     start_addr,ops_length,option);
-		dprintf("\n NAND_PROGRAM finish!");
 		handshake_PKT[0] = (u16) ret_dat;
 		handshake_PKT[1] = (u16) (ret_dat>>16);
 		HW_SendPKT(1,handshake_PKT,sizeof(handshake_PKT));
 		udc_state = IDLE;
+		dprintf(" ... finished.");
 		break;
 	case NAND_READ_TO_RAM:
-		dprintf("\n Request : NAND_READNAND!");
+		dprintf("\n Request : NAND_READ_TO_RAM!");
 		nand_read((u8 *)ram_addr,start_addr,ops_length,NO_OOB);
 		__dcache_writeback_all();
 		handshake_PKT[3]=(u16)ERR_OK;
@@ -293,7 +284,7 @@ int SDRAM_OPS_Handle(u8 *buf)
 	switch ((dreq->wValue)&0xf)
 	{
 	case 	SDRAM_LOAD:
-//		dprintf("\n Request : SDRAM_LOAD!");
+		//dprintf("\n Request : SDRAM_LOAD!");
 		ret_dat = (u32)memcpy((u8 *)start_addr,Bulk_out_buf,ops_length);
 		handshake_PKT[0] = (u16) ret_dat;
 		handshake_PKT[1] = (u16) (ret_dat>>16);
@@ -312,16 +303,10 @@ void Borad_Init()
 	{
 	case 0x4740:
 		//Init nand flash
-		nand_init_4740(Hand.nand_bw,Hand.nand_rc,Hand.nand_ps,Hand.nand_ppb,
-		       Hand.nand_bbpage,Hand.nand_bbpos,Hand.nand_force_erase,Hand.nand_eccpos);
+		nand_init_4740(Hand.nand_bw, Hand.nand_rc, Hand.nand_ps, 
+			       Hand.nand_ppb, Hand.nand_bbpage, Hand.nand_bbpos,
+			       Hand.nand_force_erase, Hand.nand_eccpos);
 	
-		dprintf("\nnand_ps, nand_ppb, nand_bbpage, nand_bbpos, nand_eccpos\n");
-		serial_put_hex(Hand.nand_ps);
-		serial_put_hex(Hand.nand_ppb);
-		serial_put_hex(Hand.nand_bbpage);
-		serial_put_hex(Hand.nand_bbpos);
-		serial_put_hex(Hand.nand_eccpos);
-
 		nand_program = nand_program_4740;
 		nand_erase = nand_erase_4740;
 		nand_read = nand_read_4740;
@@ -355,21 +340,23 @@ void Borad_Init()
 
 int CONFIGRATION_Handle(u8 *buf)
 {
+	dprintf("\n Configuration:\t");
+
 	USB_DeviceRequest *dreq = (USB_DeviceRequest *)buf;
-	switch ((dreq->wValue)&0xf)
-	{
+	switch ((dreq->wValue)&0xf) {
 	case DS_flash_info:
-		dprintf("\n configration :DS_flash_info_t!");
+		dprintf("DS_flash_info_t!");
 		config_flash_info();
 		break;
 
 	case DS_hand:
-		dprintf("\n configration :DS_hand_t!");
+		dprintf("DS_hand_t!");
 		config_hand();
 		break;
-	default:;
-		
+	default:
+		;
 	}
+
 	Borad_Init();
 	return ERR_OK;
 }
