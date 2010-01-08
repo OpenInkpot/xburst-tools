@@ -26,6 +26,12 @@ _start:
 	.word	0x0
 
 real_start:		
+	li $8, 0x0040FC04
+	mtc0 $8, $12 // CP0_STATUS
+
+	li $9, 0x00800000
+	mtc0 $9, $13 // CP0_CAUSE 
+
 	la	$29, 0x80004000	// setup stack (sp)
 	j	c_main
 	nop
