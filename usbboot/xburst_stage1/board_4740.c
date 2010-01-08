@@ -121,6 +121,9 @@ void sdram_init_4740(void)
 
 	int div[] = {1, 2, 3, 4, 6, 8, 12, 16, 24, 32};
 
+	if (SDRAM_BW16 == 0xff)
+		return;
+
 	cpu_clk = CFG_CPU_SPEED;
 	mem_clk = cpu_clk * div[__cpm_get_cdiv()] / div[__cpm_get_mdiv()];
 
