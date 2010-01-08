@@ -305,7 +305,7 @@ int usb_ingenic_upload(struct ingenic_dev *ingenic_dev, int stage)
 	stage2_addr = total_size + 0x80000000;
 	stage2_addr -= CODE_SIZE;
 
-	int stage_addr = (stage == 1 ? 0x80002000 : stage2_addr);
+	unsigned int stage_addr = (stage == 1 ? 0x80002000 : stage2_addr);
 	int rqst = VR_PROGRAM_START1;
 
 	usb_send_data_address_to_ingenic(ingenic_dev, stage_addr);
