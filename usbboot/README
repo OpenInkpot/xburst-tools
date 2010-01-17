@@ -32,6 +32,12 @@ Build and Installation:
        and the stage 1 and 2 bootloaders as well as usbboot.cfg configuration
        file into /etc/xburst-tools
 
+Buile Package:
+  install the tools for build package
+     sudo apt-get install dpkg-dev
+     sudo apt-get install debhelper
+  run "dpkg-buildpackage -rfakeroot" to create the package.
+
 Configuration file: /etc/xburst-tools/usbboot.cfg
 
 Examples:
@@ -39,3 +45,4 @@ Examples:
   sudo usbboot  -c "boot"
   sudo usbboot  -c "nprog 0 u-boot-nand.bin 0 0 -n"
   sudo usbboot  -c "nprog 2048 uImage 0 0 -n"
+
