@@ -2,7 +2,7 @@ AM_CFLAGS = -pedantic -Wall -W -O1 -g3 -std=gnu99 -lusb -lconfuse -DCFGDIR=\"$(c
 
 xburst-tools_version.h:
 	echo -e '#ifndef XBURST_TOOLS_VERSION' \
-	'\n#define XBURST_TOOLS_VERSION "20090630-1"' \
+	'\n#define XBURST_TOOLS_VERSION "201002-1"' \
 	'\n#endif' > xburst-tools_version.h
 BUILT_SOURCES = xburst-tools_version.h
 
