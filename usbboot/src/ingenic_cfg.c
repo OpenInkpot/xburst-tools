@@ -153,36 +153,36 @@ int parse_configure(struct hand *hand, char * file_path)
 
 	cfg_opt_t opts[] = {
 		CFG_INT("BOUDRATE", 57600, CFGF_NONE),
-		CFG_SIMPLE_INT("EXTCLK", &hand->fw_args.ext_clk),
-		CFG_SIMPLE_INT("CPUSPEED", &hand->fw_args.cpu_speed),
-		CFG_SIMPLE_INT("PHMDIV", &hand->fw_args.phm_div),
-		CFG_SIMPLE_INT("USEUART", &hand->fw_args.use_uart),
+		CFG_INT("EXTCLK", 0, CFGF_NONE),
+		CFG_INT("CPUSPEED", 0, CFGF_NONE),
+		CFG_INT("PHMDIV", 0, CFGF_NONE),
+		CFG_INT("USEUART", 0, CFGF_NONE),
 
-		CFG_SIMPLE_INT("BUSWIDTH", &hand->fw_args.bus_width),
-		CFG_SIMPLE_INT("BANKS", &hand->fw_args.bank_num),
-		CFG_SIMPLE_INT("ROWADDR", &hand->fw_args.row_addr),
-		CFG_SIMPLE_INT("COLADDR", &hand->fw_args.col_addr),
+		CFG_INT("BUSWIDTH", 0, CFGF_NONE),
+		CFG_INT("BANKS", 0, CFGF_NONE),
+		CFG_INT("ROWADDR", 0, CFGF_NONE),
+		CFG_INT("COLADDR", 0, CFGF_NONE),
 
-		CFG_SIMPLE_INT("ISMOBILE", &hand->fw_args.is_mobile),
-		CFG_SIMPLE_INT("ISBUSSHARE", &hand->fw_args.is_busshare),
-		CFG_SIMPLE_INT("DEBUGOPS", &hand->fw_args.debug_ops),
-		CFG_SIMPLE_INT("PINNUM", &hand->fw_args.pin_num),
-		CFG_SIMPLE_INT("START", &hand->fw_args.start),
-		CFG_SIMPLE_INT("SIZE", &hand->fw_args.size),
+		CFG_INT("ISMOBILE", 0, CFGF_NONE),
+		CFG_INT("ISBUSSHARE", 0, CFGF_NONE),
+		CFG_INT("DEBUGOPS", 0, CFGF_NONE),
+		CFG_INT("PINNUM", 0, CFGF_NONE),
+		CFG_INT("START", 0, CFGF_NONE),
+		CFG_INT("SIZE", 0, CFGF_NONE),
 
-		CFG_SIMPLE_INT("NAND_BUSWIDTH", &hand->nand_bw),
-		CFG_SIMPLE_INT("NAND_ROWCYCLES", &hand->nand_rc),
-		CFG_SIMPLE_INT("NAND_PAGESIZE", &hand->nand_ps),
-		CFG_SIMPLE_INT("NAND_PAGEPERBLOCK", &hand->nand_ppb),
-		CFG_SIMPLE_INT("NAND_FORCEERASE", &hand->nand_force_erase),
-		CFG_SIMPLE_INT("NAND_OOBSIZE", &hand->nand_os),
-		CFG_SIMPLE_INT("NAND_ECCPOS", &hand->nand_eccpos),
-		CFG_SIMPLE_INT("NAND_BADBLOCKPOS", &hand->nand_bbpos),
-		CFG_SIMPLE_INT("NAND_BADBLOCKPAGE", &hand->nand_bbpage),
-		CFG_SIMPLE_INT("NAND_PLANENUM", &hand->nand_plane),
-		CFG_SIMPLE_INT("NAND_BCHBIT", &hand->nand_bchbit),
-		CFG_SIMPLE_INT("NAND_WPPIN", &hand->nand_wppin),
-		CFG_SIMPLE_INT("NAND_BLOCKPERCHIP", &hand->nand_bpc),
+		CFG_INT("NAND_BUSWIDTH", 0, CFGF_NONE),
+		CFG_INT("NAND_ROWCYCLES", 0, CFGF_NONE),
+		CFG_INT("NAND_PAGESIZE", 0, CFGF_NONE),
+		CFG_INT("NAND_PAGEPERBLOCK", 0, CFGF_NONE),
+		CFG_INT("NAND_FORCEERASE", 0, CFGF_NONE),
+		CFG_INT("NAND_OOBSIZE", 0, CFGF_NONE),
+		CFG_INT("NAND_ECCPOS", 0, CFGF_NONE),
+		CFG_INT("NAND_BADBLOCKPOS", 0, CFGF_NONE),
+		CFG_INT("NAND_BADBLOCKPAGE", 0, CFGF_NONE),
+		CFG_INT("NAND_PLANENUM", 0, CFGF_NONE),
+		CFG_INT("NAND_BCHBIT", 0, CFGF_NONE),
+		CFG_INT("NAND_WPPIN", 0, CFGF_NONE),
+		CFG_INT("NAND_BLOCKPERCHIP", 0, CFGF_NONE),
 
 		CFG_END()
 	};
@@ -193,6 +193,37 @@ int parse_configure(struct hand *hand, char * file_path)
 		return -1;
 
 	hand->fw_args.boudrate = cfg_getint(cfg, "BOUDRATE");
+	hand->fw_args.ext_clk = cfg_getint(cfg, "EXTCLK");
+	hand->fw_args.cpu_speed = cfg_getint(cfg, "CPUSPEED");
+	hand->fw_args.phm_div = cfg_getint(cfg, "PHMDIV");
+	hand->fw_args.use_uart = cfg_getint(cfg, "USEUART");
+
+	hand->fw_args.bus_width = cfg_getint(cfg, "BUSWIDTH");
+	hand->fw_args.bank_num = cfg_getint(cfg, "BANKS");
+	hand->fw_args.row_addr = cfg_getint(cfg, "ROWADDR");
+	hand->fw_args.col_addr = cfg_getint(cfg, "COLADDR");
+
+	hand->fw_args.is_mobile = cfg_getint(cfg, "ISMOBILE");
+	hand->fw_args.is_busshare = cfg_getint(cfg, "ISBUSSHARE");
+	hand->fw_args.debug_ops = cfg_getint(cfg, "DEBUGOPS");
+	hand->fw_args.pin_num = cfg_getint(cfg, "PINNUM");
+	hand->fw_args.start = cfg_getint(cfg, "START");
+	hand->fw_args.size = cfg_getint(cfg, "SIZE");
+
+	hand->nand_bw = cfg_getint(cfg, "NAND_BUSWIDTH");
+	hand->nand_rc = cfg_getint(cfg, "NAND_ROWCYCLES");
+	hand->nand_ps = cfg_getint(cfg, "NAND_PAGESIZE");
+	hand->nand_ppb = cfg_getint(cfg, "NAND_PAGEPERBLOCK");
+	hand->nand_force_erase = cfg_getint(cfg, "NAND_FORCEERASE");
+	hand->nand_os = cfg_getint(cfg, "NAND_OOBSIZE");
+	hand->nand_eccpos = cfg_getint(cfg, "NAND_ECCPOS");
+	hand->nand_bbpos = cfg_getint(cfg, "NAND_BADBLOCKPOS");
+	hand->nand_bbpage = cfg_getint(cfg, "NAND_BADBLOCKPAGE");
+	hand->nand_plane = cfg_getint(cfg, "NAND_PLANENUM");
+	hand->nand_bchbit = cfg_getint(cfg, "NAND_BCHBIT");
+	hand->nand_wppin = cfg_getint(cfg, "NAND_WPPIN");
+	hand->nand_bpc = cfg_getint(cfg, "NAND_BLOCKPERCHIP");
+
 	cfg_free(cfg);
 
 	hand->fw_args.cpu_id = 0x4740;

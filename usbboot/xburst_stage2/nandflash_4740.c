@@ -342,11 +342,10 @@ u32 nand_erase_4740(int blk_num, int sblk, int force)
 		__nand_cmd(CMD_READ_STATUS);
 
 		if (__nand_data8() & 0x01) {
-			serial_puts("Erase fail at ");
+			serial_puts("\nErase fail at: \t");
 			serial_put_hex(cur / ppb);
 			nand_mark_bad_4740(cur/ppb);
 			cur += ppb;
-			blk_num += Hand.nand_plane;
 			continue;
 		}
 		cur += ppb;

@@ -248,9 +248,9 @@ int usb_send_data_to_ingenic(struct ingenic_dev *ingenic_dev)
 	/* bulk data        */ ingenic_dev->file_buff,
 	/* bulk data length */ ingenic_dev->file_len,
 				USB_TIMEOUT);
-	if (status < ingenic_dev->file_len) {
+	if (status < (int)ingenic_dev->file_len) {
 		fprintf(stderr, "Error - "
-			"can't send bulk data to Ingenic CPU: %i\n", status);
+			"can't send bulk data to Ingenic CPU: %i %s\n", status, usb_strerror());
 		return -1;
 	}
 
@@ -266,7 +266,8 @@ int usb_read_data_from_ingenic(struct ingenic_dev *ingenic_dev,
 	/* bulk data        */ buff,
 	/* bulk data length */ len,
 				USB_TIMEOUT);
-	if (status < len) {
+
+	if (status < (int)len) {
 		fprintf(stderr, "Error - "
 			"can't read bulk data from Ingenic device:%i\n", status);
 		return -1;
