@@ -6,12 +6,22 @@ build clean install binary-arch binary-indep binary:
 	+dh --parallel $(opt_no_act) $@
 
 override_dh_auto_clean:
+	test -e debian/xburst_stage1.bin || { \
+		echo >&2 see debian/README.source; \
+		exit 1; \
+	}
 	dh_auto_clean
 	sh debian/clean.sh
 
-override_dh_auto_configure:
-	AUTOMAKE="automake --foreign" autoreconf -is
-	dh_auto_configure -- $(opt_optimize) $(opt_quiet) LDFLAGS=-Wl,-z,defs
+override_dh_auto_configure: configure
+	dh_auto_configure -- $(opt_optimize) $(opt_quiet) \
+		--disable-firmware  LDFLAGS=-Wl,-z,defs
+
+override_dh_auto_install:
+	dh_auto_install
+	: install firmware from source package
+	dh_install debian/xburst_stage1.bin usr/share/xburst-tools/
+	dh_install debian/xburst_stage2.bin usr/share/xburst-tools/
 
 opt_optimize = CFLAGS="-g -O2"
 opt_no_act =
@@ -29,3 +39,11 @@ ifneq (,$(filter quiet,$(DEB_BUILD_OPTIONS)))
     opt_quiet = --quiet
     MAKEFLAGS += --quiet
 endif
+
+configure: configure.ac
+	AUTOMAKE="automake --foreign" autoreconf -is
+
+firmware: configure
+	./configure --enable-firmware
+	$(MAKE) -C src ../xburst_stage1/xburst_stage1.bin \
+		../xburst_stage2/xburst_stage2.bin

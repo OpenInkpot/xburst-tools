@@ -36,8 +36,7 @@ splitgitignore='#!/usr/bin/awk
 }
 '
 
-gitdir="-type d -name '.*' -prune"
-debiandir="-type d -name debian -prune"
+offlimits="-type d -name '.*' -prune -o -type d -name debian -prune"
 
 remove_file_globs() {
 	while read glob
@@ -56,7 +55,7 @@ remove_directory_globs() {
 remove_file_findpatterns() {
 	while read pat
 	do
-		find . $gitdir -o \
+		find . $offlimits -o \
 			'(' -name "$pat" -execdir rm -f '{}' + ')'
 	done
 }
@@ -64,12 +63,12 @@ remove_file_findpatterns() {
 remove_directory_findpatterns() {
 	while read pat
 	do
-		find . $gitdir -o \
+		find . $offlimits -o \
 			'(' -type d -name "$pat" -execdir rm -fr '{}' + ')'
 	done
 }
 
-find . $gitdir -o $debiandir -o '(' -name .gitignore -print ')' |
+find . $offlimits -o '(' -name .gitignore -print ')' |
 while read file
 do
 	(
