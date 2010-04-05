@@ -1,7 +1,7 @@
 Source: xburst-tools
 Section: misc
 Priority: extra
-Maintainer: Xiangfu Liu <xiangfu@qi-hardware.com>
+Maintainer: Xiangfu Liu <xiangfu@sharism.cc>
 Build-Depends: debhelper (>= 7.4.10),
 	pkg-config, autoconf, automake,
 	libusb-dev, libconfuse-dev
