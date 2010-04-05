@@ -10,8 +10,9 @@ xburst-tools (0.0+201002-1.1) local; urgency=low
   * debian/autogen.sh: new script
   * debian/rules: install firmware built at packaging time, to avoid
     requiring a mipsel cross-compiler on buildds
+  * use dpkg source format 3.0 (quilt)
 
- -- Jonathan Nieder <jrnieder@gmail.com>  Sun, 04 Apr 2010 22:08:47 -0500
+ -- Jonathan Nieder <jrnieder@gmail.com>  Mon, 05 Apr 2010 05:27:05 -0500
 
 xburst-tools (0.0+201002-1) unstable; urgency=low
 
