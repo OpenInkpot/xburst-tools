@@ -1,3 +1,12 @@
+xburst-tools (0.0+201002-1.1) local; urgency=low
+
+  * debian/rules: rewrite as a minimal rules file using dh
+    + Build-Depends: debhelper (>= 7.4.10), for the --parallel option.
+  * Standards-Version: 3.8.4
+  * Build-Conflicts: automake1.4
+
+ -- Jonathan Nieder <jrnieder@gmail.com>  Sun, 04 Apr 2010 20:19:16 -0500
+
 xburst-tools (0.0+201002-1) unstable; urgency=low
 
   * work with software usbboot

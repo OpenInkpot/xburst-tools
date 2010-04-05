@@ -2,8 +2,11 @@ Source: xburst-tools
 Section: misc
 Priority: extra
 Maintainer: Xiangfu Liu <xiangfu@qi-hardware.com>
-Build-Depends: debhelper (>= 7), pkg-config, autoconf, automake, libusb-dev, libconfuse-dev
-Standards-Version: 3.8.2
+Build-Depends: debhelper (>= 7.4.10),
+	pkg-config, autoconf, automake,
+	libusb-dev, libconfuse-dev
+Build-Conflicts: automake1.4
+Standards-Version: 3.8.4
 Homepage: http://projects.qi-hardware.com/index.php/p/xburst-tools/
 
 Package: xburst-tools
