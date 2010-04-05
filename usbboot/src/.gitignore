@@ -1,8 +1,3 @@
-.deps
-cmd.o
-command_line.o
-inflash
-inflash_version.h
-ingenic_cfg.o
-ingenic_usb.o
-main.o
+/.deps/
+/*_version.h
+/usbboot
