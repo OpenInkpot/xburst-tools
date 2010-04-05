@@ -7,6 +7,8 @@ Build-Depends: debhelper (>= 7.4.10),
 	libusb-dev, libconfuse-dev
 Build-Conflicts: automake1.4
 Standards-Version: 3.8.4
+Vcs-Git: git://projects.qi-hardware.com/xburst-tools.git
+Vcs-Browser: http://projects.qi-hardware.com/index.php/p/xburst-tools/source/changes/master/
 Homepage: http://projects.qi-hardware.com/index.php/p/xburst-tools/
 
 Package: xburst-tools

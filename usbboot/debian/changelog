@@ -4,8 +4,10 @@ xburst-tools (0.0+201002-1.1) local; urgency=low
     + Build-Depends: debhelper (>= 7.4.10), for the --parallel option.
   * Standards-Version: 3.8.4
   * Build-Conflicts: automake1.4
+  * add a Vcs-Git field to debian/control and remove the outdated watch
+    file
 
- -- Jonathan Nieder <jrnieder@gmail.com>  Sun, 04 Apr 2010 20:19:16 -0500
+ -- Jonathan Nieder <jrnieder@gmail.com>  Sun, 04 Apr 2010 21:45:57 -0500
 
 xburst-tools (0.0+201002-1) unstable; urgency=low
 
