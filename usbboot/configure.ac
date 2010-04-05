@@ -9,6 +9,18 @@ AM_CONFIG_HEADER([config.h])
 
 AM_MAINTAINER_MODE
 
+AC_ARG_ENABLE([firmware],
+ [AS_HELP_STRING([--disable-firmware],
+  [Do not build initialization code]
+  [(for example, because some other package contains it).])],
+ [
+case "$enableval" in
+yes) firmware=true ;;
+no) firmware=false ;;
+*) AC_MSG_ERROR([bad value $enableval for --enable-firmware]) ;;
+esac],[firmware=false])
+AM_CONDITIONAL([COND_FIRMWARE], [test "$firmware" = true])
+
 # Checks for programs.
 AC_PROG_CC
 AC_PROG_CXX
