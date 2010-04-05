@@ -23,6 +23,9 @@ override_dh_auto_install:
 	dh_install debian/xburst_stage1.bin usr/share/xburst-tools/
 	dh_install debian/xburst_stage2.bin usr/share/xburst-tools/
 
+override_dh_installchangelogs:
+	dh_installchangelogs debian/changelog.upstream
+
 opt_optimize = CFLAGS="-g -O2"
 opt_no_act =
 opt_quiet =
