@@ -1,6 +1,8 @@
 This Debian package is developed in a Git repository (see the Vcs-Git field
 of debian/control).  To build from a git checkout:
 
+	debian/rules get-orig-source REPO=.. BRANCH=remotes/origin/master
+	mv xburst-tools_*.tar.gz ..
 	debian/autogen.sh
 	debuild
 
@@ -18,4 +20,4 @@ To build a released version of this package, no special instructions apply.
 “dpkg-buildpackage” or “apt-get -b source xburst-tools” should work as
 usual.
 
- -- Jonathan Nieder <jrnieder@gmail.com>  Sun, 04 Apr 2010 22:08:28 -0500
+ -- Jonathan Nieder <jrnieder@gmail.com>  Mon, 05 Apr 2010 06:21:12 -0500

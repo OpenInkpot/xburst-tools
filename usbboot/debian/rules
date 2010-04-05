@@ -47,3 +47,10 @@ firmware: configure
 	./configure --enable-firmware
 	$(MAKE) -C src ../xburst_stage1/xburst_stage1.bin \
 		../xburst_stage2/xburst_stage2.bin
+
+REPO = git://projects.qi-hardware.com/xburst-tools.git
+BRANCH = master
+debiandir_SQ = $(subst ','\'',$(dir $(lastword $(MAKEFILE_LIST))))
+get-orig-source:
+	REPO='$(REPO)' BRANCH='$(BRANCH)' \
+		sh '$(debiandir_SQ)'get-orig-source.sh
