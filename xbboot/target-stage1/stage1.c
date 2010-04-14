@@ -11,25 +11,6 @@
 #include "../target-common/jz4740.h"
 #include "../target-common/serial.h"
 
-#define STAGE1_ARGS_ADDR	0x80002008
-
-struct stage1_args {
-	// PLL
-	unsigned char ext_clk;         // external crystal in MHz
-	unsigned char cpu_speed;       // PLL output frequency=cpu_speed * ext_clk Mhz
-	unsigned char phm_div;         // frequency divider ratio of PLL=CCLK:PCLK=HCLK=MCLK
-
-	// UART
-	unsigned char uart_num;        // which UART to use (default: 0)
-	unsigned int uart_baud;	       // default: 57600
-
-	// SDRAM
-	unsigned char bus_width_16;    // bus width of SDRAM is 16-bit (default is 32-bit)
-	unsigned char bank_addr_2bit;  // 2-bit bank address width (=4 banks each chip select), default is 1-bit bank address=2 banks
-	unsigned char row_addr;        // row address width in bits (11-13)
-	unsigned char col_addr;        // column address width in bits (8-12)
-} __attribute__((packed));
-
 void load_args();
 void gpio_init();
 void pll_init();
@@ -50,40 +31,28 @@ void c_main(void)
 }
 
 // tbd: do they have to be copied into globals? or just reference STAGE1_ARGS_ADDR?
-volatile u32	ARG_EXTAL;
-volatile u32	ARG_CPU_SPEED;
-volatile u8	ARG_PHM_DIV;
-volatile u32	ARG_UART_BASE;
-volatile u32	ARG_UART_BAUD;
-volatile u8	ARG_BUS_WIDTH_16;
-volatile u8	ARG_BANK_ADDR_2BIT;
-volatile u8	ARG_ROW_ADDR;
-volatile u8	ARG_COL_ADDR;
+static volatile u32	ARG_EXTAL;
+static volatile u32	ARG_CPU_SPEED;
+static volatile u8	ARG_PHM_DIV;
+static volatile u32	ARG_UART_BASE;
+static volatile u32	ARG_UART_BAUD;
+static volatile u8	ARG_BUS_WIDTH_16;
+static volatile u8	ARG_BANK_ADDR_2BIT;
+static volatile u8	ARG_ROW_ADDR;
+static volatile u8	ARG_COL_ADDR;
 
 void load_args()
 {
-	struct stage1_args* args = (struct stage1_args*) STAGE1_ARGS_ADDR;
-// NanoNote defaults
-args->ext_clk = 12;
-args->cpu_speed = 21;
-args->phm_div = 3;
-args->uart_num = 0;
-args->uart_baud = 57600;
-args->bus_width_16 = 1;
-args->bank_addr_2bit = 1;
-args->row_addr = 13;
-args->col_addr = 9;
-// END NanoNote defaults
-	ARG_EXTAL = args->ext_clk * 1000000;
-	ARG_CPU_SPEED = args->cpu_speed * ARG_EXTAL;
-	ARG_PHM_DIV = args->phm_div;
-	ARG_UART_BASE = UART0_BASE + args->uart_num * UART_OFF;
+	ARG_EXTAL = 12 * 1000000;
+	ARG_CPU_SPEED = 21 * ARG_EXTAL;
+	ARG_PHM_DIV = 3;
+	ARG_UART_BASE = UART0_BASE + 0 * UART_OFF;
 	UART_BASE = ARG_UART_BASE; // for ../target-common/serial.c
-	ARG_UART_BAUD = args->uart_baud;
-	ARG_BUS_WIDTH_16 = args->bus_width_16;
-	ARG_BANK_ADDR_2BIT = args->bank_addr_2bit;
-	ARG_ROW_ADDR = args->row_addr;
-	ARG_COL_ADDR = args->col_addr;
+	ARG_UART_BAUD = 57600;
+	ARG_BUS_WIDTH_16 = * (int *)0x80002014;
+	ARG_BANK_ADDR_2BIT = 1;
+	ARG_ROW_ADDR = 13;
+	ARG_COL_ADDR = 9;
 }
 
 void gpio_init()
@@ -197,6 +166,11 @@ void sdram_init()
 	};
 
 	int div[] = {1, 2, 3, 4, 6, 8, 12, 16, 24, 32};
+
+	if (ARG_BUS_WIDTH_16 == 0xff)
+		return;
+	else 
+		ARG_BUS_WIDTH_16 = 1;
 
 	cpu_clk = ARG_CPU_SPEED;
 	mem_clk = cpu_clk * div[__cpm_get_cdiv()] / div[__cpm_get_mdiv()];
