@@ -62,6 +62,10 @@ void gpio_init()
 	__gpio_as_uart0();
 	__gpio_as_lcd_18bit();
 	__gpio_as_msc();
+
+#define GPIO_LCD_CS	(2 * 32 + 21)
+	__gpio_as_output(GPIO_LCD_CS);
+	__gpio_clear_pin(GPIO_LCD_CS);
 }
 
 void pll_init()
