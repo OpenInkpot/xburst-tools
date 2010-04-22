@@ -39,13 +39,14 @@
 #define INGENIC_IN_ENDPOINT	0x81
 #define INGENIC_OUT_ENDPOINT	0x01
 
+uint8_t xburst_interface = 0;
+
+struct usb_dev_handle* open_xburst_device();
+void close_xburst_device(struct usb_dev_handle* xburst_h);
+int send_request(struct usb_dev_handle* xburst_h, char* request, char* str_param);
+
 int main(int argc, char** argv)
 {
-	struct usb_device* xburst_dev = 0;
-	uint8_t xburst_interface = 0;
-	struct usb_dev_handle* xburst_h = 0;
-	int request_type, usb_status;
-
 	if (argc < 2
 	    || !strcmp(argv[1], "-h")
 	    || !strcmp(argv[1], "--help")) {
@@ -69,42 +70,50 @@ int main(int argc, char** argv)
 		       "\n"
 		       "- all numbers can be prefixed 0x for hex otherwise decimal\n"
 		       "\n", XBBOOT_VERSION);
-// stage1: 0x80002000
-// stage2: 0x81C00000
-// u-boot: 0x80600000
-// uImage: 0x80010000
 		return EXIT_SUCCESS;
 	}
 	if (!strcmp(argv[1], "-v") || !strcmp(argv[1], "--version")) {
 		printf("xbboot version %s\n", XBBOOT_VERSION);
 		return EXIT_SUCCESS;
 	}
-	if (!strcmp(argv[1], "bulk_read"))
-		request_type = REQ_BULK_READ;
-	else if (!strcmp(argv[1], "bulk_write"))
-		request_type = REQ_BULK_WRITE;
-	else if (!strcmp(argv[1], "VR_GET_CPU_INFO") || !strcmp(argv[1], "get_info"))
-		request_type = VR_GET_CPU_INFO;
-	else if (!strcmp(argv[1], "VR_SET_DATA_ADDRESS") || !strcmp(argv[1], "set_addr"))
-		request_type = VR_SET_DATA_ADDRESS;
-	else if (!strcmp(argv[1], "VR_SET_DATA_LENGTH") || !strcmp(argv[1], "set_len"))
-		request_type = VR_SET_DATA_LENGTH;
-	else if (!strcmp(argv[1], "VR_FLUSH_CACHES") || !strcmp(argv[1], "flush_cache"))
-		request_type = VR_FLUSH_CACHES;
-	else if (!strcmp(argv[1], "VR_PROGRAM_START1") || !strcmp(argv[1], "start1"))
-		request_type = VR_PROGRAM_START1;
-	else if (!strcmp(argv[1], "VR_PROGRAM_START2") || !strcmp(argv[1], "start2"))
-		request_type = VR_PROGRAM_START2;
-	else {
-		fprintf(stderr, "Error - unknown vendor request %s - run with --help to see all requests\n", argv[1]);
-		return EXIT_FAILURE;
-	}
+
 	if ((getuid()) || (getgid())) {
 		fprintf(stderr, "Error - you must be root to run '%s'\n", argv[0]);
 		return EXIT_FAILURE;
 	}
 
+	struct usb_dev_handle* xburst_h = open_xburst_device();
+	if (!xburst_h)
+		return EXIT_FAILURE;
+
+	char* parameter;
+	if (argc == 2)
+		parameter = NULL;
+	else
+		parameter = argv[2];
+
+	send_request(xburst_h, argv[1], parameter);
+	close_xburst_device(xburst_h);
+
+	return EXIT_SUCCESS;
+}
+
+void close_xburst_device(struct usb_dev_handle* xburst_h)
+{
+        if (xburst_h && xburst_interface)
+		usb_release_interface(xburst_h, xburst_interface);
+
+        if (xburst_h)
+		usb_close(xburst_h);
+}
+
+struct usb_dev_handle* open_xburst_device()
+{
+	struct usb_device* xburst_dev = 0;
+	struct usb_dev_handle* xburst_h = 0;
+
 	usb_init();
+	/* usb_set_debug(255); */
 	usb_find_busses();
 	usb_find_devices();
 
@@ -176,6 +185,42 @@ int main(int argc, char** argv)
 		fprintf(stderr, "Error - can't claim XBurst interface: %s\n", usb_strerror());
 		goto xout_xburst_h;
 	}
+
+	return xburst_h;
+
+xout_xburst_h:
+	usb_close(xburst_h);
+xout:
+	return NULL;
+}
+
+int send_request(struct usb_dev_handle* xburst_h, char* request, char* str_param)
+{
+	int request_type;
+	int usb_status;
+	uint32_t u32_param;
+
+	if (!strcmp(request, "bulk_read"))
+		request_type = REQ_BULK_READ;
+	else if (!strcmp(request, "bulk_write"))
+		request_type = REQ_BULK_WRITE;
+	else if (!strcmp(request, "VR_GET_CPU_INFO") || !strcmp(request, "get_info"))
+		request_type = VR_GET_CPU_INFO;
+	else if (!strcmp(request, "VR_SET_DATA_ADDRESS") || !strcmp(request, "set_addr"))
+		request_type = VR_SET_DATA_ADDRESS;
+	else if (!strcmp(request, "VR_SET_DATA_LENGTH") || !strcmp(request, "set_len"))
+		request_type = VR_SET_DATA_LENGTH;
+	else if (!strcmp(request, "VR_FLUSH_CACHES") || !strcmp(request, "flush_cache"))
+		request_type = VR_FLUSH_CACHES;
+	else if (!strcmp(request, "VR_PROGRAM_START1") || !strcmp(request, "start1"))
+		request_type = VR_PROGRAM_START1;
+	else if (!strcmp(request, "VR_PROGRAM_START2") || !strcmp(request, "start2"))
+		request_type = VR_PROGRAM_START2;
+	else {
+		fprintf(stderr, "Error - unknown vendor request %s - run with --help to see all requests\n", request);
+		return 1;
+	}
+
 	switch (request_type) {
 		case VR_GET_CPU_INFO: {
 			char cpu_info_buf[VR_GET_CPU_INFO_LEN+1] = {0};
@@ -187,8 +232,9 @@ int main(int argc, char** argv)
 				/* bytes       */ cpu_info_buf,
 				/* size        */ VR_GET_CPU_INFO_LEN,
 				/* timeout     */ USB_TIMEOUT);
+
 			if (usb_status != VR_GET_CPU_INFO_LEN) {
-				fprintf(stderr, "Error - %s() returned %i\n", argv[1], usb_status);
+				fprintf(stderr, "Error - %s() returned %i\n", request, usb_status);
 				goto xout_xburst_interface;
 			}
 			printf("VR_GET_CPU_INFO %s\n", cpu_info_buf);
@@ -198,13 +244,12 @@ int main(int argc, char** argv)
 		case VR_SET_DATA_LENGTH:
 		case VR_PROGRAM_START1:
 		case VR_PROGRAM_START2: {
-			uint32_t u32_param;
-			if (argc != 3) {
-				fprintf(stderr, "Error - number of %s parameters %i\n", argv[1], argc);
+			if (str_param == NULL) {
+				fprintf(stderr, "Error - number of parameters %s\n", request);
 				goto xout_xburst_interface;
 			}
-			u32_param = strtoul(argv[2], 0 /* endptr */, 0 /* base */);
 
+			u32_param = strtoul(str_param, 0, 0);
 			usb_status = usb_control_msg(xburst_h,
 				/* requesttype */ USB_ENDPOINT_OUT | USB_TYPE_VENDOR | USB_RECIP_DEVICE,
 				/* request     */ request_type,
@@ -214,10 +259,10 @@ int main(int argc, char** argv)
 				/* size        */ 0,
 				/* timeout     */ USB_TIMEOUT);
 			if (usb_status) {
-				fprintf(stderr, "Error - %s() returned %i\n", argv[1], usb_status);
+				fprintf(stderr, "Error - %s() returned %i\n", request, usb_status);
 				goto xout_xburst_interface;
 			}
-			printf("%s %lxh\n", argv[1], (unsigned long) u32_param);
+			printf("%s %lxh\n", request, (unsigned long) u32_param);
 			break;
 		}
 		case VR_FLUSH_CACHES: {
@@ -230,7 +275,7 @@ int main(int argc, char** argv)
 				/* size        */ 0,
 				/* timeout     */ USB_TIMEOUT);
 			if (usb_status) {
-				fprintf(stderr, "Error - %s() returned %i\n", argv[1], usb_status);
+				fprintf(stderr, "Error - %s() returned %i\n", request, usb_status);
 				goto xout_xburst_interface;
 			}
 			printf("VR_FLUSH_CACHES\n");
@@ -240,14 +285,16 @@ int main(int argc, char** argv)
 			int read_len;
 			char* read_buf;
 
-			if (argc != 3) {
-				fprintf(stderr, "Error - number of %s parameters %i\n", argv[1], argc);
+			if (str_param == NULL) {
+				fprintf(stderr, "Error - number of parameters %s\n", request);
 				goto xout_xburst_interface;
 			}
-			if (argv[2][0] == '0' && argv[2][1] == 'x')
-				read_len = strtol(&argv[2][2], 0 /* endptr */, 16 /* base */);
+
+			if (str_param[0] == '0' && str_param[1] == 'x')
+				read_len = strtol(&str_param[2], 0, 16);
 			else
-				read_len = strtol(argv[2], 0 /* endptr */, 10 /* base */);
+				read_len = strtol(str_param, 0, 10);
+
 			read_buf = (char*) malloc(read_len);
 			if (!read_buf) {
 				fprintf(stderr, "Error - cannot allocate %i bytes read buffer.\n", read_len);
@@ -273,23 +320,23 @@ int main(int argc, char** argv)
 			FILE* file_h;
 			size_t num_read;
 
-			if (argc != 3) {
-				fprintf(stderr, "Error - number of parameters %i\n", argc);
+			if (str_param == NULL) {
+				fprintf(stderr, "Error - number of parameters %s\n", request);
 				goto xout_xburst_interface;
 			}
-			file_h = fopen(argv[2], "rb");
+			file_h = fopen(str_param, "rb");
 			if (!file_h) {
-				fprintf(stderr, "Error opening %s.\n", argv[2]);
+				fprintf(stderr, "Error opening %s.\n", str_param);
 				goto xout_xburst_interface;
 			}
 			if (fseek(file_h, 0, SEEK_END)) {
-				fprintf(stderr, "Error seeking to end of %s.\n", argv[2]);
+				fprintf(stderr, "Error seeking to end of %s.\n", str_param);
 				fclose(file_h);
 				goto xout_xburst_interface;
 			}
 			file_len = ftell(file_h);
 			if (fseek(file_h, 0, SEEK_SET)) {
-				fprintf(stderr, "Error seeking to beginning of %s.\n", argv[2]);
+				fprintf(stderr, "Error seeking to beginning of %s.\n", str_param);
 				fclose(file_h);
 				goto xout_xburst_interface;
 			}
@@ -320,14 +367,9 @@ int main(int argc, char** argv)
 			break;
 		}
 	}
-	usb_release_interface(xburst_h, xburst_interface);
-	usb_close(xburst_h);
-	return EXIT_SUCCESS;
+
+	return 0;
 
 xout_xburst_interface:
-	usb_release_interface(xburst_h, xburst_interface);
-xout_xburst_h:
-	usb_close(xburst_h);
-xout:
-	return EXIT_FAILURE;
+	return 1;
 }
