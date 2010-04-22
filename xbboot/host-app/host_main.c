@@ -1,5 +1,6 @@
 //
 // Authors: Wolfgang Spraul <wolfgang@qi-hardware.com>
+// Authors: Xiangfu Liu <xiangfu@sharism.cc>
 //
 // This program is free software; you can redistribute it and/or
 // modify it under the terms of the GNU General Public License
@@ -10,6 +11,8 @@
 #include <stdio.h>
 #include <string.h>
 #include <usb.h>
+#include <time.h>
+#include <signal.h>
 #include "xbboot_version.h"
 
 #define HIWORD(dw)	(((dw) >> 16) & 0xFFFF)
@@ -40,36 +43,26 @@
 #define INGENIC_OUT_ENDPOINT	0x01
 
 uint8_t xburst_interface = 0;
+int xkill = 0;
 
 struct usb_dev_handle* open_xburst_device();
 void close_xburst_device(struct usb_dev_handle* xburst_h);
 int send_request(struct usb_dev_handle* xburst_h, char* request, char* str_param);
+void signal_handler(int sig);
+void show_help();
 
 int main(int argc, char** argv)
 {
+	struct usb_dev_handle* xburst_h;
+
+        signal(SIGHUP, signal_handler);          /* hangup signal */
+        signal(SIGTERM, signal_handler);         /* software termination signal from kill */
+        signal(SIGINT, signal_handler);         /* software termination signal from kill */
+
 	if (argc < 2
 	    || !strcmp(argv[1], "-h")
 	    || !strcmp(argv[1], "--help")) {
-		printf("\n"
-		       "xbboot version %s - Ingenic XBurst USB Boot Vendor Requests\n"
-		       "(c) 2009 Wolfgang Spraul\n"
-		       "Report bugs to <wolfgang@qi-hardware.com>.\n"
-		       "\n"
-		       "xbboot [vendor_request] ... (must run as root)\n"
-		       "  -h --help                                 print this help message\n"
-		       "  -v --version                              print the version number\n"
-		       "\n"
-		       "  bulk_read <len>                           read len bulk bytes from USB, write to stdout\n"
-		       "  bulk_write <path>                         write file at <path> to USB\n"
-		       "  [get_info | VR_GET_CPU_INFO]              read 8-byte CPU info and write to stdout\n"
-		       "  [set_addr | VR_SET_DATA_ADDRESS] <addr>   send memory address\n"
-		       "  [set_len | VR_SET_DATA_LENGTH] <len>      send data length\n"
-		       "  [flush_cache | VR_FLUSH_CACHES]           flush I-Cache and D-Cache\n"
-		       "  [start1 | VR_PROGRAM_START1] <addr>       transfer data from D-Cache to I-Cache and branch to I-Cache\n"
-		       "  [start2 | VR_PROGRAM_START2] <addr>       branch to <addr> directly\n"
-		       "\n"
-		       "- all numbers can be prefixed 0x for hex otherwise decimal\n"
-		       "\n", XBBOOT_VERSION);
+		show_help();
 		return EXIT_SUCCESS;
 	}
 	if (!strcmp(argv[1], "-v") || !strcmp(argv[1], "--version")) {
@@ -82,21 +75,38 @@ int main(int argc, char** argv)
 		return EXIT_FAILURE;
 	}
 
-	struct usb_dev_handle* xburst_h = open_xburst_device();
-	if (!xburst_h)
-		return EXIT_FAILURE;
+	if (!strcmp(argv[1], "-d") || !strcmp(argv[1], "--daemon")) {
+		struct timespec timx,tim1;
 
-	char* parameter;
-	if (argc == 2)
-		parameter = NULL;
-	else
-		parameter = argv[2];
+		tim1.tv_sec = 1;
+		tim1.tv_nsec = 0;
+		while(1) {
+			xburst_h = open_xburst_device();
+			if (xburst_h) {
+				printf("Info - found XBurst boot device.\n");
+				printf("Info - wait 5 seconds for Xburst device booting...\n");
+				sleep(5);
+			}
 
-	send_request(xburst_h, argv[1], parameter);
+			if (xkill)
+				goto xquit;
+
+			if (nanosleep(&tim1,&timx) == -1){
+				perror("Error - ");
+				goto xquit;
+			}
+
+		}
+	}
+
+	xburst_h = open_xburst_device();
+	if (xburst_h)
+		send_request(xburst_h, argv[1], (argc == 2 ? NULL : argv[2]));
+xquit:
 	close_xburst_device(xburst_h);
-
 	return EXIT_SUCCESS;
 }
+
 
 void close_xburst_device(struct usb_dev_handle* xburst_h)
 {
@@ -137,7 +147,7 @@ struct usb_dev_handle* open_xburst_device()
 				}
 			}
 			if (!xburst_dev) {
-				fprintf(stderr, "Error - no XBurst boot device found.\n");
+				fprintf(stderr, "Info - no XBurst boot device found.\n");
 				goto xout;
 			}
 		}
@@ -372,4 +382,37 @@ int send_request(struct usb_dev_handle* xburst_h, char* request, char* str_param
 
 xout_xburst_interface:
 	return 1;
+}
+
+void signal_handler(int sig){
+        switch(sig){
+	case SIGINT:
+		xkill = 1;
+		break;
+        }
+}
+
+void show_help()
+{
+	printf("\n"
+	       "xbboot version %s - Ingenic XBurst USB Boot Vendor Requests\n"
+	       "(c) 2009 Wolfgang Spraul\n"
+	       "Report bugs to <wolfgang@qi-hardware.com>.\n"
+	       "\n"
+	       "xbboot [vendor_request] ... (must run as root)\n"
+	       "  -h --help                                 print this help message\n"
+	       "  -v --version                              print the version number\n"
+	       "  [-d | --daemon] <address> <image>         \n"
+	       "\n"
+	       "  bulk_read <len>                           read len bulk bytes from USB, write to stdout\n"
+	       "  bulk_write <path>                         write file at <path> to USB\n"
+	       "  [get_info | VR_GET_CPU_INFO]              read 8-byte CPU info and write to stdout\n"
+	       "  [set_addr | VR_SET_DATA_ADDRESS] <addr>   send memory address\n"
+	       "  [set_len | VR_SET_DATA_LENGTH] <len>      send data length\n"
+	       "  [flush_cache | VR_FLUSH_CACHES]           flush I-Cache and D-Cache\n"
+	       "  [start1 | VR_PROGRAM_START1] <addr>       transfer data from D-Cache to I-Cache and branch to I-Cache\n"
+	       "  [start2 | VR_PROGRAM_START2] <addr>       branch to <addr> directly\n"
+	       "\n"
+	       "- all numbers can be prefixed 0x for hex otherwise decimal\n"
+	       "\n", XBBOOT_VERSION);
 }
