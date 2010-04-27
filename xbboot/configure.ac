@@ -10,16 +10,24 @@ AM_CONFIG_HEADER([config.h])
 
 AM_MAINTAINER_MODE
 
+AC_ARG_ENABLE([firmware],
+ [AS_HELP_STRING([--disable-firmware],
+  [Do not build initialization code]
+  [(for example, because some other package contains it).])],
+ [
+case "$enableval" in
+yes) firmware=true ;;
+no) firmware=false ;;
+*) AC_MSG_ERROR([bad value $enableval for --enable-firmware]) ;;
+esac],[firmware=false])
+AM_CONDITIONAL([COND_FIRMWARE], [test "$firmware" = true])
+
 # Checks for programs.
 AC_PROG_CC
 AC_PROG_CXX
 
 # Checks for libraries.
 AC_CHECK_LIB([c], [main])
-AC_CHECK_LIB([confuse], [main], [], [
-echo "Error! You need to have libconfuse-dev.\n"
-echo "Maybe run 'sudo apt-get install libconfuse-dev' under debian"
-exit -1 ])
 AC_CHECK_LIB([gcc], [main])
 AC_CHECK_LIB([m], [main])
 AC_CHECK_LIB([usb], [main], [], [
@@ -32,7 +40,7 @@ CFLAGS="$CFLAGS $USB_CFLAGS"
 
 # Checks for header files.
 AC_HEADER_STDC
-AC_CHECK_HEADERS([fcntl.h stdint.h stdlib.h string.h unistd.h])
+AC_CHECK_HEADERS([time.h signal.h stdlib.h string.h])
 
 # Checks for typedefs, structures, and compiler characteristics.
 AC_C_INLINE

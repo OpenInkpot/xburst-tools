@@ -1,8 +1,8 @@
-AM_CFLAGS = -pedantic -Wall -W -O1 -g3 -std=gnu99 -lusb -lconfuse
+AM_CFLAGS = -pedantic -Wall -W -O1 -g3 -std=gnu99 -lusb
 
 xbboot_version.h:
 	echo -e '#ifndef XBBOOT_VERSION' \
-	'\n#define XBBOOT_VERSION "20090815-1"' \
+	'\n#define XBBOOT_VERSION "20100427-1"' \
 	'\n#endif' > xbboot_version.h
 BUILT_SOURCES = xbboot_version.h
 

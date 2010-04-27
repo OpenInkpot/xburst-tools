@@ -397,7 +397,7 @@ void show_help()
 	printf("\n"
 	       "xbboot version %s - Ingenic XBurst USB Boot Vendor Requests\n"
 	       "(c) 2009 Wolfgang Spraul\n"
-	       "Report bugs to <wolfgang@qi-hardware.com>.\n"
+	       "Report bugs to <wolfgang@qi-hardware.com>, <xiangfu@sharism.cc>.\n"
 	       "\n"
 	       "xbboot [vendor_request] ... (must run as root)\n"
 	       "  -h --help                                 print this help message\n"
