@@ -40,7 +40,7 @@ CFLAGS="$CFLAGS $USB_CFLAGS"
 
 # Checks for header files.
 AC_HEADER_STDC
-AC_CHECK_HEADERS([time.h signal.h stdlib.h string.h])
+AC_CHECK_HEADERS([time.h stdlib.h string.h])
 
 # Checks for typedefs, structures, and compiler characteristics.
 AC_C_INLINE
