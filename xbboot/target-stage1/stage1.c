@@ -55,10 +55,6 @@ void load_args()
 	ARG_COL_ADDR = 9;
 }
 
-#define GPIO_LCD_CS	(2 * 32 + 21)
-#define	GPIO_KEYOUT_BASE	(2 * 32 + 10)
-#define	GPIO_KEYIN_BASE	(3 * 32 + 18)
-
 void gpio_init()
 {
 	__gpio_as_nand();
@@ -66,6 +62,10 @@ void gpio_init()
 	__gpio_as_uart0();
 	__gpio_as_lcd_18bit();
 	__gpio_as_msc();
+
+#define GPIO_LCD_CS		(2 * 32 + 21)
+#define GPIO_KEYOUT_BASE	(2 * 32 + 10)
+#define GPIO_KEYIN_BASE		(3 * 32 + 18)
 
 	unsigned int i;
 	for (i = 0; i < 7; i++){
