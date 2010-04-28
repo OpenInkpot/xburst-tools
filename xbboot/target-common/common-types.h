@@ -1,5 +1,5 @@
 /*
- * Authors: Xiangfu Liu <xiangfu@qi-hardware.com>
+ * Authors: Xiangfu Liu <xiangfu@sharism.cc>
  *
  * This program is free software; you can redistribute it and/or
  * modify it under the terms of the GNU General Public License

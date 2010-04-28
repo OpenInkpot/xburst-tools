@@ -1,5 +1,5 @@
 //
-// Authors: Wolfgang Spraul <wolfgang@qi-hardware.com>
+// Authors: Wolfgang Spraul <wolfgang@sharism.cc>
 // Authors: Xiangfu Liu <xiangfu@sharism.cc>
 //
 // This program is free software; you can redistribute it and/or
@@ -419,7 +419,7 @@ void show_help()
 	printf("\n"
 	       "xbboot version %s - Ingenic XBurst USB Boot Vendor Requests\n"
 	       "(c) 2009 Wolfgang Spraul\n"
-	       "Report bugs to <wolfgang@qi-hardware.com>, <xiangfu@sharism.cc>.\n"
+	       "Report bugs to <wolfgang@sharism.cc>, <xiangfu@sharism.cc>.\n"
 	       "\n"
 	       "xbboot [vendor_request] ... (must run as root)\n"
 	       "  -h --help                                 print this help message\n"
