@@ -1,4 +1,4 @@
-AM_CFLAGS = -pedantic -Wall -W -O1 -g3 -std=gnu99 -lusb
+AM_CFLAGS = -pedantic -Wall -W -O1 -g3 -std=gnu99 -lusb -DDATADIR=\"$(pkgdatadir)\"
 
 xbboot_version.h:
 	echo -e '#ifndef XBBOOT_VERSION' \
@@ -10,10 +10,13 @@ bin_PROGRAMS = xbboot
 xbboot_SOURCES = host_main.c
 
 prefix = /usr
-datadir = /usr/share/xburst-tools
-data_DATA = ../target-stage1/stage1.bin
+pkgdatadir = $(datadir)/xburst-tools
 
-EXTRA_DIST = $(datadir)
+if COND_FIRMWARE
+pkgdata_DATA = ../target-stage1/stage1.bin
+endif
 
-../target-stage1/stage.bin:
-	$(MAKE) -C ../target-stage1
+EXTRA_DIST = $(pkgdatadir)
+
+../target-stage1/stage1.bin:
+	$(MAKE) CROSS_COMPILE=mipsel-openwrt-linux- -C ../target-stage1
