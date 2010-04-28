@@ -12,7 +12,6 @@
 #include <string.h>
 #include <usb.h>
 #include <time.h>
-#include <signal.h>
 #include "xbboot_version.h"
 
 #define HIWORD(dw)	(((dw) >> 16) & 0xFFFF)
@@ -42,22 +41,19 @@
 #define INGENIC_IN_ENDPOINT	0x81
 #define INGENIC_OUT_ENDPOINT	0x01
 
+#define STAGE1_FILE_PATH	(DATADIR "stage1.bin")
+#define STAGE1_ADDRESS		("0x80002000")
+
 uint8_t xburst_interface = 0;
-int xkill = 0;
 
 struct usb_dev_handle* open_xburst_device();
 void close_xburst_device(struct usb_dev_handle* xburst_h);
 int send_request(struct usb_dev_handle* xburst_h, char* request, char* str_param);
-void signal_handler(int sig);
 void show_help();
 
 int main(int argc, char** argv)
 {
 	struct usb_dev_handle* xburst_h;
-
-        signal(SIGHUP, signal_handler);          /* hangup signal */
-        signal(SIGTERM, signal_handler);         /* software termination signal from kill */
-        signal(SIGINT, signal_handler);         /* software termination signal from kill */
 
 	if (argc < 2
 	    || !strcmp(argv[1], "-h")
@@ -76,32 +72,65 @@ int main(int argc, char** argv)
 	}
 
 	if (!strcmp(argv[1], "-d") || !strcmp(argv[1], "--daemon")) {
+		if (argc != 4) {
+			show_help();
+			goto xquit;
+		}
+
 		struct timespec timx,tim1;
 
 		tim1.tv_sec = 1;
 		tim1.tv_nsec = 0;
 		while(1) {
+			nanosleep(&tim1,&timx);
+
 			xburst_h = open_xburst_device();
 			if (xburst_h) {
-				printf("Info - found XBurst boot device.\n");
-				printf("Info - wait 5 seconds for Xburst device booting...\n");
-				sleep(5);
-			}
+				printf("\nInfo - found XBurst boot device.\n");
+				if (send_request(xburst_h, "set_addr", STAGE1_ADDRESS)) {
+					close_xburst_device(xburst_h);
+					continue;
+				}
+				if (send_request(xburst_h, "bulk_write", STAGE1_FILE_PATH)) {
+					close_xburst_device(xburst_h);
+					continue;
+				}
+				if (send_request(xburst_h, "start1", STAGE1_ADDRESS)) {
+					close_xburst_device(xburst_h);
+					continue;
+				}
+				if (send_request(xburst_h, "get_info", "NULL")) {
+					close_xburst_device(xburst_h);
+					continue;
+				}
+				if (send_request(xburst_h, "set_addr", argv[2])) {
+					close_xburst_device(xburst_h);
+					continue;
+				}
+				if (send_request(xburst_h, "bulk_write", argv[3])) {
+					close_xburst_device(xburst_h);
+					continue;
+				}
+				if (send_request(xburst_h, "flush_cache","NULL")) {
+					close_xburst_device(xburst_h);
+					continue;
+				}
+				if (send_request(xburst_h, "start2", argv[2])) {
+					close_xburst_device(xburst_h);
+					continue;
+				}
 
-			if (xkill)
 				goto xquit;
-
-			if (nanosleep(&tim1,&timx) == -1){
-				perror("Error - ");
-				goto xquit;
 			}
-
 		}
 	}
 
 	xburst_h = open_xburst_device();
 	if (xburst_h)
-		send_request(xburst_h, argv[1], (argc == 2 ? NULL : argv[2]));
+		if (send_request(xburst_h, argv[1], (argc == 2 ? NULL : argv[2]))) {
+			close_xburst_device(xburst_h);
+			return EXIT_FAILURE;
+		}
 xquit:
 	close_xburst_device(xburst_h);
 	return EXIT_SUCCESS;
@@ -378,18 +407,11 @@ int send_request(struct usb_dev_handle* xburst_h, char* request, char* str_param
 		}
 	}
 
+	usleep(100);
 	return 0;
 
 xout_xburst_interface:
 	return 1;
-}
-
-void signal_handler(int sig){
-        switch(sig){
-	case SIGINT:
-		xkill = 1;
-		break;
-        }
 }
 
 void show_help()

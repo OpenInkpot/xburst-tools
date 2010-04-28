@@ -10,7 +10,7 @@ bin_PROGRAMS = xbboot
 xbboot_SOURCES = host_main.c
 
 prefix = /usr
-pkgdatadir = $(datadir)/xburst-tools
+pkgdatadir = $(datadir)/xburst-tools/
 
 if COND_FIRMWARE
 pkgdata_DATA = ../target-stage1/stage1.bin
