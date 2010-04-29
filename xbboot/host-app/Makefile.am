@@ -1,4 +1,4 @@
-AM_CFLAGS = -pedantic -Wall -W -O1 -g3 -std=gnu99 -lusb -DDATADIR=\"$(pkgdatadir)\"
+AM_CFLAGS = -pedantic -Wall -W -std=gnu99 -DDATADIR=\"$(pkgdatadir)\"
 
 xbboot_version.h:
 	echo -e '#ifndef XBBOOT_VERSION' \

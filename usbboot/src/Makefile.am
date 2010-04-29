@@ -1,5 +1,4 @@
-AM_CFLAGS = -pedantic -Wall -W -O1 -g3 -std=gnu99 -lusb -lconfuse \
-                -DCFGDIR=\"$(cfgdir)\" -DDATADIR=\"$(pkgdatadir)\"
+AM_CFLAGS = -pedantic -Wall -W -DCFGDIR=\"$(cfgdir)\" -DDATADIR=\"$(pkgdatadir)\"
 
 xburst-tools_version.h:
 	echo -e '#ifndef XBURST_TOOLS_VERSION' \
