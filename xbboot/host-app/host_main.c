@@ -71,7 +71,7 @@ int main(int argc, char** argv)
 		return EXIT_FAILURE;
 	}
 
-	if (!strcmp(argv[1], "-d") || !strcmp(argv[1], "--daemon")) {
+	if (!strcmp(argv[1], "-u") || !strcmp(argv[1], "--upload")) {
 		if (argc != 4) {
 			show_help();
 			goto xquit;
@@ -424,7 +424,7 @@ void show_help()
 	       "xbboot [vendor_request] ... (must run as root)\n"
 	       "  -h --help                                 print this help message\n"
 	       "  -v --version                              print the version number\n"
-	       "  [-d | --daemon] <address> <image>         \n"
+	       "  [-u | --upload] <address> <path>          upload file at <path> to <address> then jump to <address>\n"
 	       "\n"
 	       "  bulk_read <len>                           read len bulk bytes from USB, write to stdout\n"
 	       "  bulk_write <path>                         write file at <path> to USB\n"
