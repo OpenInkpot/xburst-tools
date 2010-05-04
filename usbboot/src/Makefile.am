@@ -10,6 +10,7 @@ bin_PROGRAMS = usbboot
 usbboot_SOURCES = cmd.c  command_line.c  ingenic_cfg.c  \
 	ingenic_usb.c  main.c
 
+prefix = /usr
 pkgdatadir = $(datadir)/xburst-tools/
 
 if COND_FIRMWARE
