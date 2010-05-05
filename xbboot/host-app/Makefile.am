@@ -9,7 +9,6 @@ BUILT_SOURCES = xbboot_version.h
 bin_PROGRAMS = xbboot
 xbboot_SOURCES = host_main.c
 
-prefix = /usr
 pkgdatadir = $(datadir)/xburst-tools/
 
 if COND_FIRMWARE
