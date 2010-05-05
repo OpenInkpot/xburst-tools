@@ -12,5 +12,6 @@ dpkg-parsechangelog --format rfc822 --all |
 	awk -f debian/changelog.upstream.awk
 
 debian/rules firmware
-cp -f xburst_stage1/xburst_stage1.bin debian/
-cp -f xburst_stage2/xburst_stage2.bin debian/
+cp -f usbboot/xburst_stage1/xburst_stage1.bin debian/
+cp -f usbboot/xburst_stage2/xburst_stage2.bin debian/
+cp -f xbboot/target-stage1/stage1.bin debian/

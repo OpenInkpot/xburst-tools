@@ -1,7 +1,7 @@
 This Debian package is developed in a Git repository (see the Vcs-Git field
 of debian/control).  To build from a git checkout:
 
-	debian/rules get-orig-source REPO=.. BRANCH=remotes/origin/master
+	debian/rules get-orig-source REPO=. BRANCH=remotes/origin/master
 	mv xburst-tools_*.tar.gz ..
 	debian/autogen.sh
 	debuild
