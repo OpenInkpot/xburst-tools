@@ -26,5 +26,5 @@ upstream_version="${release}+${date}"
 
 # Generate tarball.
 echo "packaging $(git rev-parse --short FETCH_HEAD)"
-git archive FETCH_HEAD -- usbboot xbboot |
-	gzip -n -9 > "xburst-tools_$upstream_version.orig.tar.gz"
+git archive FETCH_HEAD |
+	gzip -n -9 >"xburst-tools_$upstream_version.orig.tar.gz"

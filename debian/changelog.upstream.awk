@@ -84,7 +84,7 @@ function add_version(new,new_cid, limiter,versionline,command,line) {
 	print versionline >> cl;
 
 	print "" >> cl;
-	command = "git shortlog \"" limiter last_cid "\" -- .";
+	command = "git shortlog \"" limiter last_cid "\"";
 	while(command | getline line)
 		print line >> cl;
 
