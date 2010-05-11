@@ -11,7 +11,7 @@ override_dh_auto_clean:
 		exit 1; \
 	}
 	dh_auto_clean
-	#sh debian/clean.sh # COMMENT by xiangfu. don't understand why this clean.sh remove the target Makefile. look into this later
+	sh debian/clean.sh
 
 override_dh_auto_configure: configure
 	dh_auto_configure -- $(opt_optimize) $(opt_quiet) \
