@@ -16,8 +16,9 @@ as published by the Free Software Foundation; either version
 Build Requirements: libusb-dev
 
 Build and Installation:
+  cd ../
   ./autogen.sh
-  ./configure --enable-firmware
+  ./configure --enable-firmware --prefix=/usr
   make
   make install
     *) make install will install the xbboot binary to /usr/bin/xbboot

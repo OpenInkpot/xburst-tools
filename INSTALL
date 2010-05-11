@@ -1,0 +1,14 @@
+Build Requirements: libusb-dev, libconfuse-dev
+
+Build and Installation:
+  ./autogen.sh
+  ./configure --enable-firmware --prefix=/usr
+  make
+  make install
+    *) make install will install the 'usbboot' and 'xbboot' binary to /usr/bin/usbboot,
+       target stages to /usr/share/xburst-tools/, usbboot configure file 'usbboot.cfg'
+       file into /etc/xburst-tools.
+
+Buile Debian Package:
+  Please read debian/README.source
+
