@@ -1,8 +1,0 @@
-System.map
-head.o
-stage1.o
-stage1.bin
-stage1.dump
-stage1.elf
-stage1.map
-serial.o

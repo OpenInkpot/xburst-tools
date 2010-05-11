@@ -11,12 +11,3 @@
 Makefile.in
 
 /Makefile
-/host-app/Makefile
-
-*.lst
-*.o
-*.bin
-*.dump
-*.elf
-*.map
-*.sym
