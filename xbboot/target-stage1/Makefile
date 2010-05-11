@@ -21,10 +21,12 @@ OBJS	= head.o stage1.o serial.o
 all: stage1.bin
 
 stage1.bin: stage1.elf
-	$(CROSS_COMPILE)objcopy -O binary $< $@
+	$(CROSS_COMPILE)objcopy -O binary $< $@+
 	$(CROSS_COMPILE)objdump -D $< > stage1.dump
 	$(CROSS_COMPILE)objdump -h $< > stage1.map
 	$(CROSS_COMPILE)nm -n $< > System.map
+	chmod -x $@+
+	mv -f $@+ $@
 
 stage1.elf: $(OBJS)
 	$(CROSS_COMPILE)ld $(LDFLAGS) $(OBJS) -o $@

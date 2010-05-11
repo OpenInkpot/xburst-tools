@@ -23,10 +23,12 @@ OBJS	= head.o main.o common.o board_4740.o board_4750.o debug.o
 all: xburst_stage1.bin
 
 xburst_stage1.bin: xburst_stage1.elf
-	$(CROSS_COMPILE)objcopy -O binary $< $@
+	$(CROSS_COMPILE)objcopy -O binary $< $@+
 	$(CROSS_COMPILE)objdump -D $< > xburst_stage1.dump
 	$(CROSS_COMPILE)objdump -h $< > xburst_stage1.map
 	$(CROSS_COMPILE)nm -n $< > System.map
+	chmod -x $@+
+	mv -f $@+ $@
 
 xburst_stage1.elf: $(OBJS)
 	$(CROSS_COMPILE)ld $(LDFLAGS) $(OBJS) -o $@

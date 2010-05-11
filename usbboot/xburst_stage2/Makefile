@@ -37,6 +37,7 @@ OBJS	= main.o udc.o cache.o serial.o boothandler.o nandflash_4740.o nandflash_47
 
 all: xburst_stage2.elf
 	$(OBJCOPY) -O binary xburst_stage2.elf xburst_stage2.bin
+	chmod -x xburst_stage2.bin
 	$(OBJDUMP) -D xburst_stage2.elf > xburst_stage2.dump
 	$(NM) xburst_stage2.elf | sort > xburst_stage2.sym
 	$(OBJDUMP) -h xburst_stage2.elf > xburst_stage2.map
