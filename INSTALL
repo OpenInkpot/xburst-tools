@@ -1,4 +1,13 @@
 Build Requirements: libusb-dev, libconfuse-dev
+  This requires a mipsel-openwrt-linux- cross-toolchain in your $PATH.  You
+  can get one by building the development environment from Qi Hardware, for
+  example.
+
+    git://projects.qi-hardware.com/openwrt-xburst.git xburst
+
+  See the Qi Hardware wiki for details.
+
+    http://en.qi-hardware.com/wiki/Building_Software_Image
 
 Build and Installation:
   ./autogen.sh
