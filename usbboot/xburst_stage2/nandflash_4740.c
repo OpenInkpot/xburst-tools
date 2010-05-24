@@ -22,13 +22,13 @@
 #include "usb_boot.h"
 #include "usb_boot_defines.h"
 
-#define __nand_enable()		(REG_EMC_NFCSR |= EMC_NFCSR_NFE1 | EMC_NFCSR_NFCE1)
+#define __nand_enable()	(REG_EMC_NFCSR |= EMC_NFCSR_NFE1 | EMC_NFCSR_NFCE1)
 #define __nand_disable()	(REG_EMC_NFCSR &= ~(EMC_NFCSR_NFCE1))
 #define __nand_ecc_rs_encoding()	(REG_EMC_NFECR = EMC_NFECR_ECCE | EMC_NFECR_ERST | EMC_NFECR_RS | EMC_NFECR_RS_ENCODING)
 #define __nand_ecc_rs_decoding()	(REG_EMC_NFECR = EMC_NFECR_ECCE | EMC_NFECR_ERST | EMC_NFECR_RS | EMC_NFECR_RS_DECODING)
-#define __nand_ecc_disable()	(REG_EMC_NFECR &= ~EMC_NFECR_ECCE)
-#define __nand_ecc_encode_sync() while (!(REG_EMC_NFINTS & EMC_NFINTS_ENCF))
-#define __nand_ecc_decode_sync() while (!(REG_EMC_NFINTS & EMC_NFINTS_DECF))
+#define __nand_ecc_disable()		(REG_EMC_NFECR &= ~EMC_NFECR_ECCE)
+#define __nand_ecc_encode_sync()	while (!(REG_EMC_NFINTS & EMC_NFINTS_ENCF))
+#define __nand_ecc_decode_sync()	while (!(REG_EMC_NFINTS & EMC_NFINTS_DECF))
 
 #define __nand_ready()		((REG_GPIO_PXPIN(2) & 0x40000000) ? 1 : 0)
 #define __nand_ecc()		(REG_EMC_NFECC & 0x00ffffff)
@@ -42,7 +42,7 @@
 #define CMD_READC	0x50
 #define CMD_ERASE_SETUP	0x60
 #define CMD_ERASE	0xD0
-#define CMD_READ_STATUS 0x70
+#define CMD_READ_STATUS	0x70
 #define CMD_CONFIRM	0x30
 #define CMD_SEQIN	0x80
 #define CMD_PGPROG	0x10
@@ -53,12 +53,12 @@
 
 #define OP_ERASE	0
 #define OP_WRITE	1
-#define OP_READ		2
+#define OP_READ	2
 
 #define ECC_BLOCK	512
-#define ECC_POS	        6
-#define PAR_SIZE        9
-#define ECC_SIZE        36
+#define ECC_POS	6
+#define PAR_SIZE	9
+#define ECC_SIZE	36
 
 static volatile unsigned char *gpio_base = (volatile unsigned char *)0xb0010000;
 static volatile unsigned char *emc_base = (volatile unsigned char *)0xb3010000;
@@ -68,14 +68,11 @@ static volatile unsigned char *cmdport = (volatile unsigned char *)0xb8008000;
 
 static int bus = 8, row = 2, pagesize = 2048, oobsize = 64, ppb = 128;
 static int bad_block_pos,bad_block_page,force_erase,ecc_pos,wp_pin;
-extern struct hand Hand;
 static u8 oob_buf[256] = {0};
+extern struct hand Hand;
 extern u16 handshake_PKT[4];
 
-#define dprintf(x) serial_puts(x)
-
-static unsigned int EMC_CSN[4]=
-{
+static unsigned int EMC_CSN[4] = {
 	0xb8000000,
 	0xb4000000,
 	0xa8000000,
@@ -165,8 +162,7 @@ int nand_init_4740(int bus_width, int row_cycle, int page_size, int page_per_blo
 	wp_pin = Hand.nand_wppin;
 
 	/* Initialize NAND Flash Pins */
-	if (wp_pin)
-	{
+	if (wp_pin) {
 		__gpio_as_output(wp_pin);
 		__gpio_disable_pull(wp_pin);
 	}
@@ -299,8 +295,7 @@ u32 nand_read_raw_4740(void *buf, u32 startpage, u32 pagecount, int option)
 		read_proc(tmpbuf, pagesize);
 
 		tmpbuf += pagesize;
-		if (option != NO_OOB)
-		{
+		if (option != NO_OOB) {
 			read_oob(tmpbuf, oobsize, cur_page);
 			tmpbuf += oobsize;
 		}
@@ -319,11 +314,12 @@ u32 nand_erase_4740(int blk_num, int sblk, int force)
 
 	if (wp_pin)
 		__gpio_set_pin(wp_pin);
+
 	cur = sblk * ppb;
 	for (i = 0; i < blk_num; ) {
 		rowaddr = cur;
 		select_chip(cur / ppb);
-		if ( !force ) {
+		if (!force) {
 			if (nand_check_block(cur/ppb)) {
 				cur += ppb;
 				blk_num += Hand.nand_plane;
