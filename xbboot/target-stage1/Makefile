@@ -11,12 +11,13 @@ ifeq ($(CROSS_COMPILE),)
 $(error CROSS_COMPILE variable not set, should point to .../mipsel-openwrt-linux-)
 endif
 
+INCPATH = -I. -I../target-common/
 CFLAGS	= -O2 -fno-unit-at-a-time -fno-zero-initialized-in-bss -mips32 -fno-pic \
-	  -mno-abicalls -I$(INFLASH_SRC_PATH) -I$(XBURST_INCLUDE_PATH)
+	  -mno-abicalls $(INCPATH)
 LDFLAGS	= -nostdlib -EL -T target.ld 
-VPATH = ../target-common
+VPATH   = ../target-common
 
-OBJS	= head.o stage1.o serial.o
+OBJS	= head.o stage1.o serial.o board-jz4740.o
 
 all: stage1.bin
 
