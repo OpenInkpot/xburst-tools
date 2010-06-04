@@ -1,3 +1,10 @@
+xburst-tools (0.0+201006-0.1) lucid; urgency=low
+
+  * New snapshot, taken from commit 77a7270
+  * remove the static prefix and datadir
+
+ -- xiangfu <xiangfu.z@gmail.com>  Thu, 03 Jun 2010 21:44:55 +0800
+
 xburst-tools (0.0+201005-0.1) local; urgency=low
 
   [ Jonathan Nieder ]
