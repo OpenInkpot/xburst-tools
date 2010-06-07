@@ -33,11 +33,11 @@ void c_main(void)
 
 	switch (ARG_CPU_ID)	{
 	case 0x4740:
-		gpio_init();
-		serial_init();
-		pll_init();
-		sdram_init();
-		nand_init();
+		gpio_init_4740();
+		serial_init_4740();
+		pll_init_4740();
+		sdram_init_4740();
+		nand_init_4740();
 		break;
 	case 0x4760:	
 		break;

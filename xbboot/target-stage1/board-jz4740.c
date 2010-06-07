@@ -11,7 +11,7 @@
 #include "serial.h"
 #include "board-jz4740.h"
 
-void gpio_init()
+void gpio_init_4740()
 {
 	__gpio_as_nand();
 	__gpio_as_sdram_32bit();
@@ -38,7 +38,7 @@ void gpio_init()
 	__gpio_clear_pin(GPIO_LCD_CS);
 }
 
-void pll_init()
+void pll_init_4740()
 {
 	register unsigned int cfcr, plcr1;
 	int n2FR[33] = {
@@ -92,7 +92,7 @@ static void serial_setbaud()
 	*uart_lcr = tmp;
 }
 
-void serial_init()
+void serial_init_4740()
 {
 	volatile u8* uart_fcr = (volatile u8*)(ARG_UART_BASE + OFF_FCR);
 	volatile u8* uart_lcr = (volatile u8*)(ARG_UART_BASE + OFF_LCR);
@@ -126,7 +126,7 @@ void serial_init()
 #define SDRAM_TRWL		7	/* Write Latency Time */
 #define SDRAM_TREF	        15625	/* Refresh period: 4096 refresh cycles/64ms */
 
-void sdram_init()
+void sdram_init_4740()
 {
 	register unsigned int dmcr0, dmcr, sdmode, tmp, cpu_clk, mem_clk, ns;
 
@@ -229,7 +229,7 @@ void sdram_init()
 	/* everything is ok now */
 }
 
-void nand_init()
+void nand_init_4740()
 {
 	REG_EMC_SMCR1 = 0x094c4400;
 	REG_EMC_NFCSR |= EMC_NFCSR_NFE1 | EMC_NFCSR_NFCE1; //__nand_enable()

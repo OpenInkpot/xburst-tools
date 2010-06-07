@@ -9,11 +9,11 @@
 #ifndef __BOARD_JZ4740_H__
 #define __BOARD_JZ4740_H__
 
-void gpio_init();
-void pll_init();
-void serial_init();
-void sdram_init();
-void nand_init();
+void gpio_init_4740();
+void pll_init_4740();
+void serial_init_4740();
+void sdram_init_4740();
+void nand_init_4740();
 
 // tbd: do they have to be copied into globals? or just reference STAGE1_ARGS_ADDR?
 volatile u32	ARG_EXTAL;
