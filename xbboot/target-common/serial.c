@@ -10,8 +10,6 @@
 #include "serial.h"
 #include "jz4740.h"
 
-u32 UART_BASE;
-
 void serial_putc(char c)
 {
 	volatile u8* uart_lsr = (volatile u8*)(UART_BASE + OFF_LSR);

@@ -8,8 +8,6 @@
 //
 
 #include "jz4740.h"
-#include "serial.h"
-#include "board-jz4740.h"
 
 void gpio_init_4740()
 {

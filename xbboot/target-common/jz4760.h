@@ -4,11 +4,87 @@
 #ifndef __JZ4760_H__
 #define __JZ4760_H__
 
-#include "common-types.h"
+#ifndef __ASSEMBLY__
+#if 0 /* if 0, for spl program */
+#define cache_unroll(base,op)	        	\
+	__asm__ __volatile__("	         	\
+		.set noreorder;		        \
+		.set mips3;		        \
+		cache %1, (%0);	                \
+		.set mips0;			\
+		.set reorder"			\
+		:				\
+		: "r" (base),			\
+		  "i" (op));
+
+static inline void jz_flush_dcache(void)
+{
+	unsigned long start;
+	unsigned long end;
+
+	start = KSEG0;
+	end = start + CFG_DCACHE_SIZE;
+	while (start < end) {
+		cache_unroll(start,Index_Writeback_Inv_D);
+		start += CFG_CACHELINE_SIZE;
+	}
+}
+
+static inline void jz_flush_icache(void)
+{
+	unsigned long start;
+	unsigned long end;
+
+	start = KSEG0;
+	end = start + CFG_ICACHE_SIZE;
+	while(start < end) {
+		cache_unroll(start,Index_Invalidate_I);
+		start += CFG_CACHELINE_SIZE;
+	}
+}
+
+/* cpu pipeline flush */
+static inline void jz_sync(void)
+{
+	__asm__ volatile ("sync");
+}
+
+static inline void jz_writeb(u32 address, u8 value)
+{
+	*((volatile u8 *)address) = value;
+}
+
+static inline void jz_writew(u32 address, u16 value)
+{
+	*((volatile u16 *)address) = value;
+}
+
+static inline void jz_writel(u32 address, u32 value)
+{
+	*((volatile u32 *)address) = value;
+}
+
+static inline u8 jz_readb(u32 address)
+{
+	return *((volatile u8 *)address);
+}
+
+static inline u16 jz_readw(u32 address)
+{
+	return *((volatile u16 *)address);
+}
+
+static inline u32 jz_readl(u32 address)
+{
+	return *((volatile u32 *)address);
+}
+#endif
+#endif /* !ASSEMBLY */
 
 //----------------------------------------------------------------------
 // Boot ROM Specification
 //
+
 /* NOR Boot config */
 #define JZ4760_NORBOOT_8BIT	0x00000000	/* 8-bit data bus flash */
 #define JZ4760_NORBOOT_16BIT	0x10101010	/* 16-bit data bus flash */
@@ -3359,6 +3435,8 @@
 // Module Operation Definitions
 //
 //----------------------------------------------------------------------
+#ifndef __ASSEMBLY__
+
 #define is_share_mode() (1)
 
 /***************************************************************************
@@ -6350,5 +6428,7 @@ do {                                                                 \
         REG_BCH_CNT &= ~BCH_CNT_ENC_MASK;			      \
         REG_BCH_CNT |= (n) << BCH_CNT_ENC_BIT;                        \
 } while(0)
+
+#endif /* !__ASSEMBLY__ */
 
 #endif /* __JZ4760_H__ */

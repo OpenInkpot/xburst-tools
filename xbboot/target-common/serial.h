@@ -7,12 +7,13 @@
 // 3 of the License, or (at your option) any later version.
 //
 
-#include "common-types.h"
-
-extern u32 UART_BASE;
+#ifndef _SERIAL_H_
+#define _SERIAL_H_
 
 void serial_putc(char c);
 void serial_puts(const char *s);
 void serial_put_hex(unsigned int v);
 int serial_getc();
 int serial_tstc();
+
+#endif

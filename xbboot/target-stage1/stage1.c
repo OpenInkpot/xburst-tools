@@ -7,10 +7,15 @@
 // 3 of the License, or (at your option) any later version.
 //
 
-#include "jz4740.h"
+#include "common.h"
 #include "serial.h"
-#include "board-jz4740.h"
+#include "jz4740.h"
 
+extern void gpio_init_4740();
+extern void pll_init_4740();
+extern void serial_init_4740();
+extern void sdram_init_4740();
+extern void nand_init_4740();
 
 void load_args()
 {

@@ -21,22 +21,7 @@
 #ifndef __JZ4740_H__
 #define __JZ4740_H__
 
-#include "common-types.h"
-
-#ifndef __ASSEMBLY__
-#define UCOS_CSP 0
-
-#if UCOS_CSP
-#define __KERNEL__
-#include <bsp.h>
-#include <types.h>
-
-#include <sysdefs.h>
-#include <cacheops.h>
-#define KSEG0 KSEG0BASE
-#else
-/* #include <asm/cacheops.h> */
-#endif
+#include "common.h"
 
 #define cache_unroll(base,op)	        	\
 	__asm__ __volatile__("	         	\
@@ -48,34 +33,7 @@
 		:				\
 		: "r" (base),			\
 		  "i" (op));
-#if 0
-static inline void jz_flush_dcache(void)
-{
-	unsigned long start;
-	unsigned long end;
 
-	start = KSEG0;
-	end = start + CFG_DCACHE_SIZE;
-	while (start < end) {
-		cache_unroll(start,Index_Writeback_Inv_D);
-		start += CFG_CACHELINE_SIZE;
-	}
-}
-
-static inline void jz_flush_icache(void)
-{
-	unsigned long start;
-	unsigned long end;
-
-	start = KSEG0;
-	end = start + CFG_ICACHE_SIZE;
-	while(start < end) {
-		cache_unroll(start,Index_Invalidate_I);
-		start += CFG_CACHELINE_SIZE;
-	}
-}
-
-#endif
 /* cpu pipeline flush */
 static inline void jz_sync(void)
 {
@@ -112,17 +70,6 @@ static inline u32 jz_readl(u32 address)
 	return *((volatile u32 *)address);
 }
 
-#define REG8(addr)	*((volatile u8 *)(addr))
-#define REG16(addr)	*((volatile u16 *)(addr))
-#define REG32(addr)	*((volatile u32 *)(addr))
-
-#else
-
-#define REG8(addr)	(addr)
-#define REG16(addr)	(addr)
-#define REG32(addr)	(addr)
-
-#endif /* !ASSEMBLY */
 
 /* Boot ROM Specification */
 
