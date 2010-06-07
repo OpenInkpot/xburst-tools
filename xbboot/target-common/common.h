@@ -25,7 +25,6 @@ u32 UART_BASE;
 volatile u32	ARG_EXTAL;
 volatile u32	ARG_CPU_SPEED;
 volatile u8	ARG_PHM_DIV;
-volatile u32	ARG_UART_BASE;
 volatile u32	ARG_UART_BAUD;
 volatile u8	ARG_BUS_WIDTH_16;
 volatile u8	ARG_BANK_ADDR_2BIT;

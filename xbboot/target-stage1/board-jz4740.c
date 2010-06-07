@@ -73,9 +73,9 @@ void pll_init_4740()
 
 static void serial_setbaud()
 {
-	volatile u8* uart_lcr = (volatile u8*)(ARG_UART_BASE + OFF_LCR);
-	volatile u8* uart_dlhr = (volatile u8*)(ARG_UART_BASE + OFF_DLHR);
-	volatile u8* uart_dllr = (volatile u8*)(ARG_UART_BASE + OFF_DLLR);
+	volatile u8* uart_lcr = (volatile u8*)(UART_BASE + OFF_LCR);
+	volatile u8* uart_dlhr = (volatile u8*)(UART_BASE + OFF_DLHR);
+	volatile u8* uart_dllr = (volatile u8*)(UART_BASE + OFF_DLLR);
 	u32 baud_div, tmp;
 
 	baud_div = ARG_EXTAL / 16 / ARG_UART_BAUD;
@@ -90,12 +90,14 @@ static void serial_setbaud()
 	*uart_lcr = tmp;
 }
 
-void serial_init_4740()
+void serial_init_4740(int uart)
 {
-	volatile u8* uart_fcr = (volatile u8*)(ARG_UART_BASE + OFF_FCR);
-	volatile u8* uart_lcr = (volatile u8*)(ARG_UART_BASE + OFF_LCR);
-	volatile u8* uart_ier = (volatile u8*)(ARG_UART_BASE + OFF_IER);
-	volatile u8* uart_sircr = (volatile u8*)(ARG_UART_BASE + OFF_SIRCR);
+	UART_BASE = UART0_BASE + uart * UART_OFF;
+
+	volatile u8* uart_fcr = (volatile u8*)(UART_BASE + OFF_FCR);
+	volatile u8* uart_lcr = (volatile u8*)(UART_BASE + OFF_LCR);
+	volatile u8* uart_ier = (volatile u8*)(UART_BASE + OFF_IER);
+	volatile u8* uart_sircr = (volatile u8*)(UART_BASE + OFF_SIRCR);
 
 	/* Disable port interrupts while changing hardware */
 	*uart_ier = 0;

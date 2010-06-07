@@ -9,11 +9,10 @@
 
 #include "common.h"
 #include "serial.h"
-#include "jz4740.h"
 
 extern void gpio_init_4740();
 extern void pll_init_4740();
-extern void serial_init_4740();
+extern void serial_init_4740(int uart);
 extern void sdram_init_4740();
 extern void nand_init_4740();
 
@@ -23,8 +22,6 @@ void load_args()
 	ARG_EXTAL = 12 * 1000000;
 	ARG_CPU_SPEED = 21 * ARG_EXTAL;
 	ARG_PHM_DIV = 3;
-	ARG_UART_BASE = UART0_BASE + 0 * UART_OFF;
-	UART_BASE = ARG_UART_BASE; // for ../target-common/serial.c
 	ARG_UART_BAUD = 57600;
 	ARG_BUS_WIDTH_16 = * (int *)0x80002014;
 	ARG_BANK_ADDR_2BIT = 1;
@@ -39,7 +36,7 @@ void c_main(void)
 	switch (ARG_CPU_ID)	{
 	case 0x4740:
 		gpio_init_4740();
-		serial_init_4740();
+		serial_init_4740(0);
 		pll_init_4740();
 		sdram_init_4740();
 		nand_init_4740();
