@@ -559,8 +559,7 @@ restart:
 
 	while (i < pages) {
 		select_chip(cur / ppb);
-#if 1
-		if ((pagesize == 4096) && (cur < 8)) {
+		if (cur < 8) {
 			ecccnt = 4;
 			oobsize = 64;
 			ecc_pos = 6;
@@ -573,7 +572,6 @@ restart:
                 /* Skip 16KB after nand_spl if pagesize=4096 */
 		if ((pagesize == 4096) && (cur == 8))
 			tmpbuf += 16 * 1024;
-#endif
 
 		if ((cur % ppb) == 0) {
 			if (nand_check_block(cur / ppb)) {
