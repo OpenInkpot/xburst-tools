@@ -6,9 +6,16 @@
  * Copyright (C) 2006 Ingenic Semiconductor Inc.
  *
  */
+#include "common.h"
 #include "jz4760.h"
-#include "configs.h"
-#include "board_4760.h"
+#include "board-jz4760.h"
+
+#define CONFIG_NR_DRAM_BANKS	1  /* SDRAM BANK Number: 1, 2*/
+
+void cpm_start_all()
+{
+	__cpm_start_all();
+}
 
 /*
  * SD0 ~ SD7, SA0 ~ SA5, CS2#, RD#, WR#, WAIT#	
@@ -332,7 +339,7 @@ static int ddr_dma_test(int print_flag) {
 	REG_DMAC_DMADCKE(1) = 0x3f;
 
 #ifndef CONFIG_DDRC
-	banks = (SDRAM_BANK4 ? 4 : 2) *(CONFIG_NR_DRAM_BANKS);
+	banks = (ARG_BANK_ADDR_2BIT ? 4 : 2) *(CONFIG_NR_DRAM_BANKS);
 #else
 	banks = (DDR_BANK8 ? 8 : 4) *(DDR_CS0EN + DDR_CS1EN);
 #endif
@@ -688,8 +695,6 @@ void testallmem()
 
 }
 
-#define DMAC_BASE MDMAC_BASE
-	
 #define DDR_DMA_BASE  (0xa0000000)		/*un-cached*/
 
 void dma_data_move(int dma_chan, int dma_src_addr, int dma_dst_addr, int size, int burst)
@@ -749,7 +754,7 @@ static int dma_memcpy_test(int channle_0, int channle_1) {
 	int channel;
 
 #ifndef CONFIG_DDRC
-	banks = (SDRAM_BANK4 ? 4 : 2) *(CONFIG_NR_DRAM_BANKS);
+	banks = (ARG_BANK_ADDR_2BIT ? 4 : 2) *(CONFIG_NR_DRAM_BANKS);
 #else
 	banks = (DDR_BANK8 ? 8 : 4) *(DDR_CS0EN + DDR_CS1EN);
 #endif
@@ -1190,7 +1195,7 @@ void sdram_init_4760(void)
 	/* Basic DMCR value */
 	dmcr = ((SDRAM_ROW-11)<<EMC_DMCR_RA_BIT) |
 		((SDRAM_COL-8)<<EMC_DMCR_CA_BIT) |
-		(SDRAM_BANK4<<EMC_DMCR_BA_BIT) |
+		(ARG_BANK_ADDR_2BIT<<EMC_DMCR_BA_BIT) |
 		(SDRAM_BW16<<EMC_DMCR_BW_BIT) |
 		EMC_DMCR_EPIN |
 		cas_latency_dmcr[((SDRAM_CASL == 3) ? 1 : 0)];
@@ -1253,7 +1258,7 @@ void sdram_init_4760(void)
 }
 #endif
 
-void serial_setbrg_4760(void)
+static void serial_setbrg(void)
 {
 	volatile u8 *uart_lcr = (volatile u8 *)(UART_BASE + OFF_LCR);
 	volatile u8 *uart_dlhr = (volatile u8 *)(UART_BASE + OFF_DLHR);
@@ -1273,4 +1278,32 @@ void serial_setbrg_4760(void)
 
 	tmp &= ~UART_LCR_DLAB;
 	*uart_lcr = tmp;
+}
+
+void serial_init_4760(int uart)
+{
+	UART_BASE = UART0_BASE + uart * UART_OFF;
+
+	volatile u8 *uart_fcr = (volatile u8 *)(UART_BASE + OFF_FCR);
+	volatile u8 *uart_lcr = (volatile u8 *)(UART_BASE + OFF_LCR);
+	volatile u8 *uart_ier = (volatile u8 *)(UART_BASE + OFF_IER);
+	volatile u8 *uart_sircr = (volatile u8 *)(UART_BASE + OFF_SIRCR);
+
+	/* Disable port interrupts while changing hardware */
+	*uart_ier = 0;
+
+	/* Disable UART unit function */
+	*uart_fcr = ~UART_FCR_UUE;
+
+	/* Set both receiver and transmitter in UART mode (not SIR) */
+	*uart_sircr = ~(SIRCR_RSIRE | SIRCR_TSIRE);
+
+	/* Set databits, stopbits and parity. (8-bit data, 1 stopbit, no parity) */
+	*uart_lcr = UART_LCR_WLEN_8 | UART_LCR_STOP_1;
+
+	/* Set baud rate */
+	serial_setbrg();
+
+	/* Enable UART unit, enable and clear FIFO */
+	*uart_fcr = UART_FCR_UUE | UART_FCR_FE | UART_FCR_TFLS | UART_FCR_RFLS;
 }

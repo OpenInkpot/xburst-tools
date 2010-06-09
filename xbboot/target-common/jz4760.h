@@ -4,8 +4,22 @@
 #ifndef __JZ4760_H__
 #define __JZ4760_H__
 
-#ifndef __ASSEMBLY__
 #if 0 /* if 0, for spl program */
+#define UCOS_CSP 0
+
+#if UCOS_CSP
+#define __KERNEL__
+#include <bsp.h>
+#include <types.h>
+
+#include <sysdefs.h>
+#include <cacheops.h>
+#define KSEG0 KSEG0BASE
+#else
+#include <asm/addrspace.h>
+#include <asm/cacheops.h>
+#endif
+
 #define cache_unroll(base,op)	        	\
 	__asm__ __volatile__("	         	\
 		.set noreorder;		        \
@@ -79,7 +93,6 @@ static inline u32 jz_readl(u32 address)
 	return *((volatile u32 *)address);
 }
 #endif
-#endif /* !ASSEMBLY */
 
 //----------------------------------------------------------------------
 // Boot ROM Specification

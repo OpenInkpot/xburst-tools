@@ -12,9 +12,9 @@
 //#define CONFIG_FPGA
 //#define DEBUG
 
-//#define CONFIG_SDRAM_MDDR
+#define CONFIG_SDRAM_MDDR
 //#define CONFIG_SDRAM_DDR1
-#define CONFIG_SDRAM_DDR2
+//#define CONFIG_SDRAM_DDR2
 
 //#define CONFIG_LOAD_UBOOT /* if not defined, load zImage */
 

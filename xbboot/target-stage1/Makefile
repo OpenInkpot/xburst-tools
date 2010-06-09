@@ -17,7 +17,7 @@ CFLAGS	= -O2 -fno-unit-at-a-time -fno-zero-initialized-in-bss -mips32 -fno-pic \
 LDFLAGS	= -nostdlib -EL -T target.ld 
 VPATH   = ../target-common
 
-OBJS	= head.o stage1.o serial.o board-jz4740.o #board-jz4760.o
+OBJS	= head.o stage1.o serial.o board-jz4740.o board-jz4760.o
 
 all: stage1.bin
 

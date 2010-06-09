@@ -43,7 +43,7 @@ void load_args_4760()
 	ARG_PHM_DIV = 3;
 	ARG_UART_BAUD = 57600;
 	ARG_BUS_WIDTH_16 = * (int *)0x80002014;
-	ARG_BANK_ADDR_2BIT = 1;
+	ARG_BANK_ADDR_2BIT = 4;
 	ARG_ROW_ADDR = 12;
 	ARG_COL_ADDR = 9;
 }
@@ -62,6 +62,16 @@ void c_main(void)
 		nand_init_4740();
 		break;
 	case 0x4760:	
+		gpio_init_4760();
+		cpm_start_all();
+		serial_init_4760(1);
+		pll_init_4760();
+		sdram_init_4760();
+		__asm__ (
+		"li  $31, 0xbfc012e0 \n\t"
+		"jr  $31 \n\t "
+		);
+
 		break;
 	default:
 		return;
