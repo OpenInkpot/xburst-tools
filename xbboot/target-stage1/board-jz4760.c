@@ -10,9 +10,7 @@
 #include "jz4760.h"
 #include "board-jz4760.h"
 
-#define CONFIG_NR_DRAM_BANKS	1  /* SDRAM BANK Number: 1, 2*/
-
-void cpm_start_all()
+void cpm_start_all_4760()
 {
 	__cpm_start_all();
 }
@@ -136,7 +134,7 @@ void pll_init_4760()
 		(n2FR[div[4]] << CPM_CPCCR_MDIV_BIT) |
 		(n2FR[div[5]] << CPM_CPCCR_SDIV_BIT);
 
-	if (CFG_EXTAL > 16000000)
+	if (ARG_EXTAL > 16000000)
 		cfcr |= CPM_CPCCR_ECS;
 	else
 		cfcr &= ~CPM_CPCCR_ECS;
@@ -149,9 +147,9 @@ void pll_init_4760()
 #endif
 	cfcr |= CPM_CPCCR_CE;
 
-	pllout2 = (cfcr & CPM_CPCCR_PCS) ? CFG_CPU_SPEED : (CFG_CPU_SPEED / 2);
+	pllout2 = (cfcr & CPM_CPCCR_PCS) ? ARG_CPU_SPEED : (ARG_CPU_SPEED / 2);
 
-	plcr1 = pll_calc_m_n_od(CFG_CPU_SPEED, CFG_EXTAL);
+	plcr1 = pll_calc_m_n_od(ARG_CPU_SPEED, ARG_EXTAL);
 	plcr1 |= (0x20 << CPM_CPPCR_PLLST_BIT)	/* PLL stable time */
 		 | CPM_CPPCR_PLLEN;             /* enable PLL */
 
@@ -361,7 +359,7 @@ for(times = 0; times < banks; times++) {
 	DDR_DMA1_DST = DDR_DMA_BASE + banksize*(banks - 1) + testsize*3;
 #endif
 
-	cpu_clk = CFG_CPU_SPEED;
+	cpu_clk = ARG_CPU_SPEED;
 
 #ifdef DMA_CHANNEL0_EN
 	addr = DDR_DMA0_SRC;
@@ -468,7 +466,7 @@ void ddr_mem_init(int msel, int hl, int tsel, int arg)
 	register unsigned int cpu_clk, ddr_twr;
 	register unsigned int ddrc_cfg_reg=0, init_ddrc_mdelay=0;
 
-	cpu_clk = CFG_CPU_SPEED;
+	cpu_clk = ARG_CPU_SPEED;
 
 #if defined(CONFIG_SDRAM_DDR2) // ddr2
 	serial_puts("\nddr2-\n");
@@ -768,7 +766,7 @@ static int dma_memcpy_test(int channle_0, int channle_1) {
 	DDR_DMA1_SRC = DDR_DMA_BASE + banksize*(banks - 1) + testsize*2;
 	DDR_DMA1_DST = DDR_DMA_BASE + banksize*(banks - 1) + testsize*3;
 
-	cpu_clk = CFG_CPU_SPEED;
+	cpu_clk = ARG_CPU_SPEED;
 
 //    for(channel = 0; channel < MAX_DMA_NUM; channel++) {
 
@@ -883,10 +881,10 @@ void sdram_init_4760(void)
 	ddrc_regs_print();
 #endif
 
-	cpu_clk = CFG_CPU_SPEED;
+	cpu_clk = ARG_CPU_SPEED;
 
 #if defined(CONFIG_FPGA)
-	mem_clk = CFG_EXTAL / CFG_DIV;
+	mem_clk = ARG_EXTAL / CFG_DIV;
 #else
 	mem_clk = __cpm_get_mclk();
 #endif
@@ -1174,7 +1172,7 @@ void sdram_init_4760(void)
 
 	int div[] = {1, 2, 3, 4, 6, 8, 12, 16, 24, 32};
 
-	cpu_clk = CFG_CPU_SPEED;
+	cpu_clk = ARG_CPU_SPEED;
 	mem_clk = cpu_clk * div[__cpm_get_cdiv()] / div[__cpm_get_mdiv()];
 
 	REG_EMC_BCR = 0;	/* Disable bus release */
@@ -1266,9 +1264,9 @@ static void serial_setbrg(void)
 	u32 baud_div, tmp;
 
 //	baud_div = (REG_CPM_CPCCR & CPM_CPCCR_ECS) ?
-//		(CFG_EXTAL / 32 / CONFIG_BAUDRATE) : (CFG_EXTAL / 16 / CONFIG_BAUDRATE);
+//		(ARG_EXTAL / 32 / CONFIG_BAUDRATE) : (ARG_EXTAL / 16 / CONFIG_BAUDRATE);
 
-	baud_div = (CFG_EXTAL / 16 / 57600);
+	baud_div = (ARG_EXTAL / 16 / 57600);
 	tmp = *uart_lcr;
 	tmp |= UART_LCR_DLAB;
 	*uart_lcr = tmp;

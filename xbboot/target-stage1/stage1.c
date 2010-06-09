@@ -18,7 +18,7 @@ extern void nand_init_4740();
 
 extern void gpio_init_4760();
 extern void pll_init_4760();
-extern void cpm_start_all();
+extern void cpm_start_all_4760();
 extern void serial_init_4760(int uart);
 extern void sdram_init_4760();
 
@@ -39,7 +39,7 @@ void load_args_4760()
 {
 	ARG_CPU_ID = 0x4760;
 	ARG_EXTAL = 12 * 1000000;
-	ARG_CPU_SPEED = 2 * ARG_EXTAL;
+	ARG_CPU_SPEED = 12 * ARG_EXTAL;
 	ARG_PHM_DIV = 3;
 	ARG_UART_BAUD = 57600;
 	ARG_BUS_WIDTH_16 = * (int *)0x80002014;
@@ -63,7 +63,7 @@ void c_main(void)
 		break;
 	case 0x4760:	
 		gpio_init_4760();
-		cpm_start_all();
+		cpm_start_all_4760();
 		serial_init_4760(1);
 		pll_init_4760();
 		sdram_init_4760();
