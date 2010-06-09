@@ -18,7 +18,8 @@
 #define LOWORD(dw)	((dw) & 0xFFFF)
 
 #define INGENIC_VENDOR_ID	0x601A
-#define INGENIC_XBURST_USBBOOT	0x4740
+#define INGENIC_XBURST_JZ4740	0x4740
+#define INGENIC_XBURST_JZ4760	0x4760
 
 // REQ_ values are negative so they can be mixed together with the VR_ types in a signed integer.
 #define REQ_BULK_READ		-1
@@ -164,11 +165,13 @@ struct usb_dev_handle* open_xburst_device()
 
 			for (usb_bus = usb_get_busses(); usb_bus != 0; usb_bus = usb_bus->next) {
 				for (usb_dev = usb_bus->devices; usb_dev != 0; usb_dev = usb_dev->next) {
-					if (usb_dev->descriptor.idVendor == INGENIC_VENDOR_ID
-					    && usb_dev->descriptor.idProduct == INGENIC_XBURST_USBBOOT) {
-						if (xburst_dev) {
-							fprintf(stderr, "Error - more than one XBurst boot device found.\n");
-							goto xout;
+					if (usb_dev->descriptor.idVendor == INGENIC_VENDOR_ID) {
+						if ( usb_dev->descriptor.idProduct == INGENIC_XBURST_JZ4740 || 
+						     usb_dev->descriptor.idProduct == INGENIC_XBURST_JZ4760) {
+							if (xburst_dev) {
+								fprintf(stderr, "Error - more than one XBurst boot device found.\n");
+								goto xout;
+							}
 						}
 						xburst_dev = usb_dev;
 						// keep searching to make sure there is only 1 XBurst device
