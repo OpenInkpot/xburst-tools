@@ -7,11 +7,8 @@
 // 3 of the License, or (at your option) any later version.
 //
 
-#include <inttypes.h>
-#include "../target-common/jz4740.h"
 #include "../target-common/serial.h"
-
-void c_main();
+#include "../target-common/common.h"
 
 void pre_main(void)
 {
@@ -43,7 +40,7 @@ void pre_main(void)
 		*((volatile unsigned int *)(addr)) += offset; // add offset to correct all GOT
 
 //	fw_args = (struct fw_args *)(start_addr + 0x8);       //get the fw args from memory
-	UART_BASE = 0xB0030000;
+	UART_BASE = 0xB0030000 + 0x1000;
 	serial_puts("Start address is:");
 	serial_put_hex(start_addr);
 	serial_puts("Address offset is:");
