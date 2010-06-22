@@ -465,44 +465,60 @@ u32 nand_read_4740(void *buf, u32 startpage, u32 pagecount, int option)
 
 		for (j = 0; j < ecccnt; j++) {
 			volatile u8 *paraddr = (volatile u8 *)EMC_NFPAR0;
+			u8 *ecc_p = &oob_buf[ecc_pos + j * PAR_SIZE];
 			u32 stat;
+			int empty_flag = 1;
 			flag = 0;
 
-			REG_EMC_NFINTS = 0x0;
-			__nand_ecc_rs_decoding();
-			read_proc(tmpbuf, ECC_BLOCK);
 			for (k = 0; k < PAR_SIZE; k++) {
-				*paraddr++ = oob_buf[ecc_pos + j*PAR_SIZE + k];
+				if (ecc_p[k] != 0xff)
+					empty_flag = 0;
 				if (oob_buf[ecc_pos + j*PAR_SIZE + k] != 0xff)
 					flag = 1;
 			}
-			REG_EMC_NFECR |= EMC_NFECR_PRDY;
-			__nand_ecc_decode_sync();
-			__nand_ecc_disable();
-			/* Check decoding */
-			stat = REG_EMC_NFINTS;
-			if (stat & EMC_NFINTS_ERR) {
-				if (stat & EMC_NFINTS_UNCOR) {
-					if (flag) {
-						serial_puts("\nUncorrectable error occurred, Page:");
-						serial_put_hex(cur_page);
-						handshake_PKT[3] = 1;
+			if (!empty_flag) {
+				REG_EMC_NFINTS = 0x0;
+				__nand_ecc_rs_decoding();
+			}
+
+			read_proc(tmpbuf, ECC_BLOCK);
+
+			if (!empty_flag) {
+				for (k = 0; k < PAR_SIZE; k++) {
+					*paraddr++ = oob_buf[ecc_pos + j*PAR_SIZE + k];
+ 				}
+
+				REG_EMC_NFECR |= EMC_NFECR_PRDY;
+				__nand_ecc_decode_sync();
+				__nand_ecc_disable();
+				/* Check decoding */
+				stat = REG_EMC_NFINTS;
+				if (stat & EMC_NFINTS_ERR) {
+					if (stat & EMC_NFINTS_UNCOR) {
+						if (flag)
+						{
+							//						serial_puts("\nUncorrectable error occurred\n");
+							//						serial_put_hex(cur_page);
+							handshake_PKT[3] = 1;
+						}
 					}
-				} else {
-					handshake_PKT[3] = 0;
-					u32 errcnt = (stat & EMC_NFINTS_ERRCNT_MASK) >> EMC_NFINTS_ERRCNT_BIT;
-					switch (errcnt) {
-					case 4:
-						rs_correct(tmpbuf, (REG_EMC_NFERR3 & EMC_NFERR_INDEX_MASK) >> EMC_NFERR_INDEX_BIT, (REG_EMC_NFERR3 & EMC_NFERR_MASK_MASK) >> EMC_NFERR_MASK_BIT);
-					case 3:
-						rs_correct(tmpbuf, (REG_EMC_NFERR2 & EMC_NFERR_INDEX_MASK) >> EMC_NFERR_INDEX_BIT, (REG_EMC_NFERR2 & EMC_NFERR_MASK_MASK) >> EMC_NFERR_MASK_BIT);
-					case 2:
-						rs_correct(tmpbuf, (REG_EMC_NFERR1 & EMC_NFERR_INDEX_MASK) >> EMC_NFERR_INDEX_BIT, (REG_EMC_NFERR1 & EMC_NFERR_MASK_MASK) >> EMC_NFERR_MASK_BIT);
-					case 1:
-						rs_correct(tmpbuf, (REG_EMC_NFERR0 & EMC_NFERR_INDEX_MASK) >> EMC_NFERR_INDEX_BIT, (REG_EMC_NFERR0 & EMC_NFERR_MASK_MASK) >> EMC_NFERR_MASK_BIT);
-						break;
-					default:
-						break;
+					else {
+						handshake_PKT[3] = 0;
+						u32 errcnt = (stat & EMC_NFINTS_ERRCNT_MASK) >> EMC_NFINTS_ERRCNT_BIT;
+						switch (errcnt) {
+							case 4:
+								rs_correct(tmpbuf, (REG_EMC_NFERR3 & EMC_NFERR_INDEX_MASK) >> EMC_NFERR_INDEX_BIT, (REG_EMC_NFERR3 & EMC_NFERR_MASK_MASK) >> EMC_NFERR_MASK_BIT);
+							case 3:
+								rs_correct(tmpbuf, (REG_EMC_NFERR2 & EMC_NFERR_INDEX_MASK) >> EMC_NFERR_INDEX_BIT, (REG_EMC_NFERR2 & EMC_NFERR_MASK_MASK) >> EMC_NFERR_MASK_BIT);
+							case 2:
+								rs_correct(tmpbuf, (REG_EMC_NFERR1 & EMC_NFERR_INDEX_MASK) >> EMC_NFERR_INDEX_BIT, (REG_EMC_NFERR1 & EMC_NFERR_MASK_MASK) >> EMC_NFERR_MASK_BIT);
+							case 1:
+								rs_correct(tmpbuf, (REG_EMC_NFERR0 & EMC_NFERR_INDEX_MASK) >> EMC_NFERR_INDEX_BIT, (REG_EMC_NFERR0 & EMC_NFERR_MASK_MASK) >> EMC_NFERR_MASK_BIT);
+								break;
+							default:
+								break;
+						}
+
 					}
 				
 				}
@@ -541,6 +557,8 @@ u32 nand_program_4740(void *context, int spage, int pages, int option)
 	u8 *tmpbuf;
 	u32 ecccnt,oobsize_sav,ecccnt_sav,eccpos_sav;
 	u8 ecc_buf[256];
+	int k;
+	unsigned int subpages;
 
 	datasize = pagesize;
 	if (option != NO_OOB)
@@ -595,6 +613,21 @@ restart:
 		if (pagesize == 512)
 			__nand_cmd(CMD_READA);
 
+		if (option == NO_OOB) {
+			for (k = pagesize - 1; k >= 0; k--)
+				if (tmpbuf[k] != 0xff)
+					break;
+			if (k < 0) {
+				i++;
+				cur++;
+				tmpbuf += pagesize;
+				continue; /* We have only 0xff bytes, don't perform writing */
+			}
+
+			k++;
+			subpages = k / ECC_BLOCK + (k % ECC_BLOCK ? 1 : 0);
+		}
+
 		__nand_cmd(CMD_SEQIN);
 		__nand_addr(0);
 
@@ -615,12 +648,12 @@ restart:
 			tmpbuf += oobsize;
 
 			break;
-		case OOB_NO_ECC:          
+		case OOB_NO_ECC:
 			for (j = 0; j < ecccnt; j++) {
 				volatile u8 *paraddr = (volatile u8 *)EMC_NFPAR0;
 				int k;
 
-				REG_EMC_NFINTS = 0x0;				
+				REG_EMC_NFINTS = 0x0;
 				__nand_ecc_rs_encoding();
 				write_proc(tmpbuf, ECC_BLOCK);
 				__nand_ecc_encode_sync();
@@ -630,13 +663,13 @@ restart:
 				for (k = 0; k < PAR_SIZE; k++) {
 					ecc_buf[j*PAR_SIZE+k] = *paraddr++;
 				}
-				
+
 				tmpbuf += ECC_BLOCK;
 			}
 			for (j = 0; j < oobsize; j++) {
 				oob_buf[j] = tmpbuf[j];
 			}
-			
+
 			for (j = 0; j < ecccnt*PAR_SIZE; j++) 
 				oob_buf[ecc_pos + j] = ecc_buf[j];
 			write_proc((u8 *)oob_buf, oobsize);
@@ -649,20 +682,26 @@ restart:
 				volatile u8 *paraddr = (volatile u8 *)EMC_NFPAR0;
 				int k;
 
-				REG_EMC_NFINTS = 0x0;				
-				__nand_ecc_rs_encoding();
-				write_proc(tmpbuf, ECC_BLOCK);
-				__nand_ecc_encode_sync();
-				__nand_ecc_disable();
-
-				/* Read PAR values */
-				for (k = 0; k < PAR_SIZE; k++) {
-					ecc_buf[j*PAR_SIZE+k] = *paraddr++;
+				if (j < subpages) {
+					REG_EMC_NFINTS = 0x0;
+					__nand_ecc_rs_encoding();
 				}
-				
+				write_proc(tmpbuf, ECC_BLOCK);
+				if (j < subpages) {
+					__nand_ecc_encode_sync();
+					__nand_ecc_disable();
+
+					/* Read PAR values */
+					for (k = 0; k < PAR_SIZE; k++) {
+						ecc_buf[j*PAR_SIZE+k] = *paraddr++;
+					}
+				} else
+					for (k = 0; k < PAR_SIZE; k++)
+						ecc_buf[j*PAR_SIZE+k] = 0xff;
+
 				tmpbuf += ECC_BLOCK;
 			}
-			
+
 			for (j = 0; j < oobsize; j++) {
 				oob_buf[j] = 0xff;
 			}
@@ -671,11 +710,11 @@ restart:
 			oob_buf[3] = 0;
 			oob_buf[4] = 0;
 
-			for (j = 0; j < ecccnt*PAR_SIZE; j++) {
+			for (j = 0; j < subpages * PAR_SIZE; j++) {
 				oob_buf[ecc_pos + j] = ecc_buf[j];
 			}
 
-			write_proc((u8 *)oob_buf, oobsize);
+			write_proc((u8 *)oob_buf, ecc_pos + subpages * PAR_SIZE);
 			break;
 		}
 
