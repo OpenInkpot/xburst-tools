@@ -17,5 +17,6 @@ endif
 
 EXTRA_DIST = $(pkgdatadir)
 
+CROSS_COMPILE ?= mipsel-openwrt-linux-
 ../target-stage1/stage1.bin:
-	$(MAKE) CROSS_COMPILE=mipsel-openwrt-linux- -C ../target-stage1
+	$(MAKE) CROSS_COMPILE=$(CROSS_COMPILE) -C ../target-stage1

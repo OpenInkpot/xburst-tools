@@ -22,8 +22,10 @@ cfg_DATA = ../doc/usbboot.cfg
 
 EXTRA_DIST = $(pkgdatadir) $(cfgdir)
 
+CROSS_COMPILE=mipsel-openwrt-linux-
+
 ../xburst_stage1/xburst_stage1.bin:
-	$(MAKE) CROSS_COMPILE=mipsel-openwrt-linux- -C ../xburst_stage1
+	$(MAKE) CROSS_COMPILE=$(CROSS_COMPILE) -C ../xburst_stage1
 
 ../xburst_stage2/xburst_stage2.bin:
-	$(MAKE) CROSS_COMPILE=mipsel-openwrt-linux- -C ../xburst_stage2
+	$(MAKE) CROSS_COMPILE=$(CROSS_COMPILE) -C ../xburst_stage2
