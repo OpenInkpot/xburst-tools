@@ -1,10 +1,10 @@
 Source: xburst-tools
-Section: misc
+Section: host/tools
 Priority: extra
 Maintainer: Xiangfu Liu <xiangfu@sharism.cc>
-Build-Depends: debhelper (>= 7.4.10),
+Build-Depends: debhelper (>= 7.0.52),
 	pkg-config, autoconf, automake,
-	libusb-dev, libconfuse-dev
+	libusb-dev, libconfuse-dev, mipsel-cross-toolchain
 Build-Conflicts: automake1.4
 Standards-Version: 3.8.4
 Vcs-Git: git://projects.qi-hardware.com/xburst-tools.git
